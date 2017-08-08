@@ -1,4 +1,4 @@
-aa=load("/Users/vandanasandhu/Desktop/os_predictor_project/pdac_classifier.RData")
+load("/Users/vandanasandhu/Desktop/os_predictor_project/pdac_classifier.RData")
 
 ############# HEATMAPS ##################################
 library("foreach")
