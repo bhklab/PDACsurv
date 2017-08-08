@@ -1,5 +1,5 @@
 load("consensus_model.RData")
-load("/Users/vandanasandhu/Documents/Projects/Project2_MetadataSubtyping/Survival_cohorts/OS_Predictor_updated_PDAC.RData")
+load("OS_Predictor_updated_PDAC_no_duplicates.RData")
 tran_val_coh=data.frame(t(val_coh))
 
 ##################  ##################  ##################  ##################  
