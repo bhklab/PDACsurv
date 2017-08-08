@@ -18,3 +18,9 @@ Scripts
 5.Subtyping_PDACs.R : The script is used to subtype PCSI samples based on Moffitt, Bailey, PAM50 and Collisson classification system of PDACs and to plot the heatmaps and survival curves based on each subtyping method. A small snipplet is added to compare the classification of samples based on all four classification methods. 
 
 6.ICGC_array_vs_sequencing_comparison.R : The 82 samples common between ICGC-array and ICGC-sequencing were used for prediction and comparing the prediction probabilities using this script. The AUC curves and scatter plot of predicted probabilities were plotted.
+
+7.Random_TSP_model.R: The script is used to generate 1000 random TSP model by random assignment of genes. The meta-estimates of AUC was calculated using all 1000 models for all validation cohorts.
+
+8.Random_reshuffling_labels.R: The script is used to generate 1000 random TSP model by reshuffling the labels. The meta-estimates of AUC was calculated using all 1000 models for all validation cohorts.
+
+
