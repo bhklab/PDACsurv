@@ -16,3 +16,5 @@ Scripts
 4.Clinical_Models_compariosn_Dindex_Cindex.R : The concordance index and C-index was calaculated for all the three models (1.linear regression model using clinical features, 2. linear regression model using clinical and OS-TSP models probabilities, 3. linear regression model using OS-TSP model's probabilities alone). The three models were compared, meta-estimate was calculated and plotted.
 
 5.Subtyping_PDACs.R : The script is used to subtype PCSI samples based on Moffitt, Bailey, PAM50 and Collisson classification system of PDACs and to plot the heatmaps and survival curves based on each subtyping method. A small snipplet is added to compare the classification of samples based on all four classification methods. 
+
+6.ICGC_array_vs_sequencing_comparison.R : The 82 samples common between ICGC-array and ICGC-sequencing were used for prediction and comparing the prediction probabilities using this script. The AUC curves and scatter plot of predicted probabilities were plotted.
