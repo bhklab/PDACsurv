@@ -10,14 +10,13 @@ args(SWAP.Train.KTSP)
 require(data.table)
 library(reportROC)
 
-load("/Users/vandanasandhu/Documents/Projects/Project2_MetadataSubtyping/Survival_cohorts/OS_Predictor_updated_PDAC_no_duplicates.RData")
-
-tran_val_coh=data.frame(t(val_coh))
+load("/Users/vandanasandhu/Documents/Projects/Project2_MetadataSubtyping/Survival_cohorts/OS_Predictor_Aug_15_2017.RData")
+load("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Data_R_objects/random_classifier_label_reshuffling.RData")
 
 ###################### PCSI cohort as training cohort
 ######################
 
-pcsi_cohort=tran_val_coh[which(tran_val_coh$cohort %in% c("PCSI")),]
+pcsi_cohort=val_coh$PCSI
 g1=which(as.numeric(as.character(pcsi_cohort$OS))<=365 &  as.numeric(as.character(pcsi_cohort$OS_Status))==1); g2=which(as.numeric(as.character(pcsi_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
 
@@ -91,8 +90,7 @@ predict_ktsp = function(val_mat, val_grp){
 #### Validation cohorts
 ###################### ICGC
 
-icgc_cohort=tran_val_coh[which(tran_val_coh$cohort=="ICGC"),]
-
+icgc_cohort=val_coh$ICGC_seq
 
 g1=which(as.numeric(as.character(icgc_cohort$OS))<=365 &  as.numeric(as.character(icgc_cohort$OS_Status))==1); g2=which(as.numeric(as.character(icgc_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
@@ -104,7 +102,7 @@ rownames(icgc_mat)=xx[,1][1:nrow(icgc_mat)]
 icgc_grp=ifelse(as.numeric(as.character(icgc_cohort$OS))>=365,1,0)
 
 ###################### TCGA
-tcga_cohort=tran_val_coh[which(tran_val_coh$cohort=="TCGA"),]
+tcga_cohort=val_coh$TCGA
 
 
 g1=which(as.numeric(as.character(tcga_cohort$OS))<=365 &  as.numeric(as.character(tcga_cohort$OS_Status))==1); g2=which(as.numeric(as.character(tcga_cohort$OS))>365)
@@ -118,7 +116,7 @@ tcga_grp=ifelse(as.numeric(as.character(tcga_cohort$OS))>=365,1,0)
 
 ###################### Moffitt
 
-moff_cohort=tran_val_coh[which(tran_val_coh$cohort=="Moffitt"),]
+moff_cohort=val_coh$Moffitt
 
 
 g1=which(as.numeric(as.character(moff_cohort$OS))<=365 &  as.numeric(as.character(moff_cohort$OS_Status))==1); g2=which(as.numeric(as.character(moff_cohort$OS))>365)
@@ -132,7 +130,7 @@ moff_grp=ifelse(as.numeric(as.character(moff_cohort$OS))>=365,1,0)
 
 ###################### OUH
 
-ouh_cohort=tran_val_coh[which(tran_val_coh$cohort=="OUH"),]
+ouh_cohort=val_coh$OUH
 
 
 g1=which(as.numeric(as.character(ouh_cohort$OS))<=365 &  as.numeric(as.character(ouh_cohort$OS_Status))==1); g2=which(as.numeric(as.character(ouh_cohort$OS))>365)
@@ -147,7 +145,7 @@ ouh_grp=ifelse(as.numeric(as.character(ouh_cohort$OS))>=365,1,0)
 
 ###################### zhang
 
-zhang_cohort=tran_val_coh[which(tran_val_coh$cohort=="Zhang"),]
+zhang_cohort=val_coh$Zhang
 
 
 g1=which(as.numeric(as.character(zhang_cohort$OS))<=365 &  as.numeric(as.character(zhang_cohort$OS_Status))==1); g2=which(as.numeric(as.character(zhang_cohort$OS))>365)
@@ -161,7 +159,7 @@ zhang_grp=ifelse(as.numeric(as.character(zhang_cohort$OS))>=365,1,0)
 
 ###################### Winter
 
-winter_cohort=tran_val_coh[which(tran_val_coh$cohort=="Winter"),]
+winter_cohort=val_coh$Winter
 
 
 g1=which(as.numeric(as.character(winter_cohort$OS))<=365 &  as.numeric(as.character(winter_cohort$OS_Status))==1); g2=which(as.numeric(as.character(winter_cohort$OS))>365)
@@ -175,7 +173,7 @@ winter_grp=ifelse(as.numeric(as.character(winter_cohort$OS))>=365,1,0)
 
 ###################### ICGC_array
 
-icgc_array_cohort=tran_val_coh[which(tran_val_coh$cohort=="ICGC_array"),]
+icgc_array_cohort=val_coh$ICGC_array
 
 
 g1=which(as.numeric(as.character(icgc_array_cohort$OS))<=365 &  as.numeric(as.character(icgc_array_cohort$OS_Status))==1); g2=which(as.numeric(as.character(icgc_array_cohort$OS))>365)
@@ -189,7 +187,7 @@ icgc_array_grp=ifelse(as.numeric(as.character(icgc_array_cohort$OS))>=365,1,0)
 
 ###################### pcsi
 
-pcsi_cohort=tran_val_coh[which(tran_val_coh$cohort=="PCSI"),]
+pcsi_cohort=val_coh$PCSI
 
 
 g1=which(as.numeric(as.character(pcsi_cohort$OS))<=365 &  as.numeric(as.character(pcsi_cohort$OS_Status))==1); g2=which(as.numeric(as.character(pcsi_cohort$OS))>365)
@@ -211,6 +209,7 @@ moff_list=predict_ktsp(moff_mat, moff_grp)
 ouh_list=predict_ktsp(ouh_mat, ouh_grp)
 zhang_list=predict_ktsp(zhang_mat, zhang_grp)
 winter_list=predict_ktsp(winter_mat, winter_grp)
+icgc_arr_list=predict_ktsp(icgc_array_mat,icgc_array_grp )
 
 ###################### Calculating meta-estimates for all the 1000 models using all the cohorts
 
@@ -219,17 +218,17 @@ seq_auc=list()
 microarray_auc=list()
 
 for( i in 1:1000){
-  meta_auc[[i]] = combine.est(c(icgc_list[[2]][i], tcga_list[[2]][i], moff_list[[2]][i], zhang_list[[2]][i],winter_list[[2]][i], ouh_list[[2]][i], icgc_array_list[[2]][i]), c( icgc_list[[3]][i], tcga_list[[3]][i], moff_list[[3]][i], zhang_list[[3]][i], winter_list[[3]][i], ouh_list[[3]][i],icgc_array_list[[3]][i]),na.rm=TRUE)$estimate
+  meta_auc[[i]] = combine.est(c(icgc_list[[2]][i], tcga_list[[2]][i], moff_list[[2]][i], zhang_list[[2]][i],winter_list[[2]][i], ouh_list[[2]][i], icgc_arr_list[[2]][i]), c( icgc_list[[3]][i], tcga_list[[3]][i], moff_list[[3]][i], zhang_list[[3]][i], winter_list[[3]][i], ouh_list[[3]][i],icgc_arr_list[[3]][i]),na.rm=TRUE)$estimate
   seq_auc[[i]] = combine.est(c(icgc_list[[2]][i], tcga_list[[2]][i]), c( icgc_list[[3]][i], tcga_list[[3]][i]),na.rm=TRUE)$estimate
-  microarray_auc[[i]] = combine.est(c( moff_list[[2]][i], zhang_list[[2]][i],winter_list[[2]][i], ouh_list[[2]][i],icgc_array_list[[3]][i]), c( moff_list[[3]][i], zhang_list[[3]][i], winter_list[[3]][i], ouh_list[[3]][i], icgc_array_list[[3]][i]),na.rm=TRUE)$estimate
+  microarray_auc[[i]] = combine.est(c( moff_list[[2]][i], zhang_list[[2]][i],winter_list[[2]][i], ouh_list[[2]][i],icgc_arr_list[[2]][i]), c( moff_list[[3]][i], zhang_list[[3]][i], winter_list[[3]][i], ouh_list[[3]][i],icgc_arr_list[[3]][i]),na.rm=TRUE)$estimate
   
 }
 
 
 ######## Plotting the density plot 
-
+pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/Figure6b.pdf")
 myData <-data.frame(Overall=unlist(meta_auc), Sequencing =unlist(seq_auc), Microarray= unlist(microarray_auc)) 
 data=melt(myData)
 colnames(data)=c("Platforms","AUCs")
-ggplot(data,aes(x=AUCs, fill=Platforms)) + geom_density(alpha = 0.3, position = "stack") + geom_vline(aes(xintercept=0.72), color="pink", linetype="dashed", size=1)+ geom_vline(aes(xintercept=0.79), color="green", linetype="dashed", size=1) + geom_vline(aes(xintercept=0.68), color="lightblue", linetype="dashed", size=1)
+ggplot(data,aes(x=AUCs, fill=Platforms)) + geom_density(alpha = 0.3, position = "stack") + geom_vline(aes(xintercept=0.72), color="pink", linetype="dashed", size=1)+ geom_vline(aes(xintercept=0.77), color="green", linetype="dashed", size=1) + geom_vline(aes(xintercept=0.68), color="lightblue", linetype="dashed", size=1)
 
