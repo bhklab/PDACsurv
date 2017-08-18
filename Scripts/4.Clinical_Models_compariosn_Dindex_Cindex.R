@@ -1,6 +1,6 @@
 
 load("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Data_R_objects/clinical_models.RData")
-cc=load("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Data_R_objects/clinical_features_seq_cohorts_included_censored_As_well.RData")
+load("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Data_R_objects/clinical_features_seq_cohorts_included_censored_As_well.RData")
 
 ######3 Including even the censored data for C-index and D-INDEX caluculation and comprasion across the models.
 
@@ -21,6 +21,10 @@ pcsi_cl_pred1=predict(model1,pcsi, na.action = na.exclude)
 pcsi_cl_pred2=predict(model2,pcsi, na.action = na.exclude)
 pcsi_cl_pred3=predict(model3,pcsi, na.action = na.exclude)
 
+pcsi_cl_pred1=1-pcsi_cl_pred1
+pcsi_cl_pred2=1-pcsi_cl_pred2
+pcsi_cl_pred3=1-pcsi_cl_pred3
+
 ######### Validation cohorts including censored samples as well
 ########## ICGC
 
@@ -34,13 +38,19 @@ z1= which(icgc$T_status == "TX" )
 z2= which(icgc$N == "NX" )
 z3= which(icgc$G == "GX" )
 z4= which(icgc$M == "M1" )
-z5= which(icgc$M == "Mx" )
-zz=c(z1,z2,z3,z4,z5)
+
+zz=c(z1,z2,z3,z4)
 
 icgc=icgc[-zz,]
 icgc_cl_pred1=predict(model1, icgc, na.action = na.exclude)
 icgc_cl_pred2=predict(model2, icgc, na.action = na.exclude)
 icgc_cl_pred3=predict(model3, icgc, na.action = na.exclude)
+
+
+icgc_cl_pred1=1-icgc_cl_pred1
+icgc_cl_pred2=1-icgc_cl_pred2
+icgc_cl_pred3=1-icgc_cl_pred3
+
 
 
 ########## TCGA
@@ -51,16 +61,15 @@ tcga$binary_grp = as.numeric(as.character(tcga$binary_grp))
 tcga$T_status = as.character(tcga$T_status)
 tcga$pred_prob=as.numeric(as.character(tcga$pred_prob))
 
-z1= which(tcga$N == "NX" )
-z2= which(tcga$M == "M1" )
-z3= which(tcga$T_status == "[Discrepancy]" )
 
-zz=c(z1,z2,z3)
-
-tcga=tcga[-zz,]
 tcga_cl_pred1=predict(model1, tcga, na.action = na.exclude)
 tcga_cl_pred2=predict(model2, tcga, na.action = na.exclude)
 tcga_cl_pred3=predict(model3, tcga, na.action = na.exclude)
+
+
+tcga_cl_pred1=1-tcga_cl_pred1
+tcga_cl_pred2=1-tcga_cl_pred2
+tcga_cl_pred3=1-tcga_cl_pred3
 
 ########## ICGC array
 
@@ -82,6 +91,12 @@ icgc_arr_cl_pred1 = predict(model1, icgc_arr, na.action = na.exclude)
 icgc_arr_cl_pred2 = predict(model2, icgc_arr, na.action = na.exclude)
 icgc_arr_cl_pred3 = predict(model3, icgc_arr, na.action = na.exclude)
 
+
+icgc_arr_cl_pred1=1-icgc_arr_cl_pred1
+icgc_arr_cl_pred2=1-icgc_arr_cl_pred2
+icgc_arr_cl_pred3=1-icgc_arr_cl_pred3
+
+
 ########## OUH
 
 ouh$Age=as.numeric(as.character(ouh$Age))
@@ -92,13 +107,16 @@ ouh_cl_pred1 = predict(model1, ouh, na.action = na.exclude)
 ouh_cl_pred2 = predict(model2, ouh, na.action = na.exclude)
 ouh_cl_pred3 = predict(model3, ouh, na.action = na.exclude)
 
-
+ouh_cl_pred1=1-ouh_cl_pred1
+ouh_cl_pred2=1-ouh_cl_pred2
+ouh_cl_pred3=1-ouh_cl_pred3
 ###########################################################################
 ###########################################################################
 ###########################################################################
 ### Concordance indices and Dindex calcualtion 
 
 ## Clinical model
+dindex_ouh <- D.index(x=ouh_cl_pred1, surv.time=as.numeric(as.character(ouh[names(ouh_cl_pred1),]$OS)), surv.event=as.numeric(as.character(ouh[names(ouh_cl_pred1),]$OS_Status)), na.rm=TRUE, alpha = 0.05, method.test = "logrank");
 con_ouh <- concordance.index(x=ouh_cl_pred1, surv.time=as.numeric(as.character(ouh[names(ouh_cl_pred1),]$OS)), surv.event=as.numeric(as.character(ouh[names(ouh_cl_pred1),]$OS_Status)), na.rm=TRUE, method="noether");
 dindex_pcsi <- D.index(x=pcsi_cl_pred1, surv.time=as.numeric(as.character(pcsi[names(pcsi_cl_pred1),]$OS)), surv.event=as.numeric(as.character(pcsi[names(pcsi_cl_pred1),]$OS_Status)), na.rm=TRUE, alpha = 0.05, method.test = "logrank");
 con_pcsi <- concordance.index(x=pcsi_cl_pred1, surv.time=as.numeric(as.character(pcsi[names(pcsi_cl_pred1),]$OS)), surv.event=as.numeric(as.character(pcsi[names(pcsi_cl_pred1),]$OS_Status)), na.rm=TRUE, method="noether");
@@ -214,57 +232,62 @@ con_seq_pval2 <- combine.test(p=c(con_icgc2$p.value, con_tcga2$p.value),w=c(leng
 
 
 ############# Plotting Concordance index and comparison across models
+pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/Figure4d.pdf")
+r.mean <- c( con_tcga$c.index,con_icgc$c.index, con_icgc_array$c.index,con_ouh$c.index,con_seq$estimate,con_micro$estimate,con_meta$estimate,NA, NA,con_tcga1$c.index,con_icgc1$c.index, con_icgc_array1$c.index, con_ouh1$c.index, con_seq1$estimate, con_micro1$estimate, con_meta1$estimate, NA, NA,con_tcga2$c.index,con_icgc2$c.index, con_icgc_array2$c.index, con_ouh2$c.index,con_seq2$estimate, con_micro2$estimate, con_meta2$estimate)
+r.lower <- c( con_tcga$lower,con_icgc$lower, con_icgc_array$lower,con_ouh$lower,con_seq_lower, con_micro_lower, con_meta_lower,NA, NA,con_tcga1$lower,con_icgc1$lower, con_icgc_array1$lower, con_ouh1$lower, con_seq_lower1, con_micro_lower1, con_meta_lower1, NA, NA,con_tcga2$lower,con_icgc2$lower, con_icgc_array2$lower, con_ouh2$lower, con_seq_lower2, con_micro_lower2, con_meta_lower2)
+r.upper <- c( con_tcga$upper,con_icgc$upper, con_icgc_array$upper,con_ouh$upper,con_seq_upper, con_micro_upper, con_meta_upper, NA,NA, con_tcga1$upper,con_icgc1$upper, con_icgc_array1$upper, con_ouh1$upper, con_seq_upper1, con_micro_upper1, con_meta_upper1, NA, NA,con_tcga2$upper,con_icgc2$upper, con_icgc_array2$upper, con_ouh2$upper, con_seq_upper2, con_micro_upper2, con_meta_upper2)
+r.pval <- round(c(con_tcga$p.value, con_icgc$p.value,con_icgc_array$p.value,con_ouh$p.value, con_seq_pval, con_micro_pval, con_meta_pval, NA, NA,con_tcga1$p.value, con_icgc1$p.value,con_icgc_array1$p.value,con_ouh1$p.value,  con_seq_pval1, con_micro_pval1, con_meta_pval1,NA, NA,con_tcga2$p.value, con_icgc2$p.value,con_icgc_array2$p.value,con_ouh2$p.value,  con_seq_pval2, con_micro_pval2, con_meta_pval2),2)
 
-r.mean <- c( con_icgc$c.index, con_icgc1$c.index, con_icgc2$c.index, con_tcga$c.index, con_tcga1$c.index,  con_tcga2$c.index,  con_ouh$c.index, con_ouh1$c.index, con_ouh2$c.index,  con_icgc_array$c.index, con_icgc_array1$c.index, con_icgc_array2$c.index, con_meta$estimate,con_meta1$estimate,con_meta2$estimate, con_seq$estimate, con_seq1$estimate, con_seq2$estimate, con_micro$estimate, con_micro1$estimate, con_micro2$estimate)
-r.lower <- c( con_icgc$lower, con_icgc1$lower,con_icgc2$lower,con_tcga$lower,con_tcga1$lower, con_tcga2$lower,con_ouh$lower,con_ouh1$lower,con_ouh2$lower,  con_icgc_array$lower, con_icgc_array1$lower, con_icgc_array2$lower, con_meta_lower, con_meta_lower1, con_meta_lower2, con_seq_lower, con_seq_lower1, con_seq_lower2,con_micro_lower, con_micro_lower1, con_micro_lower2)
-r.upper <-  c( con_icgc$upper, con_icgc1$upper,con_icgc2$upper,con_tcga$upper,con_tcga1$upper, con_tcga2$upper,con_ouh$upper,con_ouh1$upper,con_ouh2$upper,  con_icgc_array$upper, con_icgc_array1$upper, con_icgc_array2$upper, con_meta_upper, con_meta_upper1, con_meta_upper2, con_seq_upper, con_seq_upper1, con_seq_upper2,con_micro_upper, con_micro_upper1, con_micro_upper2)
-r.pval <- round(c(con_icgc$p.value, con_icgc1$p.value,con_icgc2$p.value,con_tcga$p.value,con_tcga1$p.value, con_tcga2$p.value,con_ouh$p.value,con_ouh1$p.value,con_ouh2$p.value,  con_icgc_array$p.value, con_icgc_array1$p.value, con_icgc_array2$p.value, con_meta_pval, con_meta_pval1, con_meta_pval2, con_seq_pval, con_seq_pval1, con_seq_pval2,con_micro_pval, con_micro_pval1, con_micro_pval2),2)
-r.pval1 <- c(sprintf("%.1E", con_icgc$p.value),sprintf("%.1E", con_icgc1$p.value), sprintf("%.1E", con_icgc2$p.value),sprintf("%.1E", con_tcga$p.value), sprintf("%.1E", con_tcga1$p.value),sprintf("%.1E", con_tcga2$p.value),sprintf("%.1E", con_ouh$p.value),sprintf("%.1E", con_ouh1$p.value),sprintf("%.1E", con_ouh2$p.value), sprintf("%.1E",  con_icgc_array$p.value),sprintf("%.1E", con_icgc_array1$p.value),sprintf("%.1E",  con_icgc_array2$p.value), sprintf("%.1E",  con_meta_pval), sprintf("%.1E",  con_meta_pval1), sprintf("%.1E",  con_meta_pval2),sprintf("%.1E",  con_seq_pval),sprintf("%.1E",  con_seq_pval1),sprintf("%.1E",  con_seq_pval2),sprintf("%.1E",  con_micro_pval),sprintf("%.1E",  con_micro_pval1) ,sprintf("%.1E",  con_micro_pval2))
+r.pval1 <- c(sprintf("%.1E", con_tcga$p.value),sprintf("%.1E", con_icgc$p.value), sprintf("%.1E", con_icgc_array$p.value),sprintf("%.1E",con_ouh$p.value), sprintf("%.1E",con_seq_pval ),sprintf("%.1E", con_micro_pval), sprintf("%.1E", con_meta_pval),NA,NA,sprintf("%.1E", con_tcga1$p.value),sprintf("%.1E", con_icgc1$p.value), sprintf("%.1E", con_icgc_array1$p.value),sprintf("%.1E",con_ouh1$p.value), sprintf("%.1E",con_seq_pval1 ),sprintf("%.1E", con_micro_pval1), sprintf("%.1E", con_meta_pval1),NA,NA,sprintf("%.1E", con_tcga2$p.value),sprintf("%.1E", con_icgc2$p.value), sprintf("%.1E", con_icgc_array2$p.value),sprintf("%.1E",con_ouh2$p.value), sprintf("%.1E",con_seq_pval2),sprintf("%.1E", con_micro_pval2), sprintf("%.1E", con_meta_pval2))
 
 t <- cbind(r.mean ,r.lower,r.upper,r.pval)
-rownames(t) <-  c("ICGC Clinical", "ICGC OS-TSP", "ICGC OS-TSP + Clinical","TCGA Clinical", "TCGA OS-TSP", "TCGA OS-TSP + Clinical", "OUH Clinical", "OUH OS-TSP", "OUH OS-TSP + Clinical","ICGC-Array Clinical", "ICGC-Array OS-TSP", "ICGC-Array OS-TSP + Clinical", "Overall Clinical", "Overall OS-TSP", "Overall OS-TSP + Clinical", "Sequencing Clinical", "Sequencing OS-TSP", "Sequencing OS-TSP + Clinical","Microarray Clinical", "Microarray OS-TSP", "Microarray OS-TSP + Clinical")
+rownames(t) <-  c("TCGA","ICGC-sequencing", "ICGC-array", "OUH","Sequencing","Micro-array","Overall","", "OS-TSP model","TCGA","ICGC-sequencing", "ICGC-array", "OUH","Sequencing","Micro-array","Overall"," ","Combined OS-TSP and clinical", "TCGA","ICGC-sequencing", "ICGC-array", "OUH","Sequencing","Micro-array","Overall")
 
 data2 <- 
   structure(list(
-    mean  = c(NA,t[,1]),
-    lower = c(NA,t[,2]),
-    upper = c(NA,t[,3])),
+    mean  = c(NA,NA,t[,1]),
+    lower = c(NA,NA,t[,2]),
+    upper = c(NA,NA,t[,3])),
     .Names = c("mean", "lower", "upper"), 
-    row.names = c(NA, -22L), 
+    row.names = c(NA, NA, -26L), 
     class = "data.frame")
 
 
 tabletext2<-cbind(
-  c("Cohorts",rownames(t)),
-  c("",r.pval1))
+  c("Cohorts","Clinical model",rownames(t)),
+  c("P values","",r.pval1))
 
-forestplot(tabletext2,data2,xlab="Concordance index",clip=c(0,3.0),cex=9,col = fpColors(lines="black", box="magenta"),title="Concordance index ", zero=0.5, graphwidth=unit(2, "inches"), align=c("l"))
+forestplot(tabletext2,data2,xlab="Concordance index",is.summary=c(TRUE,TRUE,rep(FALSE,4),rep(TRUE,3),FALSE,TRUE, rep(FALSE,4),rep(TRUE,3),FALSE,TRUE,rep(FALSE,4),rep(TRUE,3)),clip=c(0,3.0),cex=9,col = fpColors(lines="royalblue", box="darkblue", summary ="darkred"),title="Concordance-index",zero=0.5,graphwidth=unit(2, "inches"), align=c("l"))
 
 ############# Plotting D-index and comparison across models
+pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/Figure4e.pdf")
+r.mean <- c( log2(dindex_tcga$d.index), log2(dindex_icgc$d.index), log2(dindex_icgc_array$d.index),log2(dindex_ouh$d.index),log2(dindex_seq$estimate),log2(dindex_micro$estimate),log2(dindex_meta$estimate),NA, NA,log2(dindex_tcga1$d.index),log2(dindex_icgc1$d.index), log2(dindex_icgc_array1$d.index), log2(dindex_ouh1$d.index), log2(dindex_seq1$estimate), log2(dindex_micro1$estimate), log2(dindex_meta1$estimate), NA, NA,log2(dindex_tcga2$d.index),log2(dindex_icgc2$d.index), log2(dindex_icgc_array2$d.index), log2(dindex_ouh2$d.index),log2(dindex_seq2$estimate), log2(dindex_micro2$estimate), log2(dindex_meta2$estimate))
+r.lower <- c( log2(dindex_tcga$lower),log2(dindex_icgc$lower), log2(dindex_icgc_array$lower),log2(dindex_ouh$lower),log2(dindex_seq_lower), log2(dindex_micro_lower), log2(dindex_meta_lower),NA, NA,log2(dindex_tcga1$lower),log2(dindex_icgc1$lower), log2(dindex_icgc_array1$lower), log2(dindex_ouh1$lower), log2(dindex_seq_lower1), log2(dindex_micro_lower1), log2(dindex_meta_lower1), NA, NA,log2(dindex_tcga2$lower),log2(dindex_icgc2$lower), log2(dindex_icgc_array2$lower), log2(dindex_ouh2$lower), log2(dindex_seq_lower2), log2(dindex_micro_lower2), log2(dindex_meta_lower2))
+r.upper <- c( log2(dindex_tcga$upper),log2(dindex_icgc$upper), log2(dindex_icgc_array$upper),log2(dindex_ouh$upper),log2(dindex_seq_upper), log2(dindex_micro_upper), log2(dindex_meta_upper), NA,NA, log2(dindex_tcga1$upper),log2(dindex_icgc1$upper), log2(dindex_icgc_array1$upper), log2(dindex_ouh1$upper), log2(dindex_seq_upper1), log2(dindex_micro_upper1), log2(dindex_meta_upper1), NA, NA,log2(dindex_tcga2$upper),log2(dindex_icgc2$upper), log2(dindex_icgc_array2$upper), log2(dindex_ouh2$upper), log2(dindex_seq_upper2), log2(dindex_micro_upper2), log2(dindex_meta_upper2))
+r.pval <- round(c(dindex_tcga$p.value, dindex_icgc$p.value,dindex_icgc_array$p.value,dindex_ouh$p.value, dindex_seq_pval, dindex_micro_pval, dindex_meta_pval, NA, NA,dindex_tcga1$p.value, dindex_icgc1$p.value,dindex_icgc_array1$p.value,dindex_ouh1$p.value,  dindex_seq_pval1, dindex_micro_pval1, dindex_meta_pval1,NA, NA,dindex_tcga2$p.value, dindex_icgc2$p.value,dindex_icgc_array2$p.value,dindex_ouh2$p.value,  dindex_seq_pval2, dindex_micro_pval2, dindex_meta_pval2),2)
 
-r.mean <- c( dindex_icgc$d.index, dindex_icgc1$d.index, dindex_icgc2$d.index, dindex_tcga$d.index, dindex_tcga1$d.index,  dindex_tcga2$d.index,  dindex_ouh$d.index, dindex_ouh1$d.index, dindex_ouh2$d.index,  dindex_icgc_array$d.index, dindex_icgc_array1$d.index, dindex_icgc_array2$d.index, dindex_meta$estimate,dindex_meta1$estimate,dindex_meta2$estimate, dindex_seq$estimate, dindex_seq1$estimate, dindex_seq2$estimate, dindex_micro$estimate, dindex_micro1$estimate, dindex_micro2$estimate)
-r.lower <- c( dindex_icgc$lower, dindex_icgc1$lower,dindex_icgc2$lower,dindex_tcga$lower,dindex_tcga1$lower, dindex_tcga2$lower,dindex_ouh$lower,dindex_ouh1$lower,dindex_ouh2$lower,  dindex_icgc_array$lower, dindex_icgc_array1$lower, dindex_icgc_array2$lower, dindex_meta_lower, dindex_meta_lower1, dindex_meta_lower2, dindex_seq_lower, dindex_seq_lower1, dindex_seq_lower2,dindex_micro_lower, dindex_micro_lower1, dindex_micro_lower2)
-r.upper <-  c( dindex_icgc$upper, dindex_icgc1$upper,dindex_icgc2$upper,dindex_tcga$upper,dindex_tcga1$upper, dindex_tcga2$upper,dindex_ouh$upper,dindex_ouh1$upper,dindex_ouh2$upper,  dindex_icgc_array$upper, dindex_icgc_array1$upper, dindex_icgc_array2$upper, dindex_meta_upper, dindex_meta_upper1, dindex_meta_upper2, dindex_seq_upper, dindex_seq_upper1, dindex_seq_upper2,dindex_micro_upper, dindex_micro_upper1, dindex_micro_upper2)
-r.pval <- round(c(dindex_icgc$p.value, dindex_icgc1$p.value,dindex_icgc2$p.value,dindex_tcga$p.value,dindex_tcga1$p.value, dindex_tcga2$p.value,dindex_ouh$p.value,dindex_ouh1$p.value,dindex_ouh2$p.value,  dindex_icgc_array$p.value, dindex_icgc_array1$p.value, dindex_icgc_array2$p.value, dindex_meta_pval, dindex_meta_pval1, dindex_meta_pval2, dindex_seq_pval, dindex_seq_pval1, dindex_seq_pval2,dindex_micro_pval, dindex_micro_pval1, dindex_micro_pval2),2)
-r.pval1 <- c(sprintf("%.1E", dindex_icgc$p.value),sprintf("%.1E", dindex_icgc1$p.value), sprintf("%.1E", dindex_icgc2$p.value),sprintf("%.1E", dindex_tcga$p.value), sprintf("%.1E", dindex_tcga1$p.value),sprintf("%.1E", dindex_tcga2$p.value),sprintf("%.1E", dindex_ouh$p.value),sprintf("%.1E", dindex_ouh1$p.value),sprintf("%.1E", dindex_ouh2$p.value), sprintf("%.1E",  dindex_icgc_array$p.value),sprintf("%.1E", dindex_icgc_array1$p.value),sprintf("%.1E",  dindex_icgc_array2$p.value), sprintf("%.1E",  dindex_meta_pval), sprintf("%.1E",  dindex_meta_pval1), sprintf("%.1E",  dindex_meta_pval2),sprintf("%.1E",  dindex_seq_pval),sprintf("%.1E",  dindex_seq_pval1),sprintf("%.1E",  dindex_seq_pval2),sprintf("%.1E",  dindex_micro_pval),sprintf("%.1E",  dindex_micro_pval1) ,sprintf("%.1E",  dindex_micro_pval2))
+r.pval1 <- c(sprintf("%.1E", dindex_tcga$p.value),sprintf("%.1E", dindex_icgc$p.value), sprintf("%.1E", dindex_icgc_array$p.value),sprintf("%.1E",dindex_ouh$p.value), sprintf("%.1E",dindex_seq_pval ),sprintf("%.1E", dindex_micro_pval), sprintf("%.1E", dindex_meta_pval),NA,NA,sprintf("%.1E", dindex_tcga1$p.value),sprintf("%.1E", dindex_icgc1$p.value), sprintf("%.1E", dindex_icgc_array1$p.value),sprintf("%.1E",dindex_ouh1$p.value), sprintf("%.1E",dindex_seq_pval1 ),sprintf("%.1E", dindex_micro_pval1), sprintf("%.1E", dindex_meta_pval1),NA,NA,sprintf("%.1E", dindex_tcga2$p.value),sprintf("%.1E", dindex_icgc2$p.value), sprintf("%.1E", dindex_icgc_array2$p.value),sprintf("%.1E",dindex_ouh2$p.value), sprintf("%.1E",dindex_seq_pval2),sprintf("%.1E", dindex_micro_pval2), sprintf("%.1E", dindex_meta_pval2))
+
+
 
 t <- cbind(r.mean ,r.lower,r.upper,r.pval)
-rownames(t) <-  c("ICGC Clinical", "ICGC OS-TSP", "ICGC OS-TSP + Clinical","TCGA Clinical", "TCGA OS-TSP", "TCGA OS-TSP + Clinical", "OUH Clinical", "OUH OS-TSP", "OUH OS-TSP + Clinical","ICGC-Array Clinical", "ICGC-Array OS-TSP", "ICGC-Array OS-TSP + Clinical", "Overall Clinical", "Overall OS-TSP", "Overall OS-TSP + Clinical", "Sequencing Clinical", "Sequencing OS-TSP", "Sequencing OS-TSP + Clinical","Microarray Clinical", "Microarray OS-TSP", "Microarray OS-TSP + Clinical")
+rownames(t) <-  c("TCGA","ICGC-sequencing", "ICGC-array", "OUH","Sequencing","Micro-array","Overall","", "OS-TSP model","TCGA","ICGC-sequencing", "ICGC-array", "OUH","Sequencing","Micro-array","Overall"," ","Combined OS-TSP and clinical", "TCGA","ICGC-sequencing", "ICGC-array", "OUH","Sequencing","Micro-array","Overall")
 
 data2 <- 
   structure(list(
-    mean  = c(NA,t[,1]),
-    lower = c(NA,t[,2]),
-    upper = c(NA,t[,3])),
+    mean  = c(NA,NA,t[,1]),
+    lower = c(NA,NA,t[,2]),
+    upper = c(NA,NA,t[,3])),
     .Names = c("mean", "lower", "upper"), 
-    row.names = c(NA, -22L), 
+    row.names = c(NA, NA, -26L), 
     class = "data.frame")
 
-tabletext2<-cbind(
-  c("Cohorts",rownames(t)),
-  c("",r.pval1))
 
-forestplot(tabletext2,data2,xlab="D index",clip=c(0,3.0),cex=9,col = fpColors(lines="black", box= "magenta"),title="D-Index ", zero=1, graphwidth=unit(2, "inches"), align=c("l"))
+tabletext2<-cbind(
+  c("Cohorts","Clinical model",rownames(t)),
+  c("P values","",r.pval1))
+
+forestplot(tabletext2,data2,xlab="Log2 D-index",is.summary=c(TRUE,TRUE,rep(FALSE,4),rep(TRUE,3),FALSE,TRUE, rep(FALSE,4),rep(TRUE,3),FALSE,TRUE,rep(FALSE,4),rep(TRUE,3)),clip=c(-2,3.0),cex=9,col = fpColors(lines="royalblue", box="darkblue", summary ="darkred"),title="D-index",zero=0,graphwidth=unit(2, "inches"), align=c("l"))
 
 
 
