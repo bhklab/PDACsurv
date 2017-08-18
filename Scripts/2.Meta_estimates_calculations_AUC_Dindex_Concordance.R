@@ -1,6 +1,5 @@
-load("consensus_model.RData")
-load("OS_Predictor_updated_PDAC_no_duplicates.RData")
-tran_val_coh=data.frame(t(val_coh))
+load("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Data_R_objects/RS_updated_model_ba.RData")
+load("/Users/vandanasandhu/Documents/Projects/Project2_MetadataSubtyping/Survival_cohorts/OS_Predictor_Aug_15_2017.RData")
 
 ##################  ##################  ##################  ##################  
 ##################  Predict function for validation in independent cohorts
@@ -30,8 +29,7 @@ predict_ktsp = function(val_mat, val_grp){
 
 #### Validation cohorts for AUC estinates 
 ###################### ICGC
-
-icgc_cohort=tran_val_coh[which(tran_val_coh$cohort=="ICGC"),]
+icgc_cohort=val_coh$ICGC_seq
 
 g1=which(as.numeric(as.character(icgc_cohort$OS))<=365 &  as.numeric(as.character(icgc_cohort$OS_Status))==1);g2=which(as.numeric(as.character(icgc_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
@@ -41,8 +39,7 @@ icgc_mat<-data.matrix(sapply(icgc_cohort[1:nrow(icgc_cohort) ,4:ncol(icgc_cohort
 rownames(icgc_mat)=rownames(icgc_cohort); icgc_grp=ifelse(as.numeric(as.character(icgc_cohort$OS))>=365,1,0)
 
 ###################### TCGA
-
-tcga_cohort=tran_val_coh[which(tran_val_coh$cohort=="TCGA"),]
+tcga_cohort=val_coh$TCGA
 
 g1=which(as.numeric(as.character(tcga_cohort$OS))<=365 &  as.numeric(as.character(tcga_cohort$OS_Status))==1);g2=which(as.numeric(as.character(tcga_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
@@ -52,8 +49,7 @@ tcga_mat<-data.matrix(sapply(tcga_cohort[1:nrow(tcga_cohort) ,4:ncol(tcga_cohort
 rownames(tcga_mat)=rownames(tcga_cohort); tcga_grp=ifelse(as.numeric(as.character(tcga_cohort$OS))>=365,1,0)
 
 ###################### Moffitt
-
-moff_cohort=tran_val_coh[which(tran_val_coh$cohort=="Moffitt"),]
+moff_cohort=val_coh$Moffitt
 
 g1=which(as.numeric(as.character(moff_cohort$OS))<=365 &  as.numeric(as.character(moff_cohort$OS_Status))==1);g2=which(as.numeric(as.character(moff_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
@@ -63,7 +59,7 @@ moff_mat<-data.matrix(sapply(moff_cohort[1:nrow(moff_cohort) ,4:ncol(moff_cohort
 rownames(moff_mat)=rownames(moff_cohort); moff_grp=ifelse(as.numeric(as.character(moff_cohort$OS))>=365,1,0)
 
 ###################### OUH
-ouh_cohort=tran_val_coh[which(tran_val_coh$cohort=="OUH"),]
+ouh_cohort=val_coh$OUH
 
 g1=which(as.numeric(as.character(ouh_cohort$OS))<=365 &  as.numeric(as.character(ouh_cohort$OS_Status))==1);g2=which(as.numeric(as.character(ouh_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
@@ -73,8 +69,7 @@ ouh_mat<-data.matrix(sapply(ouh_cohort[1:nrow(ouh_cohort) ,4:ncol(ouh_cohort)], 
 rownames(ouh_mat)=rownames(ouh_cohort); ouh_grp=ifelse(as.numeric(as.character(ouh_cohort$OS))>=365,1,0)
 
 ###################### zhang
-
-zhang_cohort=tran_val_coh[which(tran_val_coh$cohort=="Zhang"),]
+zhang_cohort=val_coh$Zhang
 
 g1=which(as.numeric(as.character(zhang_cohort$OS))<=365 &  as.numeric(as.character(zhang_cohort$OS_Status))==1);g2=which(as.numeric(as.character(zhang_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
@@ -84,8 +79,7 @@ zhang_mat<-data.matrix(sapply(zhang_cohort[1:nrow(zhang_cohort) ,4:ncol(zhang_co
 rownames(zhang_mat)=rownames(zhang_cohort); zhang_grp=ifelse(as.numeric(as.character(zhang_cohort$OS))>=365,1,0)
 
 ###################### Winter
-
-winter_cohort=tran_val_coh[which(tran_val_coh$cohort=="Winter"),]
+winter_cohort=val_coh$Winter
 
 g1=which(as.numeric(as.character(winter_cohort$OS))<=365 &  as.numeric(as.character(winter_cohort$OS_Status))==1);g2=which(as.numeric(as.character(winter_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
@@ -95,8 +89,7 @@ winter_mat<-data.matrix(sapply(winter_cohort[1:nrow(winter_cohort) ,4:ncol(winte
 rownames(winter_mat)=rownames(winter_cohort); winter_grp=ifelse(as.numeric(as.character(winter_cohort$OS))>=365,1,0)
 
 ###################### ICGC_array
-
-icgc_array_cohort=tran_val_coh[which(tran_val_coh$cohort=="ICGC_array"),]
+icgc_array_cohort=val_coh$ICGC_array
 
 g1=which(as.numeric(as.character(icgc_array_cohort$OS))<=365 &  as.numeric(as.character(icgc_array_cohort$OS_Status))==1);g2=which(as.numeric(as.character(icgc_array_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
@@ -106,8 +99,7 @@ icgc_array_mat<-data.matrix(sapply(icgc_array_cohort[1:nrow(icgc_array_cohort) ,
 rownames(icgc_array_mat)=rownames(icgc_array_cohort); icgc_array_grp=ifelse(as.numeric(as.character(icgc_array_cohort$OS))>=365,1,0)
 
 ###################### pcsi
-
-pcsi_cohort=tran_val_coh[which(tran_val_coh$cohort=="PCSI"),]
+pcsi_cohort=val_coh$PCSI
 
 g1=which(as.numeric(as.character(pcsi_cohort$OS))<=365 &  as.numeric(as.character(pcsi_cohort$OS_Status))==1);g2=which(as.numeric(as.character(pcsi_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
@@ -143,25 +135,24 @@ ouh_roc=reportROC(ouh_grp,ouh_list[[1]]); ouh_roc_se=ouh_roc$AUC.SE
 icgc_array_roc=reportROC(icgc_array_grp,icgc_array_list[[1]]); icgc_array_roc_se=icgc_array_roc$AUC.SE
 
 library(pROC)
+pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/Figure2a.pdf")
+plot(roc(icgc_grp,icgc_list[[1]]),lwd=4, col="#fb9a99",lty=1)
+plot(roc(tcga_grp,tcga_list[[1]]),lwd=4, col="chartreuse3",add=TRUE,lty=1)
+plot(roc(moff_grp,moff_list[[1]]),lwd=4, col="darkgoldenrod1",add=TRUE,lty=3)
+plot(roc(zhang_grp,zhang_list[[1]]),lwd=4, col="wheat4",add=TRUE,lty=3)
+plot(roc(winter_grp,winter_list[[1]]),lwd=4, col="cornflowerblue",add=TRUE,lty=3)
+plot(roc(ouh_grp,ouh_list[[1]]),lwd=4, col="mediumorchid2",add=TRUE,lty=3)
+plot(roc(icgc_array_grp,icgc_array_list[[1]]),lwd=4, col="turquoise3",add=TRUE,lty=3)
 
-plot(roc(pcsi_grp,pcsi_list[[1]]),lwd=2,col="blue",lty=2)
-plot(roc(icgc_grp,icgc_list[[1]]),lwd=2, col="red",add=TRUE,lty=2)
-plot(roc(tcga_grp,tcga_list[[1]]),lwd=2, col="green",add=TRUE,lty=2)
-plot(roc(moff_grp,moff_list[[1]]),lwd=2, col="purple",add=TRUE)
-plot(roc(zhang_grp,zhang_list[[1]]),lwd=2, col="pink",add=TRUE)
-plot(roc(winter_grp,winter_list[[1]]),lwd=2, col="orange",add=TRUE)
-plot(roc(ouh_grp,ouh_list[[1]]),lwd=2, col="cyan",add=TRUE)
-plot(roc(icgc_array_grp,icgc_array_list[[1]]),lwd=2, col="Yellow",add=TRUE)
-
-legend("bottomright",legend=c(paste("PCSI",round(pcsi_roc$AUC,digits=2),sep=" "),
-                              paste("ICGC",round(icgc_roc$AUC,digits=2),sep=" "),
-                              paste("TCGA",round(tcga_roc$AUC,digits=2),sep=" "),
-                              paste("Moffitt",round(moff_roc$AUC,digits=2),sep=" "),
-                              paste("Zhang",round(zhang_roc$AUC,digits=2),sep=" "),
-                              paste("Winter",round(winter_roc$AUC,digits=2),sep=" "),
-                              paste("OUH",round(ouh_roc$AUC,digits=2),sep=" "),
-                              paste("ICGC_array",round(icgc_array_roc$AUC,digits=2),sep=" ")),
-       fill=c("Blue","Red","Green","Purple","Pink","Orange","Cyan","Yellow"),y.intersp = 0.7, cex=0.9)
+legend("bottomright",legend=c(paste("TCGA :",round(tcga_roc$AUC,digits=2),sep=" "),
+                              paste("ICGC-sequencing :",round(icgc_roc$AUC,digits=2),sep=" "),
+                              paste("ICGC-array :",round(icgc_array_roc$AUC,digits=2),sep=" "),
+                              paste("GSE71729 :",round(moff_roc$AUC,digits=2),sep=" "),
+                              paste("GSE28735 :",round(zhang_roc$AUC,digits=2),sep=" "),
+                              paste("E-MEXP-2780 :",round(winter_roc$AUC,digits=2),sep=" "),
+                              paste("GSE60980 :",round(ouh_roc$AUC,digits=2),sep=" ")),
+                             
+       fill=c("chartreuse3","#fb9a99","turquoise3","darkgoldenrod1","wheat4","cornflowerblue","mediumorchid2"),y.intersp = 1, cex=0.9,bty = "n")
 
 
 meta_auc = combine.est(c(icgc_roc$AUC, tcga_roc$AUC, moff_roc$AUC, zhang_roc$AUC, winter_roc$AUC, ouh_roc$AUC,icgc_array_roc$AUC), c( icgc_roc_se, tcga_roc_se, moff_roc_se,zhang_roc_se, winter_roc_se, ouh_roc_se,icgc_array_roc_se),na.rm=TRUE)$estimate
@@ -181,9 +172,8 @@ ggplot(data = df.m, aes(x=coh, y=pred)) + geom_boxplot(aes(fill=grp)) + geom_poi
 
 ################################### Validation cohorts for D-index and C-index, including censored samples as well
 ###################### ICGC
-
-icgc_cohort=tran_val_coh[which(tran_val_coh$cohort=="ICGC"),]
-
+icgc_cohort=val_coh$ICGC_seq
+xx=icgc_cohort
 g1=which(as.numeric(as.character(icgc_cohort$OS))<=365 ); g2=which(as.numeric(as.character(icgc_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
 icgc_cohort=icgc_cohort[g_ind,]
@@ -194,9 +184,9 @@ colnames(icgc_mat)=colnames(icgc_cohort)[4:ncol(xx)]
 icgc_grp=ifelse(as.numeric(as.character(icgc_cohort$OS))>=365,1,0)
 
 ###################### tcga
+tcga_cohort=val_coh$TCGA
 
-tcga_cohort=tran_val_coh[which(tran_val_coh$cohort=="TCGA"),]
-
+xx=tcga_cohort
 g1=which(as.numeric(as.character(tcga_cohort$OS))<=365 ); g2=which(as.numeric(as.character(tcga_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
 tcga_cohort=tcga_cohort[g_ind,]
@@ -207,9 +197,9 @@ colnames(tcga_mat)=colnames(tcga_cohort)[4:ncol(xx)]
 tcga_grp=ifelse(as.numeric(as.character(tcga_cohort$OS))>=365,1,0)
 
 ###################### Moffitt
+moff_cohort=val_coh$Moffitt
 
-moff_cohort=tran_val_coh[which(tran_val_coh$cohort=="Moffitt"),]
-
+xx=moff_cohort
 g1=which(as.numeric(as.character(moff_cohort$OS))<=365 ); g2=which(as.numeric(as.character(moff_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
 moff_cohort=moff_cohort[g_ind,]
@@ -220,9 +210,8 @@ colnames(moff_mat)=colnames(moff_cohort)[4:ncol(xx)]
 moff_grp=ifelse(as.numeric(as.character(moff_cohort$OS))>=365,1,0)
 
 ###################### OUH
-
-ouh_cohort=tran_val_coh[which(tran_val_coh$cohort=="OUH"),]
-
+ouh_cohort=val_coh$OUH
+xx=ouh_cohort
 g1=which(as.numeric(as.character(ouh_cohort$OS))<=365 ); g2=which(as.numeric(as.character(ouh_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
 ouh_cohort=ouh_cohort[g_ind,]
@@ -233,9 +222,9 @@ colnames(ouh_mat)=colnames(ouh_cohort)[4:ncol(xx)]
 ouh_grp=ifelse(as.numeric(as.character(ouh_cohort$OS))>=365,1,0)
 
 ###################### zhang
-
-zhang_cohort=tran_val_coh[which(tran_val_coh$cohort=="Zhang"),]
-
+zhang_cohort=val_coh$Zhang
+#zhang_cohort=tran_val_coh[which(tran_val_coh$cohort=="Zhang"),]
+xx=zhang_cohort
 g1=which(as.numeric(as.character(zhang_cohort$OS))<=365 ); g2=which(as.numeric(as.character(zhang_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
 zhang_cohort=zhang_cohort[g_ind,]
@@ -246,9 +235,8 @@ colnames(zhang_mat)=colnames(zhang_cohort)[4:ncol(xx)]
 zhang_grp=ifelse(as.numeric(as.character(zhang_cohort$OS))>=365,1,0)
 
 ###################### Winter
-
-winter_cohort=tran_val_coh[which(tran_val_coh$cohort=="Winter"),]
-
+winter_cohort=val_coh$Winter
+xx=winter_cohort
 g1=which(as.numeric(as.character(winter_cohort$OS))<=365 ); g2=which(as.numeric(as.character(winter_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
 winter_cohort=winter_cohort[g_ind,]
@@ -259,9 +247,8 @@ colnames(winter_mat)=colnames(winter_cohort)[4:ncol(xx)]
 winter_grp=ifelse(as.numeric(as.character(winter_cohort$OS))>=365,1,0)
 
 ###################### ICGC_array
-
-icgc_array_cohort=tran_val_coh[which(tran_val_coh$cohort=="ICGC_array"),]
-
+icgc_array_cohort=val_coh$ICGC_array
+xx=icgc_array_cohort
 g1=which(as.numeric(as.character(icgc_array_cohort$OS))<=365 ); g2=which(as.numeric(as.character(icgc_array_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
 icgc_array_cohort=icgc_array_cohort[g_ind,]
@@ -346,17 +333,15 @@ con_micro_pval <- combine.test(p=c(con_ouh$p.value,con_winter$p.value,con_zhang$
 
 
 ##### Plotting Forestplot of  D index ###############
+r.mean <- c( log2(dindex_tcga$d.index),log2(dindex_icgc$d.index), log2(dindex_icgc_array$d.index), log2(dindex_moff$d.index),log2(dindex_zhang$d.index),log2(dindex_winter$d.index), log2(dindex_ouh$d.index),  log2(dindex_seq$estimate),log2(dindex_micro$estimate),log2(dindex_meta$estimate))
+r.lower <- c( log2(dindex_tcga$lower), log2(dindex_icgc$lower), log2(dindex_icgc_array$lower), log2(dindex_moff$lower),  log2(dindex_zhang$lower), log2(dindex_winter$lower), log2(dindex_ouh$lower),log2(dindex_seq_lower),log2(dindex_micro_lower), log2(dindex_meta_lower))
+r.upper <- c( log2(dindex_tcga$upper),log2(dindex_icgc$upper),log2(dindex_icgc_array$upper),  log2(dindex_moff$upper),  log2(dindex_zhang$upper), log2(dindex_winter$upper), log2(dindex_ouh$upper),log2(dindex_seq_upper), log2(dindex_micro_upper),log2(dindex_meta_upper))
+r.pval <- round(c(dindex_tcga$p.value, dindex_icgc$p.value, dindex_icgc_array$p.value,dindex_moff$p.value,dindex_zhang$p.value,   dindex_winter$p.value, dindex_ouh$p.value,dindex_seq_pval,dindex_micro_pval, dindex_meta_pval),2)
 
-r.mean <- c( dindex_icgc$d.index, dindex_tcga$d.index, dindex_moff$d.index, dindex_zhang$d.index, dindex_winter$d.index, dindex_ouh$d.index, dindex_icgc_array$d.index,  dindex_meta$estimate,dindex_seq$estimate,dindex_micro$estimate)
-r.lower <- c( dindex_icgc$lower, dindex_tcga$lower, dindex_moff$lower,  dindex_zhang$lower, dindex_winter$lower, dindex_ouh$lower,dindex_icgc_array$lower, dindex_meta_lower, dindex_seq_lower,dindex_micro_lower)
-r.upper <- c( dindex_icgc$upper, dindex_tcga$upper, dindex_moff$upper,  dindex_zhang$upper, dindex_winter$upper, dindex_ouh$upper,dindex_icgc_array$upper,dindex_meta_upper,dindex_seq_upper, dindex_micro_upper)
-r.pval <- round(c(dindex_icgc$p.value, dindex_tcga$p.value, dindex_moff$p.value,dindex_zhang$p.value,   dindex_winter$p.value, dindex_ouh$p.value,dindex_icgc_array$p.value, dindex_meta_pval,dindex_seq_pval,dindex_micro_pval),2)
-
-r.pval1 <- c(sprintf("%.1E", dindex_icgc$p.value),sprintf("%.1E", dindex_tcga$p.value),sprintf("%.1E", dindex_moff$p.value), sprintf("%.1E", dindex_zhang$p.value), sprintf("%.1E", dindex_winter$p.value), sprintf("%.1E", dindex_ouh$p.value),sprintf("%.1E", dindex_icgc_array$p.value),sprintf("%.1E", dindex_meta_pval),sprintf("%.1E", dindex_seq_pval),sprintf("%.1E", dindex_micro_pval))
+r.pval1 <- c(sprintf("%.1E", dindex_tcga$p.value),sprintf("%.1E", dindex_icgc$p.value),sprintf("%.1E", dindex_icgc_array$p.value),sprintf("%.1E", dindex_moff$p.value), sprintf("%.1E", dindex_zhang$p.value), sprintf("%.1E", dindex_winter$p.value), sprintf("%.1E", dindex_ouh$p.value),sprintf("%.1E", dindex_seq_pval),sprintf("%.1E", dindex_micro_pval),sprintf("%.1E", dindex_meta_pval))
 
 t <- cbind(r.mean ,r.lower,r.upper,r.pval)
-rownames(t) <-  c("ICGC","TCGA","Moffitt","Zhang","Winter","OUH","ICGC_array","Overall","Seq","Microarray")
-
+rownames(t) <-  c("TCGA","ICGC-sequencing","ICGC-array","GSE71729","GSE28735","E-MEXP-2780","GSE60980","Sequencing","Microarray","Overall")
 
 data2 <- 
   structure(list(
@@ -370,21 +355,23 @@ data2 <-
 
 tabletext2<-cbind(
   c("Cohorts",rownames(t)),
-  c("",r.pval1))
+  c("P values",r.pval1))
+pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/Figure3a.pdf")
 
-forestplot(tabletext2,data2,xlab="D-index",clip=c(0,3.0),cex=9,col = fpColors(lines="black", box="red"),title="DIndex of OS predictor",zero=1,graphwidth=unit(2, "inches"), align=c("l"))
-
+forestplot(tabletext2,data2,xlab="Log2 D-index",is.summary=c(TRUE,rep(FALSE,7),TRUE, TRUE, TRUE),clip=c(-3,3.0),cex=9,col = fpColors(lines="royalblue", box="darkblue", summary ="darkred",text="black"),title="D-Index",zero=0,graphwidth=unit(2, "inches"),  align=c("l"))
+dev.off()
 
 ##### Plotting Forestplot of Concordance index ###############
 
-r.mean <- c( con_icgc$c.index, con_tcga$c.index,  con_moff$c.index,con_zhang$c.index,  con_winter$c.index, con_ouh$c.index,  con_icgc_array$c.index,con_meta$estimate,con_seq$estimate,con_micro$estimate)
-r.lower <- c( con_icgc$lower, con_tcga$lower, con_moff$lower,con_zhang$lower, con_winter$lower,con_ouh$lower,  con_icgc_array$lower, con_meta_lower, con_seq_lower,con_micro_lower)
-r.upper <- c( con_icgc$upper, con_tcga$upper,  con_moff$upper,  con_zhang$upper,con_winter$upper,con_ouh$upper, con_icgc_array$upper, con_meta_upper,con_seq_upper, con_micro_upper)
-r.pval <- round(c( con_icgc$p.value, con_tcga$p.value,con_moff$p.value, con_zhang$p.value, con_winter$p.value, con_ouh$p.value, con_icgc_array$p.value, con_meta_pval,con_seq_pval,con_micro_pval),2)
-r.pval1 <- c(sprintf("%.1E", con_icgc$p.value),sprintf("%.1E", con_tcga$p.value),sprintf("%.1E", con_moff$p.value),sprintf("%.1E", con_zhang$p.value),sprintf("%.1E", con_winter$p.value), sprintf("%.1E", con_ouh$p.value),sprintf("%.1E", con_icgc_array$p.value), sprintf("%.1E", con_meta_pval),sprintf("%.1E", con_seq_pval),sprintf("%.1E", con_micro_pval))
+r.mean <- c(con_tcga$c.index, con_icgc$c.index, con_icgc_array$c.index,  con_moff$c.index,con_zhang$c.index,  con_winter$c.index, con_ouh$c.index, con_seq$estimate,con_micro$estimate,con_meta$estimate)
+r.lower <- c( con_tcga$lower,  con_icgc$lower, con_icgc_array$lower,con_moff$lower,con_zhang$lower, con_winter$lower,con_ouh$lower,  con_seq_lower,con_micro_lower, con_meta_lower)
+r.upper <- c( con_tcga$upper, con_icgc$upper,  con_icgc_array$upper,con_moff$upper,  con_zhang$upper,con_winter$upper,con_ouh$upper, con_seq_upper, con_micro_upper, con_meta_upper)
+r.pval <- round(c( con_tcga$p.value,con_icgc$p.value, con_icgc_array$p.value, con_moff$p.value, con_zhang$p.value, con_winter$p.value, con_ouh$p.value, con_seq_pval,con_micro_pval,con_meta_pval),2)
+r.pval1 <- c(sprintf("%.1E", con_tcga$p.value),sprintf("%.1E", con_icgc$p.value),sprintf("%.1E", con_icgc_array$p.value), sprintf("%.1E", con_moff$p.value),sprintf("%.1E", con_zhang$p.value),sprintf("%.1E", con_winter$p.value), sprintf("%.1E", con_ouh$p.value),sprintf("%.1E", con_seq_pval),sprintf("%.1E", con_micro_pval),sprintf("%.1E", con_meta_pval))
 
 t <- cbind(r.mean ,r.lower,r.upper,r.pval)
-rownames(t) <-  c("ICGC","TCGA","Moffitt","Zhang","Winter","OUH","ICGC_array","Overall","Seq","Microarray")
+rownames(t) <-  c("TCGA","ICGC-sequencing","ICGC-array","GSE71729","GSE28735","E-MEXP-2780","GSE60980","Sequencing","Microarray","Overall")
+
 
 data2 <- 
   structure(list(
@@ -395,9 +382,16 @@ data2 <-
     row.names = c(NA, -11L), 
     class = "data.frame")
 
+
 tabletext2<-cbind(
   c("Cohorts",rownames(t)),
-  c("",r.pval1))
+  c("P values",r.pval1))
+pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/Figure3b.pdf")
 
-forestplot(tabletext2,data2,xlab="Concordance index",clip=c(0,3.0),cex=9,col = fpColors(lines="black", box="red"),title="Concordance index of OS predictor",zero=0.5,graphwidth=unit(2, "inches"), align=c("l"))
 
+forestplot(tabletext2,data2,xlab="Concordance index",is.summary=c(TRUE,rep(FALSE,7),TRUE, TRUE, TRUE), clip=c(0,1),col = fpColors(lines="royalblue", box="darkblue", summary ="darkred"),title="Concordance-index",zero=0.5,graphwidth=unit(2, "inches"),align=c("l"))
+dev.off()
+
+#txt_gp =  fpTxtGp(label = gpar(fontfamily = "Verdana"),ticks = gpar(cex=0.8)), 
+
+#####
