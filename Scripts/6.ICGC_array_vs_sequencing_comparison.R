@@ -1,11 +1,7 @@
-load("/Users/vandanasandhu/Documents/Projects/Project2_MetadataSubtyping/Survival_cohorts/OS_Predictor_updated_PDAC.RData")
-ss=read.table("/Users/vandanasandhu/Documents/Projects/Project2_MetadataSubtyping/Subtyping-PCSI-OUH/icgc_array_survival.txt",sep="\t",header=T)
-
-
-tran_val_coh=data.frame(t(val_coh))
+load("/Users/vandanasandhu/Documents/Projects/Project2_MetadataSubtyping/Survival_cohorts/OS_Predictor_Aug_15_2017.RData")
 
 ##############  ICGC-sequencing data  ######################################################################
-icgc_cohort=tran_val_coh[which(tran_val_coh$cohort %in% c("ICGC")),]
+icgc_cohort=val_coh$ICGC_seq
 
 g1=which(as.numeric(as.character(icgc_cohort$OS))<=365  &  as.numeric(as.character(icgc_cohort$OS_Status))==1); g2=which(as.numeric(as.character(icgc_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
@@ -20,8 +16,7 @@ icgc_grp=ifelse(as.numeric(as.character(icgc_cohort$OS))>=365,1,0)
 
 
 ##############  ICGC-array data  ######################################################################
-icgc_array_cohort=tran_val_coh[which(tran_val_coh$cohort=="ICGC_array"),]
-
+icgc_array_cohort=val_coh$ICGC_array_all
 g1=which(as.numeric(as.character(icgc_array_cohort$OS))<=365 &  as.numeric(as.character(icgc_array_cohort$OS_Status))==1); g2=which(as.numeric(as.character(icgc_array_cohort$OS))>365)
 g_ind=sort(c(g1,g2))
 
@@ -29,7 +24,7 @@ icgc_array_cohort=icgc_array_cohort[g_ind,]
 
 icgc_array_mat <- data.matrix(sapply(matrix(icgc_array_cohort[1:nrow(icgc_array_cohort) ,4:ncol(icgc_array_cohort)]), function(xx) as.numeric(as.character(xx))))
  
-rownames(icgc_array_mat)=as.character(ss[,2][g_ind])
+rownames(icgc_array_mat)=rownames(icgc_array_cohort)
 colnames(icgc_array_mat)=colnames(icgc_array_cohort)[4:ncol(icgc_array_cohort)]
 
 icgc_array_grp=ifelse(as.numeric(as.character(icgc_array_cohort$OS))>=365,1,0)
@@ -57,25 +52,31 @@ B=matrix(cbind(rownames(icgc_mat)[z2],pr_seq),ncol=2,nrow=82)
 B=B[order(B[,1]),]
 
 #### Correlation analysis and Scatter plots
-Z=cbind(A,B)
-plot(as.numeric(Z[,2]),as.numeric(Z[,4]),col="#6a3d9a",pch=19, xlab="ICGC array", ylab="ICGC-seq")
-cor.test(as.numeric(Z[,2]),as.numeric(Z[,4]),method = "spearman")
+pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/Figure2c.pdf")
 
+Z=cbind(A,B)
+plot(as.numeric(Z[,2]),as.numeric(Z[,4]),col="#6a3d9a",pch=19, xlab="ICGC array", ylab="ICGC-sequencing")
+cor.test(as.numeric(Z[,2]),as.numeric(Z[,4]),method = "spearman")
+legend("bottomright",legend=c( paste("Spearman correlation R:",0.9,sep=" "),
+                               paste("P value:",2.2e-16,sep=" ")), bty='n')
 
 ################################### ROC curves for ICGC-array and ICGC-sequencing ##################################
 
 
-icgc_array_roc=reportROC(icgc_array_grp,as.numeric(icgc_arr_list[[1]]))
+icgc_array_roc=reportROC(icgc_arr_grp,pr_arr)
 icgc_array_roc_se=icgc_array_roc$AUC.SE
 
-icgc_seq_roc=reportROC(icgc_grp,icgc_seq_list[[1]])
+icgc_seq_roc=reportROC(icgc_seq_grp,pr_seq)
 icgc_seq_roc_se=icgc_seq_roc$AUC.SE
 
-plot(roc(icgc_array_grp,icgc_arr_list[[1]]),lwd=2,col="blue",lty=2)
-plot(roc(icgc_grp,icgc_seq_list[[1]]),lwd=2, col="red",add=TRUE,lty=2)
-legend("bottomright",legend=c(paste("ICGC-ARRAYS",round(icgc_array_roc$AUC,digits=2),sep=" "),
-                              paste("ICGC-SEQ",round(icgc_seq_roc$AUC,digits=2),sep=" ")),
-       
-       fill=c("Blue","Red"),y.intersp = 0.7, cex=0.9)
+pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/Figure2b.pdf")
+
+plot(roc(icgc_array_grp,icgc_arr_list[[1]]),lwd=4,col="turquoise3",lty=3)
+plot(roc(icgc_grp,icgc_seq_list[[1]]),lwd=4, col="#fb9a99",add=TRUE,lty=1)
+legend("bottomright",legend=c( paste("ICGC-sequencing",round(icgc_seq_roc$AUC,digits=2),sep=" "),
+                              paste("ICGC-array",round(icgc_array_roc$AUC,digits=2),sep=" ")),
+       fill=c("#fb9a99","turquoise3"),y.intersp = 1, cex=1,bty = "n")
+
+
 
 
