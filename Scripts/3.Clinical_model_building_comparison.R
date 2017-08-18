@@ -59,12 +59,9 @@ tcga$Age=as.numeric(as.character(tcga$Age))
 tcga$Sex = as.character(tcga$Sex)
 tcga$binary_grp = as.numeric(as.character(tcga$binary_grp))
 tcga$T_status = as.character(tcga$T_status)
+tcga$pred_prob=as.numeric(as.character(tcga$pred_prob))
+#tcga$Grade=as.character(tcga$Grade)
 
-z1= which(tcga$N == "NX" )
-z2= which(tcga$M == "M1" )
-zz=c(z1,z2)
-
-tcga=tcga[-zz,]
 tcga_cl_pred1=predict(model1, tcga, na.action = na.exclude)
 tcga_cl_pred2=predict(model2, tcga, na.action = na.exclude)
 tcga_cl_pred3=predict(model3, tcga, na.action = na.exclude)
@@ -101,66 +98,17 @@ ouh_cl_pred3 = predict(model3, ouh, na.action = na.exclude)
 
 #MODEL 1: Clinical model AUC comparison ####################
 ###########################################################################
-
 pcsi_roc1=reportROC(pcsi[names(pcsi_cl_pred1),]$binary_grp,pcsi_cl_pred1); pcsi_roc_se1=pcsi_roc1$AUC.SE
 icgc_roc1=reportROC(icgc[names(icgc_cl_pred1),]$binary_grp,icgc_cl_pred1); icgc_roc_se1=icgc_roc1$AUC.SE
 tcga_roc1=reportROC(tcga[names(tcga_cl_pred1),]$binary_grp,tcga_cl_pred1); tcga_roc_se1=tcga_roc1$AUC.SE
 ouh_roc1=reportROC(ouh[names(ouh_cl_pred1),]$binary_grp,ouh_cl_pred1); ouh_roc_se1=ouh_roc1$AUC.SE
 icgc_array_roc1 = reportROC(icgc_arr[names(icgc_arr_cl_pred1),]$binary_grp,icgc_arr_cl_pred1); icgc_array_roc_se1 = icgc_array_roc1$AUC.SE
 
-
-library(pROC)
-
-plot(roc(pcsi[names(pcsi_cl_pred1),]$binary_grp,pcsi_cl_pred1),lwd=2,col="blue",lty=2,  main="Clinicopathological model")
-plot(roc(icgc[names(icgc_cl_pred1),]$binary_grp,icgc_cl_pred1),lwd=2, col="red",add=TRUE,lty=2)
-plot(roc(tcga[names(tcga_cl_pred1),]$binary_grp,tcga_cl_pred1),lwd=2, col="green",add=TRUE,lty=2)
-plot(roc(ouh[names(ouh_cl_pred1),]$binary_grp,ouh_cl_pred1),lwd=2, col="cyan",add=TRUE)
-plot(roc(icgc_arr[names(icgc_arr_cl_pred1),]$binary_grp,icgc_arr_cl_pred1),lwd=2, col="yellow",add=TRUE)
-
-legend("bottomright",legend=c(paste("PCSI",round(pcsi_roc1$AUC,digits=2),sep=" "),
-                              paste("ICGC sequencing",round(icgc_roc1$AUC,digits=2),sep=" "),
-                              paste("TCGA",round(tcga_roc1$AUC,digits=2),sep=" "),
-                              paste("OUH",round(ouh_roc1$AUC,digits=2),sep=" "),
-                              paste("ICGC array",round(icgc_array_roc1$AUC,digits=2),sep=" ")),
-              fill=c("Blue","Red","Green","cyan","yellow"),y.intersp = 0.7, cex=0.9)
-
-model1_meta= combine.est(c(icgc_roc1$AUC, tcga_roc1$AUC, ouh_roc1$AUC,icgc_array_roc1$AUC), c( icgc_roc_se1, tcga_roc_se1, ouh_roc_se1,icgc_array_roc_se1),na.rm=TRUE)$estimate
-model1_seq= combine.est(c(icgc_roc1$AUC, tcga_roc1$AUC), c( icgc_roc_se1, tcga_roc_se1),na.rm=TRUE)$estimate
-model1_micro=combine.est(c( ouh_roc1$AUC,icgc_array_roc1$AUC), c( ouh_roc_se1,icgc_array_roc_se1),na.rm=TRUE)$estimate
-
-
-
-# Model 2 Ensembled TSP prognostic model
 pcsi_roc2=reportROC(pcsi[names(pcsi_cl_pred2),]$binary_grp,pcsi_cl_pred2); pcsi_roc_se2=pcsi_roc2$AUC.SE
 icgc_roc2=reportROC(icgc[names(icgc_cl_pred2),]$binary_grp,icgc_cl_pred2); icgc_roc_se2=icgc_roc2$AUC.SE
 tcga_roc2=reportROC(tcga[names(tcga_cl_pred2),]$binary_grp,tcga_cl_pred2); tcga_roc_se2=tcga_roc2$AUC.SE
 ouh_roc2=reportROC(ouh[names(ouh_cl_pred2),]$binary_grp,ouh_cl_pred2); ouh_roc_se2=ouh_roc2$AUC.SE
 icgc_array_roc2 = reportROC(icgc_arr[names(icgc_arr_cl_pred2),]$binary_grp,icgc_arr_cl_pred2);icgc_array_roc_se2 = icgc_array_roc2$AUC.SE
-
-
-library(pROC)
-
-plot(roc(pcsi[names(pcsi_cl_pred2),]$binary_grp,pcsi_cl_pred2),lwd=2,col="blue",lty=2, main="OS-TSP model")
-plot(roc(icgc[names(icgc_cl_pred2),]$binary_grp,icgc_cl_pred2),lwd=2, col="red",add=TRUE,lty=2)
-plot(roc(tcga[names(tcga_cl_pred2),]$binary_grp,tcga_cl_pred2),lwd=2, col="green",add=TRUE,lty=2)
-plot(roc(ouh[names(ouh_cl_pred2),]$binary_grp,ouh_cl_pred2),lwd=2, col="cyan",add=TRUE)
-plot(roc(icgc_arr[names(icgc_arr_cl_pred2),]$binary_grp,icgc_arr_cl_pred2),lwd=2, col="yellow",add=TRUE)
-
-legend("bottomright",legend=c(paste("PCSI",round(pcsi_roc2$AUC,digits=2),sep=" "),
-                              paste("ICGC sequencing",round(icgc_roc2$AUC,digits=2),sep=" "),
-                              paste("TCGA",round(tcga_roc2$AUC,digits=2),sep=" "),
-                              paste("OUH",round(ouh_roc2$AUC,digits=2),sep=" "),
-                              paste("ICGC array",round(icgc_array_roc2$AUC,digits=2),sep=" ")),
-       
-       fill=c("Blue","Red","Green","cyan","yellow"),y.intersp = 0.7, cex=0.9)
-
-
-model2_meta= combine.est(c(icgc_roc2$AUC, tcga_roc2$AUC, ouh_roc2$AUC,icgc_array_roc2$AUC), c( icgc_roc_se2, tcga_roc_se2, ouh_roc_se2,icgc_array_roc_se2),na.rm=TRUE)$estimate
-model2_seq= combine.est(c(icgc_roc2$AUC, tcga_roc2$AUC), c( icgc_roc_se2, tcga_roc_se2),na.rm=TRUE)$estimate
-model2_micro=combine.est(c( ouh_roc2$AUC,icgc_array_roc2$AUC), c( ouh_roc_se2,icgc_array_roc_se2),na.rm=TRUE)$estimate
-
-########################################################################
-#### Model 3 Integrated Ensembled TSP prognostic model + Clinical features
 
 pcsi_roc3=reportROC(pcsi[names(pcsi_cl_pred3),]$binary_grp,pcsi_cl_pred3); pcsi_roc_se3=pcsi_roc3$AUC.SE
 icgc_roc3=reportROC(icgc[names(icgc_cl_pred3),]$binary_grp,icgc_cl_pred3); icgc_roc_se3=icgc_roc3$AUC.SE
@@ -169,27 +117,34 @@ ouh_roc3=reportROC(ouh[names(ouh_cl_pred3),]$binary_grp,ouh_cl_pred3); ouh_roc_s
 icgc_array_roc3 = reportROC(icgc_arr[names(icgc_arr_cl_pred3),]$binary_grp,icgc_arr_cl_pred3); icgc_array_roc_se3 = icgc_array_roc3$AUC.SE
 
 
-library(pROC)
+data <- structure(list("TCGA"= c(tcga_roc1$AUC, tcga_roc2$AUC,tcga_roc3$AUC ),
+                       "ICGC-sequencing" = c(icgc_roc1$AUC, icgc_roc2$AUC, icgc_roc3$AUC), 
+                       "ICGC-array" = c(icgc_array_roc1$AUC,icgc_array_roc2$AUC,icgc_array_roc3$AUC),
+                       "GSE60980" = c(ouh_roc1$AUC,ouh_roc2$AUC, ouh_roc3$AUC)), 
+                  .Names = c("TCGA","ICGC-sequencing","ICGC-array","GSE60980"), class = "data.frame", row.names = c( "Clinicopathological model", "OS-TSP model", "Integrated clinical and OS-TSP model"))
 
-plot(roc(pcsi[names(pcsi_cl_pred3),]$binary_grp,pcsi_cl_pred3),lwd=2,col="blue",lty=2, main="Combined Clinical and OS-TSP model")
-plot(roc(icgc[names(icgc_cl_pred3),]$binary_grp,icgc_cl_pred3),lwd=2, col="red",add=TRUE,lty=2)
-plot(roc(tcga[names(tcga_cl_pred3),]$binary_grp,tcga_cl_pred3),lwd=2, col="green",add=TRUE,lty=2)
-plot(roc(ouh[names(ouh_cl_pred3),]$binary_grp,ouh_cl_pred3),lwd=2, col="cyan",add=TRUE)
-plot(roc(icgc_arr[names(icgc_arr_cl_pred3),]$binary_grp,icgc_arr_cl_pred3),lwd=2, col="yellow",add=TRUE)
+attach(data)
+print(data)
 
-legend("bottomright",legend=c(paste("PCSI",round(pcsi_roc3$AUC,digits=2),sep=" "),
-                              paste("ICGC sequencing",round(icgc_roc3$AUC,digits=2),sep=" "),
-                              paste("TCGA",round(tcga_roc3$AUC,digits=2),sep=" "),
-                              paste("OUH",round(ouh_roc3$AUC,digits=2),sep=" "),
-                              paste("ICGC array",round(icgc_array_roc3$AUC,digits=2),sep=" "),
-                              paste("Meta",round(as.numeric(combine.est(c(icgc_roc3$AUC, tcga_roc3$AUC, ouh_roc3$AUC,icgc_array_roc3$AUC), c( icgc_roc_se3, tcga_roc_se3, ouh_roc_se3,icgc_array_roc_se3),na.rm=TRUE)$estimate),digits=2),sep=" "),
-                              paste("Seq",round(as.numeric(combine.est(c(icgc_roc3$AUC, tcga_roc3$AUC), c( icgc_roc_se3, tcga_roc_se3),na.rm=TRUE)$estimate),digits=2),sep=" "),
-                              paste("Microarray",round(as.numeric(combine.est(c( ouh_roc3$AUC,icgc_array_roc3$AUC), c( ouh_roc_se3,icgc_array_roc_se3),na.rm=TRUE)$estimate),digits=2),sep=" ")),
-       
-       
-       fill=c("Blue","Red","Green","cyan","yellow","black"),y.intersp = 0.7, cex=0.9)
+colours <- c(  "black", "yellow", "gray")
+pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/Figure4a.pdf")
 
+barplot(as.matrix(data), main="", ylab = "AUCs", å, cex.main = 1.4, beside=TRUE, col=colours,border = 'NA')
+dev.off()
+
+
+
+
+
+
+model1_meta= combine.est(c(icgc_roc1$AUC, tcga_roc1$AUC, ouh_roc1$AUC,icgc_array_roc1$AUC), c( icgc_roc_se1, tcga_roc_se1, ouh_roc_se1,icgc_array_roc_se1),na.rm=TRUE)$estimate
+model1_seq= combine.est(c(icgc_roc1$AUC, tcga_roc1$AUC), c( icgc_roc_se1, tcga_roc_se1),na.rm=TRUE)$estimate
+model1_micro=combine.est(c( ouh_roc1$AUC,icgc_array_roc1$AUC), c( ouh_roc_se1,icgc_array_roc_se1),na.rm=TRUE)$estimate
+model2_meta= combine.est(c(icgc_roc2$AUC, tcga_roc2$AUC, ouh_roc2$AUC,icgc_array_roc2$AUC), c( icgc_roc_se2, tcga_roc_se2, ouh_roc_se2,icgc_array_roc_se2),na.rm=TRUE)$estimate
+model2_seq= combine.est(c(icgc_roc2$AUC, tcga_roc2$AUC), c( icgc_roc_se2, tcga_roc_se2),na.rm=TRUE)$estimate
+model2_micro=combine.est(c( ouh_roc2$AUC,icgc_array_roc2$AUC), c( ouh_roc_se2,icgc_array_roc_se2),na.rm=TRUE)$estimate
 model3_meta= combine.est(c(icgc_roc3$AUC, tcga_roc3$AUC, ouh_roc3$AUC,icgc_array_roc3$AUC), c( icgc_roc_se3, tcga_roc_se3, ouh_roc_se3,icgc_array_roc_se3),na.rm=TRUE)$estimate
 model3_seq= combine.est(c(icgc_roc3$AUC, tcga_roc3$AUC), c( icgc_roc_se3, tcga_roc_se3),na.rm=TRUE)$estimate
 model3_micro=combine.est(c( ouh_roc3$AUC,icgc_array_roc3$AUC), c( ouh_roc_se3,icgc_array_roc_se3),na.rm=TRUE)$estimate
+
 
