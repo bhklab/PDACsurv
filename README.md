@@ -7,7 +7,7 @@ A unique set of 89 pancreatic cancer samples profiled using both sequencing and 
 
 Scripts
 
-1.PCOSP_model_building.R : The script is used for building Pancreatic cancer overall survival predictor using unique 89 samples profiled using microarray and sequencing platform.
+1. PCOSP_model_building.R : The script is used for building Pancreatic cancer overall survival predictor using unique 89 samples profiled using microarray and sequencing platform.
 
 2. Meta_estimate_Calculation_Validation_Cohorts.R : The script calculates D-index and Concordance index for independent cohorts and calculate the meta-estimae of C-index and D-index. The forestplot of C-index and D-index was plotted for all the cohorts.
 
