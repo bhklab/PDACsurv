@@ -154,42 +154,6 @@ model3_micro_pval <- combine.test(p=c( ouh_roc3_pval,icgc_array_roc3_pval),w=c(l
 
 
 
-##################################
-cohort_classes$pcsi[,1] == pcsi$ID
-
-pcsi_classes= cohort_classes$pcsi[,2][which(cohort_classes$pcsi[,1] %in% pcsi$ID)]
-cohort_classes$pcsi[,1][which(cohort_classes$pcsi[,1] %in% pcsi$ID)]==pcsi$ID
-pcsi_grp=ifelse(as.numeric(as.character(pcsi$OS)) >=365,1,0)
-
-tcga$ID=gsub( "_",".",tcga$ID)
-tcga_classes= cohort_classes$tcga[,2][which(cohort_classes$tcga[,1] %in% tcga$ID)]
-cohort_classes$tcga[,1][which(cohort_classes$tcga[,1] %in% tcga$ID)]==tcga$ID
-tcga_grp=ifelse(as.numeric(as.character(tcga$OS)) >=365,1,0)
-
-
-ouh_classes= cohort_classes$ouh[,2][which(cohort_classes$ouh[,1] %in% ouh$ID)]
-cohort_classes$ouh[,1][which(cohort_classes$ouh[,1] %in% ouh$ID)]==ouh$ID
-ouh_grp=ifelse(as.numeric(as.character(ouh$OS)) >=365,1,0)
-
-icgc_arr_classes= cohort_classes$icgc_arr[,2][which(cohort_classes$icgc_arr[,1] %in% icgc_arr$ID)]
-cohort_classes$icgc_arr[,1][which(cohort_classes$icgc_arr[,1] %in% icgc_arr$ID)]==icgc_arr$ID
-icgc_arr_grp=ifelse(as.numeric(as.character(icgc_arr$OS)) >=365,1,0)
-
-
-anova(lm(ouh_grp ~ Age + Sex + T_status+ N + M + Grade +pred_prob+ouh_classes, data=ouh, na.action = na.exclude))
-anova(lm(pcsi_grp ~ Age + Sex + T_status+ N + M + Grade + pred_prob + pcsi_classes, data=pcsi, na.action = na.exclude))
-anova(lm(tcga_grp ~ Age + Sex + T_status+ N + M + Grade + pred_prob +tcga_classes , data=tcga, na.action = na.exclude))
-anova(lm(icgc_arr_grp ~ Age + Sex + T_status+ N + M + Grade + pred_prob + icgc_arr_classes, data=icgc_arr, na.action = na.exclude))
-
-
-
-anova(lm(ouh_grp ~ pred_prob+ouh_classes, data=ouh, na.action = na.exclude))
-anova(lm(pcsi_grp ~ pred_prob + pcsi_classes, data=pcsi, na.action = na.exclude))
-anova(lm(tcga_grp ~  pred_prob +tcga_classes , data=tcga, na.action = na.exclude))
-anova(lm(icgc_arr_grp ~ pred_prob + icgc_arr_classes, data=icgc_arr, na.action = na.exclude))
-
-
-
 
 
 
