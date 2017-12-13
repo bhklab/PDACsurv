@@ -15,5 +15,17 @@ Scripts
 
 4. Validation cohorts formatting.R: Used for formatting independent datasets for input to PCOSP.
 
+5. HyperGSA_Pathway_analysis.R: Used for identifying pathways overrepsentrated in PCOSP genes, the 12,430 common across all the cohorts were used as reference.
+
+6. Clinical_model_comparison.R: This script is used for building linear regression  model using clinicopathological features and integrated clinicopathological and PCOSP model. 
+
+7. Clinical_model_dindex_Cindex.R : The meta-estimate of C-index and D-index was compared between clinicopathological model, PCOSP model and integrated clinicopathological and PCOSP model.
+
+8. Existing_Classifiers_Score_Calculation.R : The signature score for each validation cohort Birnbaum et al, 2017 and Chen et al, 2015 classifier was calculated using sig.score function in this script using the classifier genes for each classifier.
+
+9. Existing_classifier_Forestplot: The forestplot of existing classifiers for C-index and D-index is plotted using this script.
+
+10. predict_meta_estimates_function.R: Function to estimate meta-estimates.
+
 
 
