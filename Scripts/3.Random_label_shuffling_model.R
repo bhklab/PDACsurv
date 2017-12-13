@@ -15,7 +15,7 @@ install_github("easyGgplot2", "kassambara")
 library("easyGgplot2")
 
 load("training_cohorts.RData")
-load("Validation_Datasets.RData")
+load("PDAC_Expression_dataset.RData")
 
 icgc_seq_cohort = training_cohort$icgc_seq_cohort
 icgc_array_cohort = training_cohort$icgc_array_cohort
