@@ -103,7 +103,7 @@ dindex_meta_pval <- combine.test(p=c(dindex_pcsi$p.value, dindex_tcga$p.value, d
                                  w=c(length(pcsi_list[[1]]), length(tcga_list[[1]]),length(kirby_list[[1]]),
                                      length(ouh_list[[1]]),length(winter_list[[1]]),length(zhang_list[[1]]),
                                      length(unc_list[[1]]),length(icgc_array_list[[1]]), length(collisson_list[[1]]), 
-                                     length(chen_list[[1]])),hetero = FALSE,method="z.transform")
+                                     length(chen_list[[1]])),method="z.transform")
 
 
 con_meta <- combine.est(c( con_pcsi$c.index, con_tcga$c.index, con_kirby$c.index, 
@@ -129,14 +129,14 @@ con_meta_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value, con_kirby$
 ### Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR sequencing cohort
 
 dindex_seq <- combine.est(c( dindex_pcsi$d.index, dindex_tcga$d.index, dindex_kirby$d.index),
-                          c(dindex_pcsi$se, dindex_tcga$se, dindex_kirby$se),na.rm = TRUE, hetero = FALSE) ## Since the platform is same
+                          c(dindex_pcsi$se, dindex_tcga$se, dindex_kirby$se),na.rm = TRUE, hetero = TRUE) ## Since the platform is same
 dindex_seq_lower <- dindex_seq$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_seq$se
 dindex_seq_upper <- dindex_seq$estimate + qnorm(0.025, lower.tail=FALSE) *  dindex_seq$se
 dindex_seq_pval <- combine.test(p=c(dindex_pcsi$p.value, dindex_tcga$p.value, dindex_kirby$p.value),
                                 w=c(length(pcsi_list[[1]]), length(tcga_list[[1]]), length(kirby_list[[1]])),method="z.transform")
 
 con_seq <- combine.est(c( con_pcsi$c.index, con_tcga$c.index, con_kirby$c.index),
-                       c(con_pcsi$se, con_tcga$se, con_kirby$se),na.rm = TRUE,  hetero = FALSE)## Since the platform is same
+                       c(con_pcsi$se, con_tcga$se, con_kirby$se),na.rm = TRUE,  hetero = TRUE)## Since the platform is same
 con_seq_lower <- con_seq$estimate + qnorm(0.025, lower.tail=TRUE) *  con_seq$se
 con_seq_upper <- con_seq$estimate + qnorm(0.025, lower.tail=FALSE) *  con_seq$se
 con_seq_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value, con_kirby$p.value),
@@ -147,7 +147,7 @@ con_seq_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value, con_kirby$p
 dindex_micro <- combine.est(c( dindex_ouh$d.index,dindex_winter$d.index,dindex_zhang$d.index,
                                dindex_unc$d.index,dindex_icgc_array$d.index, dindex_collisson$d.index, dindex_chen$d.index),
                             c( dindex_ouh$se,dindex_winter$se,dindex_zhang$se,
-                               dindex_unc$se,dindex_icgc_array$se, dindex_collisson$se, dindex_chen$se),na.rm = TRUE, hetero = FALSE)
+                               dindex_unc$se,dindex_icgc_array$se, dindex_collisson$se, dindex_chen$se),na.rm = TRUE, hetero = TRUE)
 
 dindex_micro_lower <- dindex_micro$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_micro$se
 dindex_micro_upper <- dindex_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  dindex_micro$se
@@ -155,20 +155,20 @@ dindex_micro_pval <- combine.test(p=c(dindex_ouh$p.value,dindex_winter$p.value,d
                                       dindex_unc$p.value,dindex_icgc_array$p.value, dindex_collisson$p.value, dindex_chen$p.value),
                                   w=c(length(ouh_list[[1]]),length(winter_list[[1]]),length(zhang_list[[1]]),
                                       length(unc_list[[1]]),length(icgc_array_list[[1]]), length(collisson_list[[1]]), 
-                                      length(chen_list[[1]])),hetero = FALSE,method="z.transform")
+                                      length(chen_list[[1]])),method="z.transform")
 
 
 con_micro <- combine.est(c(  con_ouh$c.index,con_winter$c.index,con_zhang$c.index,
                              con_unc$c.index,con_icgc_array$c.index, con_collisson$c.index,  con_chen$c.index),
                          c( con_ouh$se,con_winter$se,con_zhang$se,
-                            con_unc$se,con_icgc_array$se, con_collisson$se, con_chen$se),na.rm = TRUE, hetero = FALSE)
+                            con_unc$se,con_icgc_array$se, con_collisson$se, con_chen$se),na.rm = TRUE, hetero = TRUE)
 con_micro_lower <- con_micro$estimate + qnorm(0.025, lower.tail=TRUE) *  con_micro$se
 con_micro_upper <- con_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  con_micro$se
 con_micro_pval <- combine.test(p=c(con_ouh$p.value,con_winter$p.value,con_zhang$p.value,con_unc$p.value,
                                    con_icgc_array$p.value, con_collisson$p.value, con_chen$p.value),
                                w=c(length(ouh_list[[1]]),length(winter_list[[1]]),length(zhang_list[[1]]),length(unc_list[[1]]),
                                    length(icgc_array_list[[1]]), length(collisson_list[[1]]),  length(chen_list[[1]])),
-                               hetero = FALSE,method="z.transform")
+                               method="z.transform")
 
 
 
@@ -374,16 +374,19 @@ chen_roc_se=reportROC(chen_grp,chen_list[[1]][g_chen], plot = FALSE)$AUC.SE
 kirby_roc=roc(kirby_grp,kirby_list[[1]][g_kirby])$auc[1]
 kirby_roc_se=reportROC(kirby_grp,kirby_list[[1]][g_kirby], plot = FALSE)$AUC.SE
 
-meta_auc = combine.est(c(pcsi_roc, tcga_roc, kirby_roc, unc_roc, zhang_roc,
-                         winter_roc, ouh_roc,icgc_array_roc, collisson_roc, chen_roc),
-                       c( pcsi_roc_se, tcga_roc_se,kirby_roc_se, unc_roc_se,zhang_roc_se,
-                          winter_roc_se, ouh_roc_se,icgc_array_roc_se, collisson_roc_se, chen_roc_se),na.rm=TRUE,hetero = TRUE)$estimate
+meta_auc = combine.est(c(pcsi_roc, tcga_roc, kirby_roc, unc_roc,
+                         zhang_roc, winter_roc, ouh_roc,icgc_array_roc, 
+                         collisson_roc, chen_roc),
+                       c( pcsi_roc_se, tcga_roc_se,kirby_roc_se, unc_roc_se,zhang_roc_se, 
+                          winter_roc_se, ouh_roc_se,icgc_array_roc_se, collisson_roc_se, 
+                          chen_roc_se),na.rm=TRUE,hetero = TRUE)$estimate
+
 seq_auc = combine.est(c(pcsi_roc, tcga_roc, kirby_roc), 
-                      c( pcsi_roc_se, tcga_roc_se,kirby_roc_se),na.rm=TRUE,hetero =FALSE)$estimate
-micro_auc = combine.est(c( unc_roc, zhang_roc, winter_roc, ouh_roc,
-                           icgc_array_roc,collisson_roc,  chen_roc), 
-                        c(  unc_roc_se,zhang_roc_se, winter_roc_se, ouh_roc_se,
-                            icgc_array_roc_se, collisson_roc_se,  chen_roc_se),na.rm=TRUE,hetero = FALSE)$estimate
+                      c( pcsi_roc_se, tcga_roc_se,kirby_roc_se),na.rm=TRUE,hetero =TRUE)$estimate
+
+micro_auc = combine.est(c( unc_roc, zhang_roc, winter_roc, ouh_roc,icgc_array_roc,collisson_roc,  chen_roc), 
+                        c(  unc_roc_se,zhang_roc_se, winter_roc_se, ouh_roc_se,icgc_array_roc_se, collisson_roc_se,  chen_roc_se),
+                        na.rm=TRUE,hetero = TRUE)$estimate
 
 
 pcsi_pval = roc.area(pcsi_grp,1-pcsi_list[[1]][g_pcsi])$p.value  
@@ -445,18 +448,5 @@ legend("bottomright",legend=c(paste("TCGA: ",round(tcga_roc,digits=2)," (P = ", 
        fill=c( "chartreuse3","magenta","#fb9a99","turquoise3","darkgoldenrod1","wheat4","green","red","cornflowerblue","mediumorchid2"),y.intersp = 1, cex=0.9,bty = "n")
 
 #dev.off()
-meta_auc = combine.est(c(pcsi_roc, tcga_roc, kirby_roc, unc_roc,
-                         zhang_roc, winter_roc, ouh_roc,icgc_array_roc, 
-                         collisson_roc, chen_roc),
-                       c( pcsi_roc_se, tcga_roc_se,kirby_roc_se, unc_roc_se,zhang_roc_se, 
-                          winter_roc_se, ouh_roc_se,icgc_array_roc_se, collisson_roc_se, 
-                          chen_roc_se),na.rm=TRUE,hetero = TRUE)$estimate
-
-seq_auc = combine.est(c(pcsi_roc, tcga_roc, kirby_roc), 
-                      c( pcsi_roc_se, tcga_roc_se,kirby_roc_se),na.rm=TRUE,hetero =FALSE)$estimate
-
-micro_auc = combine.est(c( unc_roc, zhang_roc, winter_roc, ouh_roc,icgc_array_roc,collisson_roc,  chen_roc), 
-                        c(  unc_roc_se,zhang_roc_se, winter_roc_se, ouh_roc_se,icgc_array_roc_se, collisson_roc_se,  chen_roc_se),
-                        na.rm=TRUE,hetero = FALSE)$estimate
 
 #######################Probability distribution boxplots
