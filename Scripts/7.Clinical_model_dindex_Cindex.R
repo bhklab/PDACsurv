@@ -86,16 +86,16 @@ con_icgc_array1 <- concordance.index(x=icgc_arr_cl_pred2 , surv.time=as.numeric(
 ####################################### Meta estimates calculations
 ## Clinical model
 dindex_meta <- combine.est(c( dindex_pcsi$d.index, dindex_tcga$d.index, dindex_ouh$d.index,dindex_icgc_array$d.index),
-                           c(dindex_pcsi$se, dindex_tcga$se, dindex_ouh$se,dindex_icgc_array$se),na.rm = TRUE)
+                           c(dindex_pcsi$se, dindex_tcga$se, dindex_ouh$se,dindex_icgc_array$se),na.rm = TRUE,hetero=TRUE)
 
 con_meta <- combine.est(c( con_pcsi$c.index, con_tcga$c.index, con_ouh$c.index,con_icgc_array$c.index),
-                        c(con_pcsi$se, con_tcga$se, con_ouh$se,con_icgc_array$se),na.rm = TRUE)
+                        c(con_pcsi$se, con_tcga$se, con_ouh$se,con_icgc_array$se),na.rm = TRUE,hetero=TRUE)
 
 dindex_seq <- combine.est(c( dindex_pcsi$d.index, dindex_tcga$d.index),c(dindex_pcsi$se, dindex_tcga$se),na.rm = TRUE)
-con_seq <- combine.est(c( con_pcsi$c.index, con_tcga$c.index),c(con_pcsi$se, con_tcga$se),na.rm = TRUE)
+con_seq <- combine.est(c( con_pcsi$c.index, con_tcga$c.index),c(con_pcsi$se, con_tcga$se),na.rm = TRUE,hetero=TRUE)
 
-dindex_micro <- combine.est(c( dindex_ouh$d.index,dindex_icgc_array$d.index),c( dindex_ouh$se,dindex_icgc_array$se),na.rm = TRUE)
-con_micro <- combine.est(c(  con_ouh$c.index,con_icgc_array$c.index),c( con_ouh$se,con_icgc_array$se),na.rm = TRUE)
+dindex_micro <- combine.est(c( dindex_ouh$d.index,dindex_icgc_array$d.index),c( dindex_ouh$se,dindex_icgc_array$se),na.rm = TRUE,hetero=TRUE)
+con_micro <- combine.est(c(  con_ouh$c.index,con_icgc_array$c.index),c( con_ouh$se,con_icgc_array$se),na.rm = TRUE,hetero=TRUE)
 
 dindex_meta_lower <- dindex_meta$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_meta$se
 con_meta_lower <- con_meta$estimate + qnorm(0.025, lower.tail=TRUE) *  con_meta$se
@@ -122,12 +122,14 @@ con_micro_pval <- combine.test(p=c(con_ouh$p.value,con_icgc_array$p.value),w=c(l
 con_seq_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value),w=c(length(pcsi_cl_pred1), length(tcga_cl_pred1)),hetero = FALSE,method="z.transform")
 
 ## PCOSP
-dindex_meta1 <- combine.est(c( dindex_pcsi1$d.index, dindex_tcga1$d.index, dindex_ouh1$d.index,dindex_icgc_array1$d.index),c(dindex_pcsi1$se, dindex_tcga1$se, dindex_ouh1$se,dindex_icgc_array1$se),na.rm = TRUE)
-con_meta1 <- combine.est(c(con_pcsi1$c.index, con_tcga1$c.index, con_ouh1$c.index, con_icgc_array1$c.index),c(con_pcsi1$se, con_tcga1$se, con_ouh1$se,con_icgc_array1$se),na.rm = TRUE)
-dindex_seq1 <- combine.est(c( dindex_pcsi1$d.index, dindex_tcga1$d.index),c(dindex_pcsi1$se, dindex_tcga1$se),na.rm = TRUE)
-con_seq1 <- combine.est(c( con_pcsi1$c.index, con_tcga1$c.index),c(con_pcsi1$se, con_tcga1$se),na.rm = TRUE)
-dindex_micro1 <- combine.est(c( dindex_ouh1$d.index,dindex_icgc_array1$d.index),c( dindex_ouh1$se,dindex_icgc_array1$se),na.rm = TRUE)
-con_micro1 <- combine.est(c(  con_ouh1$c.index,con_icgc_array1$c.index),c( con_ouh1$se,con_icgc_array1$se),na.rm = TRUE)
+dindex_meta1 <- combine.est(c( dindex_pcsi1$d.index, dindex_tcga1$d.index, dindex_ouh1$d.index,dindex_icgc_array1$d.index),c(dindex_pcsi1$se, dindex_tcga1$se, dindex_ouh1$se,dindex_icgc_array1$se),na.rm = TRUE,hetero=TRUE)
+con_meta1 <- combine.est(c(con_pcsi1$c.index, con_tcga1$c.index, con_ouh1$c.index, con_icgc_array1$c.index),c(con_pcsi1$se, con_tcga1$se, con_ouh1$se,con_icgc_array1$se),na.rm = TRUE,hetero=TRUE)
+dindex_seq1 <- combine.est(c( dindex_pcsi1$d.index, dindex_tcga1$d.index),c(dindex_pcsi1$se, dindex_tcga1$se),na.rm = TRUE,hetero=TRUE)
+con_seq1 <- combine.est(c( con_pcsi1$c.index, con_tcga1$c.index),c(con_pcsi1$se, con_tcga1$se),na.rm = TRUE,hetero=TRUE)
+dindex_micro1 <- combine.est(c( dindex_ouh1$d.index,dindex_icgc_array1$d.index),c( dindex_ouh1$se,dindex_icgc_array1$se),na.rm = TRUE,hetero=TRUE)
+con_micro1 <- combine.est(c(  con_ouh1$c.index,con_icgc_array1$c.index),c( con_ouh1$se,con_icgc_array1$se),na.rm = TRUE,hetero=TRUE)
+
+
 dindex_meta_lower1 <- dindex_meta1$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_meta1$se
 con_meta_lower1 <- con_meta1$estimate + qnorm(0.025, lower.tail=TRUE) *  con_meta1$se
 dindex_seq_lower1 <- dindex_seq1$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_seq1$se
