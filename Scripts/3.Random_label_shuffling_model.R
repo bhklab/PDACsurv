@@ -115,6 +115,16 @@ predict_ktsp = function(val_mat, val_grp){
 }
 
 ############# Function call for independent cohorts #######################################
+pcsi_mat=pcsi_mat[g_pcsi,]
+chen_mat=chen_mat[g_chen,]
+kirby_mat=kirby_mat[g_kirby,]
+collisson_mat=collisson_mat[g_coll,]
+ouh_mat=ouh_mat[g_ouh,]
+winter_mat=winter_mat[g_winter,]
+tcga_mat=tcga_mat[g_tcga,]
+unc_mat=unc_mat[g_unc,]
+zhang_mat=zhang_mat[g_zhang,]
+icgc_array_mat=icgc_array_mat[g_icgc_arr,]
 
 pcsi_list=predict_ktsp(pcsi_mat, pcsi_grp)
 chen_list=predict_ktsp(chen_mat, chen_grp)
@@ -134,9 +144,9 @@ seq_auc=list()
 microarray_auc=list()
 
 for( i in 1:1000){
-  meta_auc[[i]] = combine.est(c(pcsi_list[[2]][i], tcga_list[[2]][i], unc_list[[2]][i], zhang_list[[2]][i],winter_list[[2]][i], ouh_list[[2]][i], icgc_arr_list[[2]][i], chen_list[[2]][i], kirby_list[[2]][i], collisson_list[[2]][i]), c( pcsi_list[[3]][i], tcga_list[[3]][i], unc_list[[3]][i], zhang_list[[3]][i], winter_list[[3]][i], ouh_list[[3]][i],icgc_arr_list[[3]][i], chen_list[[3]][i], kirby_list[[3]][i], collisson_list[[3]][i]),na.rm=TRUE)$estimate
-  seq_auc[[i]] = combine.est(c(pcsi_list[[2]][i], tcga_list[[2]][i], kirby_list[[2]][i]), c( pcsi_list[[3]][i], tcga_list[[3]][i],kirby_list[[3]][i]),na.rm=TRUE)$estimate
-  microarray_auc[[i]] = combine.est(c( unc_list[[2]][i], zhang_list[[2]][i],winter_list[[2]][i], ouh_list[[2]][i],icgc_arr_list[[2]][i], chen_list[[2]][i], collisson_list[[2]][i]), c( unc_list[[3]][i], zhang_list[[3]][i], winter_list[[3]][i], ouh_list[[3]][i],icgc_arr_list[[3]][i], chen_list[[3]][i], collisson_list[[3]][i]),na.rm=TRUE)$estimate
+  meta_auc[[i]] = combine.est(c(pcsi_list[[2]][i], tcga_list[[2]][i], unc_list[[2]][i], zhang_list[[2]][i],winter_list[[2]][i], ouh_list[[2]][i], icgc_arr_list[[2]][i], chen_list[[2]][i], kirby_list[[2]][i], collisson_list[[2]][i]), c( pcsi_list[[3]][i], tcga_list[[3]][i], unc_list[[3]][i], zhang_list[[3]][i], winter_list[[3]][i], ouh_list[[3]][i],icgc_arr_list[[3]][i], chen_list[[3]][i], kirby_list[[3]][i], collisson_list[[3]][i]),hetero=TRUE,na.rm=TRUE)$estimate
+  seq_auc[[i]] = combine.est(c(pcsi_list[[2]][i], tcga_list[[2]][i], kirby_list[[2]][i]), c( pcsi_list[[3]][i], tcga_list[[3]][i],kirby_list[[3]][i]),na.rm=TRUE,hetero=TRUE)$estimate
+  microarray_auc[[i]] = combine.est(c( unc_list[[2]][i], zhang_list[[2]][i],winter_list[[2]][i], ouh_list[[2]][i],icgc_arr_list[[2]][i], chen_list[[2]][i], collisson_list[[2]][i]), c( unc_list[[3]][i], zhang_list[[3]][i], winter_list[[3]][i], ouh_list[[3]][i],icgc_arr_list[[3]][i], chen_list[[3]][i], collisson_list[[3]][i]),na.rm=TRUE, hetero=TRUE)$estimate
   
 }
 
