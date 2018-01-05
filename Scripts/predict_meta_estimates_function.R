@@ -48,13 +48,13 @@ predict_meta_estimates = function(pcsi_list, tcga_list, kirby_list,icgc_array_li
   
   ### Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR sequencing cohort
   
-  dindex_seq <- combine.est(c( dindex_pcsi$d.index,dindex_tcga$d.index, dindex_kirby$d.index),c(dindex_pcsi$se,  dindex_tcga$se, dindex_kirby$se),na.rm = TRUE, hetero = FALSE) ## Since the platform is same
+  dindex_seq <- combine.est(c( dindex_pcsi$d.index,dindex_tcga$d.index, dindex_kirby$d.index),c(dindex_pcsi$se,  dindex_tcga$se, dindex_kirby$se),na.rm = TRUE, hetero = TRUE) ## Since the platform is same
   dindex_seq_lower <- dindex_seq$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_seq$se
   dindex_seq_upper <- dindex_seq$estimate + qnorm(0.025, lower.tail=FALSE) *  dindex_seq$se
   dindex_seq_pval <- combine.test(p=c(dindex_pcsi$p.value,dindex_tcga$p.value, dindex_kirby$p.value),
                                   w=c(length(pcsi_list),length(tcga_list), length(kirby_list)),method="z.transform")
   
-  con_seq <- combine.est(c( con_pcsi$c.index, con_tcga$c.index, con_kirby$c.index),c(con_pcsi$se,  con_tcga$se, con_kirby$se),na.rm = TRUE,  hetero = FALSE)## Since the platform is same
+  con_seq <- combine.est(c( con_pcsi$c.index, con_tcga$c.index, con_kirby$c.index),c(con_pcsi$se,  con_tcga$se, con_kirby$se),na.rm = TRUE,  hetero = TRUE)## Since the platform is same
   con_seq_lower <- con_seq$estimate + qnorm(0.025, lower.tail=TRUE) *  con_seq$se
   con_seq_upper <- con_seq$estimate + qnorm(0.025, lower.tail=FALSE) *  con_seq$se
   con_seq_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value, con_kirby$p.value),
@@ -62,13 +62,13 @@ predict_meta_estimates = function(pcsi_list, tcga_list, kirby_list,icgc_array_li
   
   ### Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR microarray cohort
   
-  dindex_micro <- combine.est(c( dindex_ouh$d.index,dindex_winter$d.index,dindex_unc$d.index,dindex_icgc_array$d.index, dindex_collisson$d.index),c( dindex_ouh$se,dindex_winter$se,dindex_unc$se,dindex_icgc_array$se, dindex_collisson$se),na.rm = TRUE, hetero = FALSE)
+  dindex_micro <- combine.est(c( dindex_ouh$d.index,dindex_winter$d.index,dindex_unc$d.index,dindex_icgc_array$d.index, dindex_collisson$d.index),c( dindex_ouh$se,dindex_winter$se,dindex_unc$se,dindex_icgc_array$se, dindex_collisson$se),na.rm = TRUE, hetero =TRUE)
   dindex_micro_lower <- dindex_micro$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_micro$se
   dindex_micro_upper <- dindex_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  dindex_micro$se
   dindex_micro_pval <- combine.test(p=c(dindex_ouh$p.value,dindex_winter$p.value,dindex_unc$p.value,dindex_icgc_array$p.value, dindex_collisson$p.value),
                                     w=c(length(ouh_list),length(winter_list),length(unc_list),length(icgc_array_list), length(collisson_list)),hetero = FALSE,method="z.transform")
   
-  con_micro <- combine.est(c(  con_ouh$c.index,con_winter$c.index,con_unc$c.index,con_icgc_array$c.index, con_collisson$c.index),c( con_ouh$se,con_winter$se,con_unc$se,con_icgc_array$se, con_collisson$se),na.rm = TRUE, hetero = FALSE)
+  con_micro <- combine.est(c(  con_ouh$c.index,con_winter$c.index,con_unc$c.index,con_icgc_array$c.index, con_collisson$c.index),c( con_ouh$se,con_winter$se,con_unc$se,con_icgc_array$se, con_collisson$se),na.rm = TRUE, hetero = TRUE)
   con_micro_lower <- con_micro$estimate + qnorm(0.025, lower.tail=TRUE) *  con_micro$se
   con_micro_upper <- con_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  con_micro$se
   con_micro_pval <- combine.test(p=c(con_ouh$p.value,con_winter$p.value,con_unc$p.value,con_icgc_array$p.value, con_collisson$p.value),
