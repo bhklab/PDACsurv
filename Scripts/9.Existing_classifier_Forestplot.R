@@ -104,22 +104,18 @@ tabletext2<-cbind(
   c("Classifiers",rownames(t)),
   c("P values",r.pval1))
 #pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/New_Figure_DINDEX.pdf")
-fn <- local({
+fn1 <- local({
   i = 0
   
-  b_clrs =  c(c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A") )
-  l_clrs =  c(c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A") )
-  #s_clrs =c(rep("red",10),"green","#E7298A","yellow","orange")
-  function(..., clr.line, clr.marker){
+  s_clrs =c(c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A") )
+  function(..., col){
     i <<- i + 1
-    fpDrawNormalCI(..., clr.line = l_clrs[i], clr.marker = b_clrs[i])
-    #fpDrawSummaryCI(...,col=s_clrs[i])
+    fpDrawSummaryCI(...,col=s_clrs[i])
   }
 })
-
-forestplot(tabletext2,data2,xlab="Log2 D-index", is.summary=c(TRUE,TRUE, rep(FALSE,4),rep(TRUE,2),rep(FALSE,4),rep(TRUE,2),  rep(FALSE,4)), new_page = TRUE,
+forestplot(tabletext2,data2,xlab="Log2 D-index", new_page=FALSE, is.summary=c( rep(TRUE,18)),
            clip=c(-1,4),txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),ticks = gpar(cex=0.8),  xlab  = gpar(fontfamily = "Helvetica", cex = 1)),
-           col = fpColors(text="black"),title=" ",zero=0,graphwidth=unit(2, "inches"),  align=c("l"), fn.ci_norm = fn, boxsize = 0.25)
+           col = fpColors(text="black"),title=" ",zero=0,graphwidth=unit(2, "inches"),  align=c("l"),  fn.ci_sum = fn1,boxsize = 0.25)
 #dev.off()
 ################################################################################################################
 ################################################################################################################
@@ -176,22 +172,21 @@ tabletext2<-cbind(
   c("Classifiers",rownames(t)),
   c("P values",r.pval1))
 #pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/New_Figure_CONCORDANCE.pdf")
-fn <- local({
+
+fn1 <- local({
   i = 0
   
-  b_clrs =  c(c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A") )
-  l_clrs =  c(c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A") )
-  #s_clrs =c(rep("red",10),"green","#E7298A","yellow","orange")
-  function(..., clr.line, clr.marker){
+  s_clrs =c(c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A") )
+  function(..., col){
     i <<- i + 1
-    fpDrawNormalCI(..., clr.line = l_clrs[i], clr.marker = b_clrs[i])
-    #fpDrawSummaryCI(...,col=s_clrs[i])
+    fpDrawSummaryCI(...,col=s_clrs[i])
   }
 })
 
-forestplot(tabletext2,data2,xlab="Concordance Index",is.summary=c(TRUE,TRUE, rep(FALSE,4),rep(TRUE,2),rep(FALSE,4),rep(TRUE,2),  rep(FALSE,4)),
-           fn.ci_norm = fn, new_page = TRUE, clip=c(0.4,0.9), txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),ticks = gpar(cex=0.8),  
-                                                                               xlab  = gpar(fontfamily = "Helvetica", cex = 1)), col = fpColors(text="black"),title="",zero=0.5,graphwidth=unit(2, "inches"),align=c("l"), boxsize = 0.25)
+forestplot(tabletext2,data2,xlab="Concordance Index",new_page=FALSE, is.summary=c( rep(TRUE,18)),
+           fn.ci_sum = fn1, clip=c(0.4,0.9), txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),ticks = gpar(cex=0.8),  
+          xlab  = gpar(fontfamily = "Helvetica", cex = 1)), col = fpColors(text="black"),title="",zero=0.5,graphwidth=unit(2, "inches"),align=c("l"), boxsize = 0.25)
+                                                                 xlab  = gpar(fontfamily = "Helvetica", cex = 1)), col = fpColors(text="black"),title="",zero=0.5,graphwidth=unit(2, "inches"),align=c("l"), boxsize = 0.25)
 
 ############################################### ##################################################################
 ############################################### ##################################################################
