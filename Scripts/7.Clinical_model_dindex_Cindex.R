@@ -187,33 +187,18 @@ arr=length(icgc_arr_cl_pred1)+ length(ouh_cl_pred1)
 
 #pdf("/Users/vandanasandhu/Desktop/c.pdf")
 
-fn <- local({
-  i = 0
-  
-  b_clrs =  c(c("#FF7F00","#FF7F00","#1F78B4","#1F78B4"),c("#FF7F00","#FF7F00","#1F78B4","#1F78B4"))
-  l_clrs =   c(c("#FF7F00","#FF7F00","#1F78B4","#1F78B4"),c("#FF7F00","#FF7F00","#1F78B4","#1F78B4"))
-  #s_clrs =c(rep("red",10),"green","pink","yellow","orange")
-  function(..., clr.line, clr.marker){
-    i <<- i + 1
-    fpDrawNormalCI(..., clr.line = l_clrs[i], clr.marker = b_clrs[i])
-    #fpDrawSummaryCI(...,col=s_clrs[i])
-  }
-})
-
 fn1 <- local({
   i = 0
   
-  s_clrs =c("#FF7F00","#1F78B4","grey57","#FF7F00","#1F78B4","grey57")
+  s_clrs =c(c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A") )
   function(..., col){
     i <<- i + 1
     fpDrawSummaryCI(...,col=s_clrs[i])
   }
 })
-
-
-forestplot(tabletext2,data2,xlab="Concordance index",is.summary=c(TRUE,TRUE,rep(FALSE,4),rep(TRUE,3),FALSE,TRUE, rep(FALSE,4),rep(TRUE,3)),clip=c(0,3.0),cex=10,
-           fn.ci_norm = fn,  fn.ci_sum = fn1,zero=0.5,graphwidth=unit(2, "inches"), align=c("l"), new_page = FALSE,txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),ticks = gpar(cex=0.8),  
-                                                                                                                                    xlab  = gpar(fontfamily = "Helvetica", cex = 1)), col = fpColors(text="black"))
+forestplot(tabletext2,data2,xlab="Log2 D-index", new_page=FALSE, is.summary=c( rep(TRUE,18)),
+           clip=c(-1,4),txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),ticks = gpar(cex=0.8),  xlab  = gpar(fontfamily = "Helvetica", cex = 1)),
+           col = fpColors(text="black"),title=" ",zero=0,graphwidth=unit(2, "inches"),  align=c("l"),  fn.ci_sum = fn1,boxsize = 0.25)
 
 ############# Plotting D-index and comparison across models
 #pdf("/Users/vandanasandhu/Desktop/RS_Remodelling_TSP_project/Manuscript-Figures/Clinical-d-index.pdf")
@@ -250,33 +235,19 @@ tabletext2<-cbind(
   c("Cohorts","Clinical model",rownames(t)),
   c("P values","",r.pval1))
 #pdf("/Users/vandanasandhu/Desktop/d.pdf")
-fn <- local({
-  i = 0
-  
-  b_clrs =  c(c("#FF7F00","#FF7F00","#1F78B4","#1F78B4"),c("#FF7F00","#FF7F00","#1F78B4","#1F78B4"))
-  l_clrs =   c(c("#FF7F00","#FF7F00","#1F78B4","#1F78B4"),c("#FF7F00","#FF7F00","#1F78B4","#1F78B4"))
-  #s_clrs =c(rep("red",10),"green","pink","yellow","orange")
-  function(..., clr.line, clr.marker){
-    i <<- i + 1
-    fpDrawNormalCI(..., clr.line = l_clrs[i], clr.marker = b_clrs[i])
-    #fpDrawSummaryCI(...,col=s_clrs[i])
-  }
-})
-
 fn1 <- local({
   i = 0
   
-  s_clrs =c("#FF7F00","#1F78B4","grey57","#FF7F00","#1F78B4","grey57")
+  s_clrs =c(c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A"),c("#666666","#666666","#666666","#E7298A") )
   function(..., col){
     i <<- i + 1
     fpDrawSummaryCI(...,col=s_clrs[i])
   }
 })
 
-forestplot(tabletext2,data2,xlab="Log2 D-index",is.summary=c(TRUE,TRUE,rep(FALSE,4),rep(TRUE,3),FALSE,TRUE, rep(FALSE,4),rep(TRUE,3)),clip=c(-2,3.0),cex=9,
-           fn.ci_norm = fn,  fn.ci_sum = fn1,zero=0,graphwidth=unit(2, "inches"), align=c("l"), new_page = FALSE,txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),ticks = gpar(cex=0.8),  
-                                                                                                                                  xlab  = gpar(fontfamily = "Helvetica", cex = 1)), col = fpColors(text="black"))
-
+forestplot(tabletext2,data2,xlab="Concordance Index",new_page=FALSE, is.summary=c( rep(TRUE,18)),
+           fn.ci_sum = fn1, clip=c(0.4,0.9), txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),ticks = gpar(cex=0.8),  
+          xlab  = gpar(fontfamily = "Helvetica", cex = 1)), col = fpColors(text="black"),title="",zero=0.5,graphwidth=unit(2, "inches"),align=c("l"), boxsize = 0.25)
 
 
 
