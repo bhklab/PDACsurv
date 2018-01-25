@@ -222,13 +222,12 @@ seq=length(tcga_cl_pred1) +  length(pcsi_cl_pred1)
 arr=length(icgc_arr_cl_pred1)+ length(ouh_cl_pred1)
 
 #pdf("/Users/vandanasandhu/Desktop/c.pdf")
-
 fn <- local({
   i = 0
   
-  b_clrs =  c("#FF7F00","#FF7F00","#FF7F00","#FF7F00", "#1F78B4","#1F78B4","#1F78B4","#1F78B4")
-  l_clrs =   c("#FF7F00","#FF7F00","#FF7F00","#FF7F00", "#1F78B4","#1F78B4","#1F78B4","#1F78B4")
-  #s_clrs =c(rep("red",10),"green","pink","yellow","orange")
+  b_clrs =  c("palevioletred1","darkgrey","palevioletred1","darkgrey", "palevioletred1","darkgrey","palevioletred1","darkgrey")
+  l_clrs =    c("palevioletred1","darkgrey","palevioletred1","darkgrey", "palevioletred1","darkgrey","palevioletred1","darkgrey")
+  #s_clrs =c(rep("palevioletred1",10),"green","pink","darkgrey","orange")
   function(..., clr.line, clr.marker){
     i <<- i + 1
     fpDrawNormalCI(..., clr.line = l_clrs[i], clr.marker = b_clrs[i])
@@ -239,12 +238,14 @@ fn <- local({
 fn1 <- local({
   i = 0
   
-  s_clrs =c("#FF7F00","#FF7F00","#1F78B4","#1F78B4","grey57","grey57")
+  s_clrs =c("palevioletred1","darkgrey","palevioletred1","darkgrey","black","black")
   function(..., col){
     i <<- i + 1
     fpDrawSummaryCI(...,col=s_clrs[i])
   }
 })
+
+
 
 
 forestplot(tabletext2,data2,xlab="Concordance index",is.summary=c(TRUE, TRUE, FALSE, FALSE, 
@@ -333,9 +334,9 @@ arr=length(icgc_arr_cl_pred1)+ length(ouh_cl_pred1)
 fn <- local({
   i = 0
   
-  b_clrs =  c("#FF7F00","#FF7F00","#FF7F00","#FF7F00", "#1F78B4","#1F78B4","#1F78B4","#1F78B4")
-  l_clrs =   c("#FF7F00","#FF7F00","#FF7F00","#FF7F00", "#1F78B4","#1F78B4","#1F78B4","#1F78B4")
-  #s_clrs =c(rep("red",10),"green","pink","yellow","orange")
+  b_clrs =  c("palevioletred1","darkgrey","palevioletred1","darkgrey", "palevioletred1","darkgrey","palevioletred1","darkgrey")
+  l_clrs =    c("palevioletred1","darkgrey","palevioletred1","darkgrey", "palevioletred1","darkgrey","palevioletred1","darkgrey")
+  #s_clrs =c(rep("palevioletred1",10),"green","pink","darkgrey","orange")
   function(..., clr.line, clr.marker){
     i <<- i + 1
     fpDrawNormalCI(..., clr.line = l_clrs[i], clr.marker = b_clrs[i])
@@ -346,12 +347,14 @@ fn <- local({
 fn1 <- local({
   i = 0
   
-  s_clrs =c("#FF7F00","#FF7F00","#1F78B4","#1F78B4","grey57","grey57")
+  s_clrs =c("palevioletred1","darkgrey","palevioletred1","darkgrey","black","black")
   function(..., col){
     i <<- i + 1
     fpDrawSummaryCI(...,col=s_clrs[i])
   }
 })
+
+
 
        
 forestplot(tabletext2,data2,xlab="Log2 D-index",is.summary=c(TRUE, TRUE, FALSE, FALSE, 
