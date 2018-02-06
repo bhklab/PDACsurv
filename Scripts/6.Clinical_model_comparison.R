@@ -3,6 +3,7 @@ load("/Users/vandanasandhu/Desktop/RS_Remodelling_TSP_project/Github/RData/cohor
 library(verification)
 library(reportROC)
 library(glmnet)
+library(ggthemes)
 ############################## ###########################################
 
 pcsi=data.frame(clinical_features$pcsi_clinical)
@@ -96,20 +97,37 @@ icgc_array_roc2_pval= roc.area(icgc_arr[names(icgc_arr_cl_pred1),]$binary_grp,ic
 
 
 ######## Plotting barplot
-data <- structure(list("TCGA"= c(tcga_roc1$AUC, tcga_roc2$AUC ),
-                       "PCSI" = c(pcsi_roc1$AUC, pcsi_roc2$AUC), 
-                       "ICGC-array" = c(icgc_array_roc1$AUC,icgc_array_roc2$AUC),
-                       "OUH" = c(ouh_roc1$AUC,ouh_roc2$AUC)), 
-                  .Names = c("TCGA","PCSI","ICGC-array","OUH"), class = "data.frame", row.names = c( "Clinicopathological model", "PCOSP"))
+df.plot=data.frame(cohort=c("1.TCGA","1.TCGA","2.PCSI","2.PCSI","3.ICGC-array","3.ICGC-array","4.OUH","4.OUH"), 
+                   model=c(rep(c("Clinicopathological model","PCOSP"),4)), 
+                   AUC=c(tcga_roc1$AUC, tcga_roc2$AUC ,pcsi_roc1$AUC, pcsi_roc2$AUC,icgc_array_roc1$AUC,
+                         icgc_array_roc2$AUC,ouh_roc1$AUC,ouh_roc2$AUC),
+                   AUC_up      =        c(tcga_roc1$AUC + tcga_roc1$AUC.SE,
+                                          tcga_roc2$AUC + tcga_roc2$AUC.SE,
+                                          pcsi_roc1$AUC + pcsi_roc1$AUC.SE,
+                                          pcsi_roc2$AUC + pcsi_roc2$AUC.SE,
+                                          icgc_array_roc1$AUC +   icgc_array_roc1$AUC.SE,
+                                          icgc_array_roc2$AUC +   icgc_array_roc2$AUC.SE,
+                                          ouh_roc1$AUC +  ouh_roc1$AUC.SE,
+                                          ouh_roc2$AUC +  ouh_roc2$AUC.SE),
+                   
+                   AUC_low      =        c(tcga_roc1$AUC - tcga_roc1$AUC.SE,
+                                           tcga_roc2$AUC - tcga_roc2$AUC.SE,
+                                           pcsi_roc1$AUC - pcsi_roc1$AUC.SE,
+                                           pcsi_roc2$AUC - pcsi_roc2$AUC.SE,
+                                           icgc_array_roc1$AUC -   icgc_array_roc1$AUC.SE,
+                                           icgc_array_roc2$AUC -   icgc_array_roc2$AUC.SE,
+                                           ouh_roc1$AUC -  ouh_roc1$AUC.SE,
+                                           ouh_roc2$AUC -  ouh_roc2$AUC.SE))
 
-attach(data)
-print(data)
-
-colours <- c("palevioletred1", "darkgrey")
-#pdf("/Users/vandanasandhu/Desktop/e.pdf")
-
-barplot(as.matrix(data), main="", ylim= c(0, 0.8), ylab = "AUCs",  cex.main = 1.4, beside=TRUE, col=colours,border = 'NA',
-        space=c(0.6,0.08,0.6,0.08,0.6,0.08,0.6,0.08))
+ggplot(df.plot, aes(x=cohort, y=AUC, fill=model)) +
+  geom_bar( stat='identity',width = 0.8, position = position_dodge(width = 0.85)) +
+  xlab(NULL) + scale_fill_manual(values=c("palevioletred1", "darkgrey"))+
+  geom_errorbar(aes(ymin = AUC_low, ymax = AUC_up),
+                width = 0.2,
+                linetype = "dotted",
+                position = position_dodge(width = 0.9),
+                color="black", size=1) +
+theme_hc() + theme(legend.position="none",axis.text = element_text(size = 12),axis.title  = element_text(size = 12))
 
 ########## Meta-estimate Calculations
 model1_meta = combine.est(c(pcsi_roc1$AUC, tcga_roc1$AUC, ouh_roc1$AUC,icgc_array_roc1$AUC), c( pcsi_roc_se1, tcga_roc_se1, ouh_roc_se1,icgc_array_roc_se1),na.rm=TRUE,hetero=TRUE)$estimate
