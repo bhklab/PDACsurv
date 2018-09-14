@@ -110,16 +110,14 @@ con_seq_upper <- con_seq$estimate + qnorm(0.025, lower.tail=FALSE) *  con_seq$se
 dindex_micro_upper <- dindex_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  dindex_micro$se
 con_micro_upper <- con_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  con_micro$se
 
-dindex_meta_pval <- combine.test(p=c(dindex_pcsi$p.value, dindex_tcga$p.value, dindex_ouh$p.value,dindex_icgc_array$p.value),
-                                 w=c(length(pcsi_cl_pred1), length(tcga_cl_pred1),length(ouh_cl_pred1),length(icgc_arr_cl_pred1)),hetero = FALSE,method="z.transform")
-dindex_micro_pval <- combine.test(p=c(dindex_ouh$p.value,dindex_icgc_array$p.value),
-                                  w=c(length(ouh_cl_pred1),length(icgc_arr_cl_pred1)),hetero = FALSE,method="z.transform")
-dindex_seq_pval <- combine.test(p=c(dindex_pcsi$p.value, dindex_tcga$p.value),
-                                w=c(length(pcsi_cl_pred1), length(tcga_cl_pred1)),hetero = FALSE,method="z.transform")
-con_meta_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value, con_ouh$p.value,con_icgc_array$p.value),
-                              w=c(length(pcsi_cl_pred1), length(tcga_cl_pred1),length(ouh_cl_pred1),length(icgc_arr_cl_pred1)),hetero = FALSE,method="z.transform")
-con_micro_pval <- combine.test(p=c(con_ouh$p.value,con_icgc_array$p.value),w=c(length(ouh_cl_pred1),length(icgc_arr_cl_pred1)),hetero = FALSE,method="z.transform")
-con_seq_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value),w=c(length(pcsi_cl_pred1), length(tcga_cl_pred1)),hetero = FALSE,method="z.transform")
+dindex_meta_pval <- pnorm((dindex_meta$estimate -1)/dindex_meta$se, lower.tail = dindex_meta$estimate < 1) * 2
+dindex_micro_pval <- pnorm((dindex_micro$estimate -1)/dindex_micro$se, lower.tail = dindex_micro$estimate < 1) * 2
+dindex_seq_pval <- pnorm((dindex_seq$estimate -1)/dindex_seq$se, lower.tail = dindex_seq$estimate < 1) * 2
+
+con_meta_pval <- pnorm((con_meta$estimate -0.5)/con_meta$se, lower.tail = con_meta$estimate < 0.5) * 2
+con_micro_pval <- pnorm((con_micro$estimate -0.5)/con_micro$se, lower.tail = con_micro$estimate < 0.5) * 2
+con_seq_pval <- pnorm((con_seq$estimate -0.5)/con_seq$se, lower.tail = con_seq$estimate < 0.5) * 2
+
 
 ## PCOSP
 dindex_meta1 <- combine.est(c( dindex_pcsi1$d.index, dindex_tcga1$d.index, dindex_ouh1$d.index,dindex_icgc_array1$d.index),c(dindex_pcsi1$se, dindex_tcga1$se, dindex_ouh1$se,dindex_icgc_array1$se),na.rm = TRUE,hetero=TRUE)
@@ -142,12 +140,16 @@ dindex_seq_upper1 <- dindex_seq1$estimate + qnorm(0.025, lower.tail=FALSE) *  di
 con_seq_upper1 <- con_seq1$estimate + qnorm(0.025, lower.tail=FALSE) *  con_seq1$se
 dindex_micro_upper1 <- dindex_micro1$estimate + qnorm(0.025, lower.tail=FALSE) *  dindex_micro1$se
 con_micro_upper1 <- con_micro1$estimate + qnorm(0.025, lower.tail=FALSE) *  con_micro1$se
-dindex_meta_pval1 <- combine.test(p=c(dindex_pcsi1$p.value, dindex_tcga1$p.value, dindex_ouh1$p.value,dindex_icgc_array1$p.value),w=c(length(pcsi_cl_pred2), length(tcga_cl_pred2),length(ouh_cl_pred2),length(icgc_arr_cl_pred2)),hetero = FALSE,method="z.transform")
-dindex_micro_pval1 <- combine.test(p=c(dindex_ouh1$p.value,dindex_icgc_array1$p.value),w=c(length(ouh_cl_pred2),length(icgc_arr_cl_pred2)),hetero = FALSE,method="z.transform")
-dindex_seq_pval1 <- combine.test(p=c(dindex_pcsi1$p.value, dindex_tcga1$p.value),w=c(length(pcsi_cl_pred2), length(tcga_cl_pred2)),hetero = FALSE,method="z.transform")
-con_meta_pval1 <- combine.test(p=c(con_pcsi1$p.value, con_tcga1$p.value, con_ouh1$p.value,con_icgc_array1$p.value),w=c(length(pcsi_cl_pred2), length(tcga_cl_pred2),length(ouh_cl_pred2),length(icgc_arr_cl_pred2)),hetero = FALSE,method="z.transform")
-con_micro_pval1 <- combine.test(p=c(con_ouh1$p.value,con_icgc_array1$p.value),w=c(length(ouh_cl_pred2),length(icgc_arr_cl_pred2)),hetero = FALSE,method="z.transform")
-con_seq_pval1 <- combine.test(p=c(con_pcsi1$p.value, con_tcga1$p.value),w=c(length(pcsi_cl_pred2), length(tcga_cl_pred2)),hetero = FALSE,method="z.transform")
+
+
+dindex_meta_pval1 <- pnorm((dindex_meta1$estimate -1)/dindex_meta1$se, lower.tail = dindex_meta1$estimate < 1) * 2
+dindex_micro_pval1 <- pnorm((dindex_micro1$estimate -1)/dindex_micro1$se, lower.tail = dindex_micro1$estimate < 1) * 2
+dindex_seq_pval1 <- pnorm((dindex_seq1$estimate -1)/dindex_seq1$se, lower.tail = dindex_seq1$estimate < 1) * 2
+
+con_meta_pval1 <- pnorm((con_meta1$estimate -0.5)/con_meta1$se, lower.tail = con_meta1$estimate < 0.5) * 2
+con_micro_pval1 <- pnorm((con_micro1$estimate -0.5)/con_micro1$se, lower.tail = con_micro1$estimate < 0.5) * 2
+con_seq_pval1 <- pnorm((con_seq1$estimate -0.5)/con_seq1$se, lower.tail = con_seq1$estimate < 0.5) * 2
+
 
 ############# Plotting Concordance index and comparison across models
 #pdf("/Users/vandanasandhu/Desktop/RS_Remodelling_TSP_project/Manuscript-Figures/Clinical-c-index.pdf")
