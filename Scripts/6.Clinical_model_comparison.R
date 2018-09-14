@@ -129,6 +129,7 @@ ggplot(df.plot, aes(x=cohort, y=AUC, fill=model)) +
                 color="black", size=1) +
 theme_hc() + theme(legend.position="none",axis.text = element_text(size = 12),axis.title  = element_text(size = 12))
 
+
 ########## Meta-estimate Calculations
 model1_meta = combine.est(c(pcsi_roc1$AUC, tcga_roc1$AUC, ouh_roc1$AUC,icgc_array_roc1$AUC), c( pcsi_roc_se1, tcga_roc_se1, ouh_roc_se1,icgc_array_roc_se1),na.rm=TRUE,hetero=TRUE)$estimate
 model1_seq = combine.est(c(pcsi_roc1$AUC, tcga_roc1$AUC), c( pcsi_roc_se1, tcga_roc_se1),na.rm=TRUE,hetero=TRUE)$estimate
@@ -138,13 +139,25 @@ model2_meta = combine.est(c(pcsi_roc2$AUC, tcga_roc2$AUC, ouh_roc2$AUC,icgc_arra
 model2_seq = combine.est(c(pcsi_roc2$AUC, tcga_roc2$AUC), c( pcsi_roc_se2, tcga_roc_se2),na.rm=TRUE,hetero=TRUE)$estimate
 model2_micro =combine.est(c( ouh_roc2$AUC,icgc_array_roc2$AUC), c( ouh_roc_se2,icgc_array_roc_se2),hetero=TRUE,na.rm=TRUE)$estimate
 
-model1_meta_pval <- combine.test(p=c(pcsi_roc1_pval,tcga_roc1_pval, ouh_roc1_pval,icgc_array_roc1_pval),w=c(length(pcsi_cl_pred1),length(tcga_cl_pred1),length(ouh_cl_pred1),length(icgc_arr_cl_pred1)),method="z.transform")
-model1_seq_pval <- combine.test(p=c(pcsi_roc1_pval,tcga_roc1_pval),w=c(length(pcsi_cl_pred1),length(tcga_cl_pred1)),method="z.transform")
-model1_micro_pval <- combine.test(p=c( ouh_roc1_pval,icgc_array_roc1_pval),w=c(length(ouh_cl_pred1),length(icgc_arr_cl_pred1)),method="z.transform")
+m11=combine.est(c(pcsi_roc1$AUC, tcga_roc1$AUC, ouh_roc1$AUC,icgc_array_roc1$AUC), c( pcsi_roc_se1, tcga_roc_se1, ouh_roc_se1,icgc_array_roc_se1),na.rm=TRUE,hetero=TRUE)
+model1_meta_pval = pnorm((m11$estimate -0.5)/m11$se, lower.tail = m11$estimate < 0.5) * 2
 
-model2_meta_pval <- combine.test(p=c(pcsi_roc2_pval,tcga_roc2_pval, ouh_roc2_pval,icgc_array_roc2_pval),w=c(length(pcsi_cl_pred2),length(tcga_cl_pred2),length(ouh_cl_pred2),length(icgc_arr_cl_pred2)),method="z.transform")
-model2_seq_pval <- combine.test(p=c(pcsi_roc2_pval,tcga_roc2_pval),w=c(length(pcsi_cl_pred2),length(tcga_cl_pred2)),method="z.transform")
-model2_micro_pval <- combine.test(p=c( ouh_roc2_pval,icgc_array_roc2_pval),w=c(length(ouh_cl_pred2),length(icgc_arr_cl_pred2)),method="z.transform")
+m11=combine.est(c(pcsi_roc1$AUC, tcga_roc1$AUC), c( pcsi_roc_se1, tcga_roc_se1),na.rm=TRUE,hetero=TRUE)
+model1_seq_pval <-  pnorm((m11$estimate -0.5)/m11$se, lower.tail = m11$estimate < 0.5) * 2
+
+m11=combine.est(c( ouh_roc1$AUC,icgc_array_roc1$AUC), c( ouh_roc_se1,icgc_array_roc_se1),na.rm=FALSE,hetero=TRUE)
+model1_micro_pval <-pnorm((m11$estimate -0.5)/m11$se, lower.tail = m11$estimate < 0.5) * 2
+
+m12=combine.est(c(pcsi_roc2$AUC, tcga_roc2$AUC, ouh_roc2$AUC,icgc_array_roc2$AUC), c( pcsi_roc_se2, tcga_roc_se2, ouh_roc_se2,icgc_array_roc_se2),na.rm=TRUE,hetero=TRUE)
+model2_meta_pval = pnorm((m12$estimate -0.5)/m12$se, lower.tail = m12$estimate < 0.5) * 2
+
+m12=combine.est(c(pcsi_roc2$AUC, tcga_roc2$AUC), c( pcsi_roc_se2, tcga_roc_se2),na.rm=TRUE,hetero=TRUE)
+model2_seq_pval <-  pnorm((m12$estimate -0.5)/m12$se, lower.tail = m12$estimate < 0.5) * 2
+
+m12=combine.est(c( ouh_roc2$AUC,icgc_array_roc2$AUC), c( ouh_roc_se2,icgc_array_roc_se2),hetero=TRUE,na.rm=TRUE)
+model2_micro_pval <-pnorm((m12$estimate -0.5)/m12$se, lower.tail = m12$estimate < 0.5) * 2
+
+
 
 
 
