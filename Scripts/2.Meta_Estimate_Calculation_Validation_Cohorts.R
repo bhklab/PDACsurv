@@ -31,7 +31,6 @@ unc_list=pcosp_prob(unc_mat)
 collisson_list=pcosp_prob(collisson_mat)
 chen_list=pcosp_prob(chen_mat)
 kirby_list=pcosp_prob(kirby_mat)
-
 ######################
 ### Dindex estimate calculation
 
@@ -96,14 +95,17 @@ dindex_meta <- combine.est(c( dindex_pcsi$d.index, dindex_tcga$d.index, dindex_k
                               dindex_chen$se),na.rm = TRUE,hetero = TRUE)
 dindex_meta_lower <- dindex_meta$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_meta$se
 dindex_meta_upper <- dindex_meta$estimate + qnorm(0.025, lower.tail=FALSE) *  dindex_meta$se
-dindex_meta_pval <- combine.test(p=c(dindex_pcsi$p.value, dindex_tcga$p.value, dindex_kirby$p.value, 
-                                     dindex_ouh$p.value,dindex_winter$p.value,dindex_zhang$p.value,
-                                     dindex_unc$p.value,dindex_icgc_array$p.value, dindex_collisson$p.value,dindex_chen$p.value),
-                                 
-                                 w=c(length(pcsi_list[[1]]), length(tcga_list[[1]]),length(kirby_list[[1]]),
-                                     length(ouh_list[[1]]),length(winter_list[[1]]),length(zhang_list[[1]]),
-                                     length(unc_list[[1]]),length(icgc_array_list[[1]]), length(collisson_list[[1]]), 
-                                     length(chen_list[[1]])),method="z.transform")
+# #dindex_meta_pval <- combine.test(p=c(dindex_pcsi$p.value, dindex_tcga$p.value, dindex_kirby$p.value, 
+#                                      dindex_ouh$p.value,dindex_winter$p.value,dindex_zhang$p.value,
+#                                      dindex_unc$p.value,dindex_icgc_array$p.value, dindex_collisson$p.value,dindex_chen$p.value),
+#                                  
+#                                  w=c(length(pcsi_list[[1]]), length(tcga_list[[1]]),length(kirby_list[[1]]),
+#                                      length(ouh_list[[1]]),length(winter_list[[1]]),length(zhang_list[[1]]),
+#                                      length(unc_list[[1]]),length(icgc_array_list[[1]]), length(collisson_list[[1]]), 
+#                                      length(chen_list[[1]])),hetero = FALSE,method="z.transform")
+
+
+dindex_meta_pval=pnorm((dindex_meta$estimate - 1)/dindex_meta$se, lower.tail = dindex_meta$estimate < 1) * 2
 
 
 con_meta <- combine.est(c( con_pcsi$c.index, con_tcga$c.index, con_kirby$c.index, 
@@ -116,60 +118,68 @@ con_meta <- combine.est(c( con_pcsi$c.index, con_tcga$c.index, con_kirby$c.index
 
 con_meta_lower <- con_meta$estimate + qnorm(0.025, lower.tail=TRUE) *  con_meta$se
 con_meta_upper <- con_meta$estimate + qnorm(0.025, lower.tail=FALSE) *  con_meta$se
-con_meta_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value, con_kirby$p.value,
-                                  con_ouh$p.value, con_winter$p.value, con_zhang$p.value,
-                                  con_unc$p.value, con_icgc_array$p.value, con_collisson$p.value, con_chen$p.value),
-                              
-                              w=c(length(pcsi_list[[1]]), length(tcga_list[[1]]),length(kirby_list[[1]]), 
-                                  length(ouh_list[[1]]),length(winter_list[[1]]),length(zhang_list[[1]]),
-                                  length(unc_list[[1]]),length(icgc_array_list[[1]]), length(collisson_list[[1]]), 
-                                  length(chen_list[[1]])),method="z.transform")
+# con_meta_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value, con_kirby$p.value,
+#                                   con_ouh$p.value, con_winter$p.value, con_zhang$p.value,
+#                                   con_unc$p.value, con_icgc_array$p.value, con_collisson$p.value, con_chen$p.value),
+#                               
+#                               w=c(length(pcsi_list[[1]]), length(tcga_list[[1]]),length(kirby_list[[1]]), 
+#                                   length(ouh_list[[1]]),length(winter_list[[1]]),length(zhang_list[[1]]),
+#                                   length(unc_list[[1]]),length(icgc_array_list[[1]]), length(collisson_list[[1]]), 
+#                                   length(chen_list[[1]])),method="z.transform")
+# 
+con_meta_pval=pnorm((con_meta$estimate - 0.5)/con_meta$se, lower.tail = con_meta$estimate < 0.5) * 2
 
 
 ### Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR sequencing cohort
 
 dindex_seq <- combine.est(c( dindex_pcsi$d.index, dindex_tcga$d.index, dindex_kirby$d.index),
-                          c(dindex_pcsi$se, dindex_tcga$se, dindex_kirby$se),na.rm = TRUE, hetero = TRUE) ## Since the platform is same
+                          c(dindex_pcsi$se, dindex_tcga$se, dindex_kirby$se),na.rm = TRUE, hetero = FALSE) ## Since the platform is same
 dindex_seq_lower <- dindex_seq$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_seq$se
 dindex_seq_upper <- dindex_seq$estimate + qnorm(0.025, lower.tail=FALSE) *  dindex_seq$se
-dindex_seq_pval <- combine.test(p=c(dindex_pcsi$p.value, dindex_tcga$p.value, dindex_kirby$p.value),
-                                w=c(length(pcsi_list[[1]]), length(tcga_list[[1]]), length(kirby_list[[1]])),method="z.transform")
+# dindex_seq_pval <- combine.test(p=c(dindex_pcsi$p.value, dindex_tcga$p.value, dindex_kirby$p.value),
+#                                 w=c(length(pcsi_list[[1]]), length(tcga_list[[1]]), length(kirby_list[[1]])),method="z.transform")
+
+dindex_seq_pval<-pnorm((dindex_seq$estimate - 1)/dindex_seq$se, lower.tail = dindex_seq$estimate < 1) * 2
+
 
 con_seq <- combine.est(c( con_pcsi$c.index, con_tcga$c.index, con_kirby$c.index),
-                       c(con_pcsi$se, con_tcga$se, con_kirby$se),na.rm = TRUE,  hetero = TRUE)## Since the platform is same
+                       c(con_pcsi$se, con_tcga$se, con_kirby$se),na.rm = TRUE,  hetero = FALSE)## Since the platform is same
 con_seq_lower <- con_seq$estimate + qnorm(0.025, lower.tail=TRUE) *  con_seq$se
 con_seq_upper <- con_seq$estimate + qnorm(0.025, lower.tail=FALSE) *  con_seq$se
-con_seq_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value, con_kirby$p.value),
-                             w=c(length(pcsi_list[[1]]), length(tcga_list[[1]]), length(kirby_list[[1]])),method="z.transform")
+# con_seq_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value, con_kirby$p.value),
+#                              w=c(length(pcsi_list[[1]]), length(tcga_list[[1]]), length(kirby_list[[1]])),method="z.transform")
+con_seq_pval<-pnorm((con_seq$estimate - 0.5)/con_seq$se, lower.tail = con_seq$estimate < 0.5) * 2
 
 ### Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR microarray cohort
 
 dindex_micro <- combine.est(c( dindex_ouh$d.index,dindex_winter$d.index,dindex_zhang$d.index,
                                dindex_unc$d.index,dindex_icgc_array$d.index, dindex_collisson$d.index, dindex_chen$d.index),
                             c( dindex_ouh$se,dindex_winter$se,dindex_zhang$se,
-                               dindex_unc$se,dindex_icgc_array$se, dindex_collisson$se, dindex_chen$se),na.rm = TRUE, hetero = TRUE)
+                               dindex_unc$se,dindex_icgc_array$se, dindex_collisson$se, dindex_chen$se),na.rm = TRUE, hetero = FALSE)
 
 dindex_micro_lower <- dindex_micro$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_micro$se
 dindex_micro_upper <- dindex_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  dindex_micro$se
-dindex_micro_pval <- combine.test(p=c(dindex_ouh$p.value,dindex_winter$p.value,dindex_zhang$p.value,
-                                      dindex_unc$p.value,dindex_icgc_array$p.value, dindex_collisson$p.value, dindex_chen$p.value),
-                                  w=c(length(ouh_list[[1]]),length(winter_list[[1]]),length(zhang_list[[1]]),
-                                      length(unc_list[[1]]),length(icgc_array_list[[1]]), length(collisson_list[[1]]), 
-                                      length(chen_list[[1]])),method="z.transform")
+# dindex_micro_pval <- combine.test(p=c(dindex_ouh$p.value,dindex_winter$p.value,dindex_zhang$p.value,
+#                                       dindex_unc$p.value,dindex_icgc_array$p.value, dindex_collisson$p.value, dindex_chen$p.value),
+#                                   w=c(length(ouh_list[[1]]),length(winter_list[[1]]),length(zhang_list[[1]]),
+#                                       length(unc_list[[1]]),length(icgc_array_list[[1]]), length(collisson_list[[1]]), 
+#                                       length(chen_list[[1]])),hetero = FALSE,method="z.transform")
 
-
+dindex_micro_pval<-pnorm((dindex_micro$estimate - 1)/dindex_micro$se, lower.tail = dindex_micro$estimate < 1) * 2
+  
 con_micro <- combine.est(c(  con_ouh$c.index,con_winter$c.index,con_zhang$c.index,
                              con_unc$c.index,con_icgc_array$c.index, con_collisson$c.index,  con_chen$c.index),
                          c( con_ouh$se,con_winter$se,con_zhang$se,
-                            con_unc$se,con_icgc_array$se, con_collisson$se, con_chen$se),na.rm = TRUE, hetero = TRUE)
+                            con_unc$se,con_icgc_array$se, con_collisson$se, con_chen$se),na.rm = TRUE, hetero = FALSE)
 con_micro_lower <- con_micro$estimate + qnorm(0.025, lower.tail=TRUE) *  con_micro$se
 con_micro_upper <- con_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  con_micro$se
-con_micro_pval <- combine.test(p=c(con_ouh$p.value,con_winter$p.value,con_zhang$p.value,con_unc$p.value,
-                                   con_icgc_array$p.value, con_collisson$p.value, con_chen$p.value),
-                               w=c(length(ouh_list[[1]]),length(winter_list[[1]]),length(zhang_list[[1]]),length(unc_list[[1]]),
-                                   length(icgc_array_list[[1]]), length(collisson_list[[1]]),  length(chen_list[[1]])),
-                               method="z.transform")
+# con_micro_pval <- combine.test(p=c(con_ouh$p.value,con_winter$p.value,con_zhang$p.value,con_unc$p.value,
+#                                    con_icgc_array$p.value, con_collisson$p.value, con_chen$p.value),
+#                                w=c(length(ouh_list[[1]]),length(winter_list[[1]]),length(zhang_list[[1]]),length(unc_list[[1]]),
+#                                    length(icgc_array_list[[1]]), length(collisson_list[[1]]),  length(chen_list[[1]])),
+#                                hetero = FALSE,method="z.transform")
 
+con_micro_pval<-pnorm((con_micro$estimate - 0.5)/con_micro$se, lower.tail = con_micro$estimate < 0.5) * 2
 
 
 ##### Plotting Forestplot of  D index ###############
@@ -215,10 +225,10 @@ data2 <-
 tabletext2<-cbind(
   c("Cohorts",rownames(t)),
   c("P values",r.pval1))
-#pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/New_Figure_DINDEX.pdf")
+#pdf("../results/PCOSP-D-index.pdf")
 length_seq= length(tcga_list[[1]]) + length(pcsi_list[[1]])+ length(kirby_list[[1]])
 length_micro = length(icgc_array_list[[1]])+length(unc_list[[1]])+ length(chen_list[[1]])+
-               length(ouh_list[[1]])+length(zhang_list[[1]])+length(winter_list[[1]])+length(collisson_list[[1]])
+  length(ouh_list[[1]])+length(zhang_list[[1]])+length(winter_list[[1]])+length(collisson_list[[1]])
 length_c=  c(NA,c(length(tcga_list[[1]]), length(pcsi_list[[1]]),length(kirby_list[[1]]),
                   length(icgc_array_list[[1]]),length(unc_list[[1]]), length(chen_list[[1]]),
                   length(ouh_list[[1]]),length(zhang_list[[1]]),length(winter_list[[1]]),length(collisson_list[[1]]),
@@ -249,9 +259,9 @@ fn1 <- local({
 
 
 
-forestplot(tabletext2,data2,xlab="Log2 D-index",is.summary=c(TRUE,rep(FALSE,10),TRUE, TRUE, TRUE),new_page = TRUE,clip=c(-1,2.5),
+forestplot(tabletext2,data2,xlab="Log2 HR",is.summary=c(TRUE,rep(FALSE,10),TRUE, TRUE, TRUE),clip=c(-1,2.5),
            txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),ticks = gpar(cex=0.8),  xlab  = gpar(fontfamily = "Helvetica", cex = 1)),
-           col = fpColors(text="black"),title=" ",
+           col = fpColors(text="black"),title=" ",new_page = FALSE,
            fn.ci_norm = fn,  fn.ci_sum = fn1, zero=0,graphwidth=unit(2, "inches"),  align=c("l"), pch=16,boxsize = length_c+0.2)
 #dev.off()
 
@@ -296,7 +306,7 @@ data2 <-
 tabletext2<-cbind(
   c("Cohorts",rownames(t)),
   c("P values",r.pval1))
-#pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/New_Figure_CONCORDANCE.pdf")
+pdf("../results/PCOSP-C-index.pdf")
 fn <- local({
   i = 0
   
@@ -319,19 +329,10 @@ fn1 <- local({
     fpDrawSummaryCI(...,col=s_clrs[i])
   }
 })
-fn1 <- local({
-  i = 0
-  
-  s_clrs =c("#FF7F00","#1F78B4","grey57")
-  function(..., col){
-    i <<- i + 1
-    fpDrawSummaryCI(...,col=s_clrs[i])
-  }
-})
 
-forestplot(tabletext2,data2,xlab="Concordance Index",is.summary=c(TRUE,rep(FALSE,10),TRUE, TRUE, TRUE),new_page = TRUE, clip=c(0.3,0.8), 
+forestplot(tabletext2,data2,xlab="C-index",is.summary=c(TRUE,rep(FALSE,10),TRUE, TRUE, TRUE), clip=c(0.3,0.8), 
            txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),ticks = gpar(cex=0.9),  xlab  = gpar(fontfamily = "Helvetica", cex = 1)), 
-           col = fpColors(text="black"), fn.ci_norm = fn,  fn.ci_sum = fn1,title="",zero=0.5,graphwidth=unit(2, "inches"),align=c("l"),
+           col = fpColors(text="black"), fn.ci_norm = fn,  fn.ci_sum = fn1,title="",zero=0.5,graphwidth=unit(2, "inches"),align=c("l"),new_page = FALSE,
            boxsize = length_c+0.2)
 #dev.off()
 
@@ -400,28 +401,42 @@ collisson_pval=roc.area(collisson_grp,1-collisson_list[[1]][g_coll])$p.value
 chen_pval=roc.area(chen_grp,1-chen_list[[1]][g_chen])$p.value
 kirby_pval=roc.area(kirby_grp,1-kirby_list[[1]][g_kirby])$p.value
 
+m1= combine.est(c(pcsi_roc, tcga_roc, kirby_roc, unc_roc,
+                  zhang_roc, winter_roc, ouh_roc,icgc_array_roc, 
+                  collisson_roc, chen_roc),
+                c( pcsi_roc_se, tcga_roc_se,kirby_roc_se, unc_roc_se,zhang_roc_se, 
+                   winter_roc_se, ouh_roc_se,icgc_array_roc_se, collisson_roc_se, 
+                   chen_roc_se),na.rm=TRUE,hetero = TRUE)
+m2=combine.est(c(pcsi_roc, tcga_roc, kirby_roc), 
+               c( pcsi_roc_se, tcga_roc_se,kirby_roc_se),na.rm=TRUE,hetero =TRUE)
+m3= combine.est(c( unc_roc, zhang_roc, winter_roc, ouh_roc,icgc_array_roc,collisson_roc,  chen_roc), 
+                c(  unc_roc_se,zhang_roc_se, winter_roc_se, ouh_roc_se,icgc_array_roc_se, collisson_roc_se,  chen_roc_se),
+                na.rm=TRUE,hetero = TRUE)
 
-
-meta_pval = combine.test(p=c(pcsi_pval,tcga_pval, ouh_pval, unc_pval, zhang_pval,winter_pval,icgc_array_pval,
-                             collisson_pval,chen_pval,kirby_pval ),
-                         w= c( length(pcsi_list[[1]][g_icgc_seq]), length(tcga_list[[1]][g_tcga]),  length(ouh_list[[1]][g_ouh]),
-                               length(unc_list[[1]][g_unc]), length(zhang_list[[1]][g_zhang]), length(winter_list[[1]][g_winter]),  
-                               length(icgc_array_list[[1]][g_icgc_arr]), length(collisson_list[[1]][g_coll]), length(chen_list[[1]][g_chen]),
-                               length(kirby_list[[1]][g_kirby])),na.rm=TRUE,method="z.transform")
-
-seq_pval = combine.test(p=c(pcsi_pval,tcga_pval, kirby_pval), w= c( length(pcsi_list[[1]][g_icgc_seq]), length(tcga_list[[1]][g_tcga]), 
-                                                                    length(kirby_list[[1]][g_kirby])),na.rm=TRUE)
-
-micro_pval = combine.test(p=c(ouh_pval, unc_pval, zhang_pval,winter_pval,icgc_array_pval,collisson_pval,chen_pval),
-                          w= c( length(ouh_list[[1]][g_ouh]),length(unc_list[[1]][g_unc]), length(zhang_list[[1]][g_zhang]), 
-                                length(winter_list[[1]][g_winter]), length(icgc_array_list[[1]][g_icgc_arr]), 
-                                length(collisson_list[[1]][g_coll]),length(chen_list[[1]][g_chen])),na.rm=TRUE,method="z.transform")
+meta_pval= pnorm((m1$estimate - 0.5)/m1$se, lower.tail = m1$estimate < 0.5) * 2
+seq_pval=pnorm((m2$estimate -0.5)/m2$se, lower.tail = m2$estimate < 0.5) * 2
+micro_pval=pnorm((m3$estimate -0.5)/m3$se, lower.tail = m3$estimate < 0.5) * 2
+# 
+# meta_pval = combine.test(p=c(pcsi_pval,tcga_pval, ouh_pval, unc_pval, zhang_pval,winter_pval,icgc_array_pval,
+#                              collisson_pval,chen_pval,kirby_pval ),
+#                          w= c( length(pcsi_list[[1]][g_icgc_seq]), length(tcga_list[[1]][g_tcga]),  length(ouh_list[[1]][g_ouh]),
+#                                length(unc_list[[1]][g_unc]), length(zhang_list[[1]][g_zhang]), length(winter_list[[1]][g_winter]),  
+#                                length(icgc_array_list[[1]][g_icgc_arr]), length(collisson_list[[1]][g_coll]), length(chen_list[[1]][g_chen]),
+#                                length(kirby_list[[1]][g_kirby])),na.rm=TRUE,method="z.transform")
+# 
+# seq_pval = combine.test(p=c(pcsi_pval,tcga_pval, kirby_pval), w= c( length(pcsi_list[[1]][g_icgc_seq]), length(tcga_list[[1]][g_tcga]), 
+#                                                                     length(kirby_list[[1]][g_kirby])),na.rm=TRUE)
+# 
+# micro_pval = combine.test(p=c(ouh_pval, unc_pval, zhang_pval,winter_pval,icgc_array_pval,collisson_pval,chen_pval),
+#                           w= c( length(ouh_list[[1]][g_ouh]),length(unc_list[[1]][g_unc]), length(zhang_list[[1]][g_zhang]), 
+#                                 length(winter_list[[1]][g_winter]), length(icgc_array_list[[1]][g_icgc_arr]), 
+#                                 length(collisson_list[[1]][g_coll]),length(chen_list[[1]][g_chen])),na.rm=TRUE,method="z.transform")
 
 
 library(pROC)
 
 
-#pdf("/Users/vandanasandhu/Desktop/Project1-Metadatasubtyping/Figures/New_Figure_AUC.pdf")
+#pdf("../results/PCOSP-AUC.pdf")
 plot(roc(tcga_grp,tcga_list[[1]][g_tcga]),lwd=4, col="chartreuse3",lty=1)
 plot(roc(kirby_grp,kirby_list[[1]][g_kirby]),lwd=4, col="magenta",add=TRUE,lty=1)
 plot(roc(pcsi_grp,pcsi_list[[1]][g_pcsi]),lwd=4, col="#fb9a99",add=TRUE,lty=1)
@@ -448,5 +463,3 @@ legend("bottomright",legend=c(paste("TCGA: ",round(tcga_roc,digits=2)," (P = ", 
        fill=c( "chartreuse3","magenta","#fb9a99","turquoise3","darkgoldenrod1","wheat4","green","red","cornflowerblue","mediumorchid2"),y.intersp = 1, cex=0.9,bty = "n")
 
 #dev.off()
-
-#######################Probability distribution boxplots
