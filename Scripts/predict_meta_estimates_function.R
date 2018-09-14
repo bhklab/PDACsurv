@@ -35,46 +35,59 @@ predict_meta_estimates = function(pcsi_list, tcga_list, kirby_list,icgc_array_li
                              c(dindex_pcsi$se, dindex_tcga$se, dindex_kirby$se, dindex_ouh$se,dindex_winter$se,dindex_unc$se,dindex_icgc_array$se,dindex_collisson$se),na.rm = TRUE,hetero = TRUE)
   dindex_meta_lower <- dindex_meta$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_meta$se
   dindex_meta_upper <- dindex_meta$estimate + qnorm(0.025, lower.tail=FALSE) *  dindex_meta$se
-  dindex_meta_pval <- combine.test(p=c(dindex_pcsi$p.value,  dindex_tcga$p.value, dindex_kirby$p.value, dindex_ouh$p.value,dindex_winter$p.value,dindex_unc$p.value,dindex_icgc_array$p.value, dindex_collisson$p.value),
-                                   w=c(length(pcsi_list), length(tcga_list),length(kirby_list),length(ouh_list),length(winter_list),length(unc_list),length(icgc_array_list), length(collisson_list)),hetero = FALSE,method="z.transform")
+ # dindex_meta_pval <- combine.test(p=c(dindex_pcsi$p.value,  dindex_tcga$p.value, dindex_kirby$p.value, dindex_ouh$p.value,dindex_winter$p.value,dindex_unc$p.value,dindex_icgc_array$p.value, dindex_collisson$p.value),
+  #                                 w=c(length(pcsi_list), length(tcga_list),length(kirby_list),length(ouh_list),length(winter_list),length(unc_list),length(icgc_array_list), length(collisson_list)),hetero = FALSE,method="z.transform")
+  
+  
+  dindex_meta_pval <- pnorm((dindex_meta$estimate - 1)/dindex_meta$se, lower.tail = dindex_meta$estimate < 1) * 2
   
   con_meta <- combine.est(c(con_pcsi$c.index, con_tcga$c.index, con_kirby$c.index, con_ouh$c.index,con_winter$c.index,con_unc$c.index,con_icgc_array$c.index, con_collisson$c.index),
                           c(con_pcsi$se,  con_tcga$se, con_kirby$se,con_ouh$se,con_winter$se,con_unc$se,con_icgc_array$se, con_collisson$se),na.rm = TRUE,hetero = TRUE)
   con_meta_lower <- con_meta$estimate + qnorm(0.025, lower.tail=TRUE) *  con_meta$se
   con_meta_upper <- con_meta$estimate + qnorm(0.025, lower.tail=FALSE) *  con_meta$se
-  con_meta_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value, con_kirby$p.value,con_ouh$p.value,con_winter$p.value,con_unc$p.value,con_icgc_array$p.value, con_collisson$p.value),
-                                w=c(length(pcsi_list), length(tcga_list),length(kirby_list), length(ouh_list),length(winter_list),length(unc_list),length(icgc_array_list), length(collisson_list) ),method="z.transform")
-  
+  #con_meta_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value, con_kirby$p.value,con_ouh$p.value,con_winter$p.value,con_unc$p.value,con_icgc_array$p.value, con_collisson$p.value),
+   #                             w=c(length(pcsi_list), length(tcga_list),length(kirby_list), length(ouh_list),length(winter_list),length(unc_list),length(icgc_array_list), length(collisson_list) ),method="z.transform")
+    
+    con_meta_pval <- pnorm((con_meta$estimate -0.5)/con_meta$se, lower.tail = con_meta$estimate < 0.5) * 2
+
   
   ### Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR sequencing cohort
   
-  dindex_seq <- combine.est(c( dindex_pcsi$d.index,dindex_tcga$d.index, dindex_kirby$d.index),c(dindex_pcsi$se,  dindex_tcga$se, dindex_kirby$se),na.rm = TRUE, hetero = TRUE) ## Since the platform is same
+  dindex_seq <- combine.est(c( dindex_pcsi$d.index,dindex_tcga$d.index, dindex_kirby$d.index),c(dindex_pcsi$se,  dindex_tcga$se, dindex_kirby$se),na.rm = TRUE, hetero = TRUE) 
   dindex_seq_lower <- dindex_seq$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_seq$se
   dindex_seq_upper <- dindex_seq$estimate + qnorm(0.025, lower.tail=FALSE) *  dindex_seq$se
-  dindex_seq_pval <- combine.test(p=c(dindex_pcsi$p.value,dindex_tcga$p.value, dindex_kirby$p.value),
-                                  w=c(length(pcsi_list),length(tcga_list), length(kirby_list)),method="z.transform")
+  #dindex_seq_pval <- combine.test(p=c(dindex_pcsi$p.value,dindex_tcga$p.value, dindex_kirby$p.value),
+   #                               w=c(length(pcsi_list),length(tcga_list), length(kirby_list)),method="z.transform")
   
-  con_seq <- combine.est(c( con_pcsi$c.index, con_tcga$c.index, con_kirby$c.index),c(con_pcsi$se,  con_tcga$se, con_kirby$se),na.rm = TRUE,  hetero = TRUE)## Since the platform is same
+  dindex_seq_pval<- pnorm((dindex_seq$estimate - 1)/dindex_seq$se, lower.tail = dindex_seq$estimate < 1) * 2
+  
+  con_seq <- combine.est(c( con_pcsi$c.index, con_tcga$c.index, con_kirby$c.index),c(con_pcsi$se,  con_tcga$se, con_kirby$se),na.rm = TRUE,  hetero = TRUE)
   con_seq_lower <- con_seq$estimate + qnorm(0.025, lower.tail=TRUE) *  con_seq$se
   con_seq_upper <- con_seq$estimate + qnorm(0.025, lower.tail=FALSE) *  con_seq$se
-  con_seq_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value, con_kirby$p.value),
-                               w=c(length(pcsi_list), length(tcga_list), length(kirby_list)),method="z.transform")
+ # con_seq_pval <- combine.test(p=c(con_pcsi$p.value, con_tcga$p.value, con_kirby$p.value),
+  #                             w=c(length(pcsi_list), length(tcga_list), length(kirby_list)),method="z.transform")
+  
+    con_seq_pval<- pnorm((con_seq$estimate -0.5)/con_seq$se, lower.tail = con_seq$estimate < 0.5) * 2
   
   ### Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR microarray cohort
   
-  dindex_micro <- combine.est(c( dindex_ouh$d.index,dindex_winter$d.index,dindex_unc$d.index,dindex_icgc_array$d.index, dindex_collisson$d.index),c( dindex_ouh$se,dindex_winter$se,dindex_unc$se,dindex_icgc_array$se, dindex_collisson$se),na.rm = TRUE, hetero =TRUE)
+  dindex_micro <- combine.est(c( dindex_ouh$d.index,dindex_winter$d.index,dindex_unc$d.index,dindex_icgc_array$d.index, dindex_collisson$d.index),c( dindex_ouh$se,dindex_winter$se,dindex_unc$se,dindex_icgc_array$se, dindex_collisson$se),na.rm = TRUE, hetero = TRUE)
   dindex_micro_lower <- dindex_micro$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_micro$se
   dindex_micro_upper <- dindex_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  dindex_micro$se
-  dindex_micro_pval <- combine.test(p=c(dindex_ouh$p.value,dindex_winter$p.value,dindex_unc$p.value,dindex_icgc_array$p.value, dindex_collisson$p.value),
-                                    w=c(length(ouh_list),length(winter_list),length(unc_list),length(icgc_array_list), length(collisson_list)),hetero = FALSE,method="z.transform")
+  #dindex_micro_pval <- combine.test(p=c(dindex_ouh$p.value,dindex_winter$p.value,dindex_unc$p.value,dindex_icgc_array$p.value, dindex_collisson$p.value),
+   #                                 w=c(length(ouh_list),length(winter_list),length(unc_list),length(icgc_array_list), length(collisson_list)),hetero = FALSE,method="z.transform")
+  
+    dindex_micro_pval<- pnorm((dindex_micro$estimate - 1)/dindex_micro$se, lower.tail = dindex_micro$estimate < 1) * 2
+
   
   con_micro <- combine.est(c(  con_ouh$c.index,con_winter$c.index,con_unc$c.index,con_icgc_array$c.index, con_collisson$c.index),c( con_ouh$se,con_winter$se,con_unc$se,con_icgc_array$se, con_collisson$se),na.rm = TRUE, hetero = TRUE)
   con_micro_lower <- con_micro$estimate + qnorm(0.025, lower.tail=TRUE) *  con_micro$se
   con_micro_upper <- con_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  con_micro$se
-  con_micro_pval <- combine.test(p=c(con_ouh$p.value,con_winter$p.value,con_unc$p.value,con_icgc_array$p.value, con_collisson$p.value),
-                                 w=c(length(ouh_list),length(winter_list),length(unc_list),length(icgc_array_list), length(collisson_list)),hetero = FALSE,method="z.transform")
+  #con_micro_pval <- combine.test(p=c(con_ouh$p.value,con_winter$p.value,con_unc$p.value,con_icgc_array$p.value, con_collisson$p.value),
+   #                              w=c(length(ouh_list),length(winter_list),length(unc_list),length(icgc_array_list), length(collisson_list)),hetero = FALSE,method="z.transform")
   
-  
+      con_micro_pval<- pnorm((con_micro$estimate -0.5)/con_micro$se, lower.tail = con_micro$estimate < 0.5) * 2
+
   
   results = list(dindex_meta=dindex_meta, dindex_meta_lower=dindex_meta_lower, dindex_meta_upper=dindex_meta_upper, dindex_meta_pval=dindex_meta_pval,
                  dindex_seq=dindex_seq,dindex_seq_lower= dindex_seq_lower, dindex_seq_upper=dindex_seq_upper,dindex_seq_pval= dindex_seq_pval,
