@@ -16,8 +16,8 @@ library(verification)
 #### Load PCOSP model and Validation cohort
 setwd("/Users/vandanasandhu/Desktop/RS_Remodelling_TSP_project/Github/RData/")
 load("PCOSP.RData")
-source("PCOSP_score_estimation.R")
-source("Validation_cohorts_formatting.R")
+source("/Users/vandanasandhu/Desktop/RS_Remodelling_TSP_project/Github/Scripts/PCOSP_score_estimation.R")
+source("/Users/vandanasandhu/Desktop/RS_Remodelling_TSP_project/Github/Scripts/Validation_cohorts_formatting.R")
 
 ######## PCOSP score estimations for all validation cohort
 pcsi_list=pcosp_prob(pcsi_mat)
@@ -31,6 +31,7 @@ unc_list=pcosp_prob(unc_mat)
 collisson_list=pcosp_prob(collisson_mat)
 chen_list=pcosp_prob(chen_mat)
 kirby_list=pcosp_prob(kirby_mat)
+
 ######################
 ### Dindex estimate calculation
 
@@ -105,7 +106,9 @@ dindex_meta_upper <- dindex_meta$estimate + qnorm(0.025, lower.tail=FALSE) *  di
 #                                      length(chen_list[[1]])),hetero = FALSE,method="z.transform")
 
 
-dindex_meta_pval=pnorm((dindex_meta$estimate - 1)/dindex_meta$se, lower.tail = dindex_meta$estimate < 1) * 2
+dindex_meta_pval= 2*pnorm(-abs(log(dindex_meta$estimate)/dindex_meta$se))
+
+#pnorm((dindex_meta$estimate - 0.5)/dindex_meta$se, lower.tail = dindex_meta$estimate < 0.5) * 2
 
 
 con_meta <- combine.est(c( con_pcsi$c.index, con_tcga$c.index, con_kirby$c.index, 
@@ -139,7 +142,10 @@ dindex_seq_upper <- dindex_seq$estimate + qnorm(0.025, lower.tail=FALSE) *  dind
 # dindex_seq_pval <- combine.test(p=c(dindex_pcsi$p.value, dindex_tcga$p.value, dindex_kirby$p.value),
 #                                 w=c(length(pcsi_list[[1]]), length(tcga_list[[1]]), length(kirby_list[[1]])),method="z.transform")
 
-dindex_seq_pval<-pnorm((dindex_seq$estimate - 1)/dindex_seq$se, lower.tail = dindex_seq$estimate < 1) * 2
+dindex_seq_pval<-2*pnorm(-abs(log(dindex_seq$estimate)/dindex_seq$se))
+
+
+#pnorm((dindex_seq$estimate - 0.5)/dindex_seq$se, lower.tail = dindex_seq$estimate < 0.5) * 2
 
 
 con_seq <- combine.est(c( con_pcsi$c.index, con_tcga$c.index, con_kirby$c.index),
@@ -165,7 +171,9 @@ dindex_micro_upper <- dindex_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  
 #                                       length(unc_list[[1]]),length(icgc_array_list[[1]]), length(collisson_list[[1]]), 
 #                                       length(chen_list[[1]])),hetero = FALSE,method="z.transform")
 
-dindex_micro_pval<-pnorm((dindex_micro$estimate - 1)/dindex_micro$se, lower.tail = dindex_micro$estimate < 1) * 2
+dindex_micro_pval<- 2*pnorm(-abs(log(dindex_micro$estimate)/dindex_micro$se))
+
+#pnorm((dindex_micro$estimate - 0.5)/dindex_micro$se, lower.tail = dindex_micro$estimate < 0.5) * 2
   
 con_micro <- combine.est(c(  con_ouh$c.index,con_winter$c.index,con_zhang$c.index,
                              con_unc$c.index,con_icgc_array$c.index, con_collisson$c.index,  con_chen$c.index),
@@ -180,6 +188,7 @@ con_micro_upper <- con_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  con_mi
 #                                hetero = FALSE,method="z.transform")
 
 con_micro_pval<-pnorm((con_micro$estimate - 0.5)/con_micro$se, lower.tail = con_micro$estimate < 0.5) * 2
+
 
 
 ##### Plotting Forestplot of  D index ###############
@@ -225,7 +234,7 @@ data2 <-
 tabletext2<-cbind(
   c("Cohorts",rownames(t)),
   c("P values",r.pval1))
-#pdf("../results/PCOSP-D-index.pdf")
+pdf("/Users/vandanasandhu/Desktop/RS_Remodelling_TSP_project/Figures/New_Figure_DINDEX1.pdf")
 length_seq= length(tcga_list[[1]]) + length(pcsi_list[[1]])+ length(kirby_list[[1]])
 length_micro = length(icgc_array_list[[1]])+length(unc_list[[1]])+ length(chen_list[[1]])+
   length(ouh_list[[1]])+length(zhang_list[[1]])+length(winter_list[[1]])+length(collisson_list[[1]])
@@ -263,7 +272,7 @@ forestplot(tabletext2,data2,xlab="Log2 HR",is.summary=c(TRUE,rep(FALSE,10),TRUE,
            txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),ticks = gpar(cex=0.8),  xlab  = gpar(fontfamily = "Helvetica", cex = 1)),
            col = fpColors(text="black"),title=" ",new_page = FALSE,
            fn.ci_norm = fn,  fn.ci_sum = fn1, zero=0,graphwidth=unit(2, "inches"),  align=c("l"), pch=16,boxsize = length_c+0.2)
-#dev.off()
+dev.off()
 
 ##### Plotting Forestplot of Concordance index ###############
 
@@ -306,7 +315,7 @@ data2 <-
 tabletext2<-cbind(
   c("Cohorts",rownames(t)),
   c("P values",r.pval1))
-pdf("../results/PCOSP-C-index.pdf")
+pdf("/Users/vandanasandhu/Desktop/RS_Remodelling_TSP_project/Figures/New_Figure_CONCORDANCE1.pdf")
 fn <- local({
   i = 0
   
@@ -334,7 +343,7 @@ forestplot(tabletext2,data2,xlab="C-index",is.summary=c(TRUE,rep(FALSE,10),TRUE,
            txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),ticks = gpar(cex=0.9),  xlab  = gpar(fontfamily = "Helvetica", cex = 1)), 
            col = fpColors(text="black"), fn.ci_norm = fn,  fn.ci_sum = fn1,title="",zero=0.5,graphwidth=unit(2, "inches"),align=c("l"),new_page = FALSE,
            boxsize = length_c+0.2)
-#dev.off()
+dev.off()
 
 #txt_gp =  fpTxtGp(label = gpar(fontfamily = "Verdana"),ticks = gpar(cex=0.8)), 
 
@@ -436,7 +445,7 @@ micro_pval=pnorm((m3$estimate -0.5)/m3$se, lower.tail = m3$estimate < 0.5) * 2
 library(pROC)
 
 
-#pdf("../results/PCOSP-AUC.pdf")
+pdf("/Users/vandanasandhu/Desktop/RS_Remodelling_TSP_project/Figures/New_Figure_AUC.pdf")
 plot(roc(tcga_grp,tcga_list[[1]][g_tcga]),lwd=4, col="chartreuse3",lty=1)
 plot(roc(kirby_grp,kirby_list[[1]][g_kirby]),lwd=4, col="magenta",add=TRUE,lty=1)
 plot(roc(pcsi_grp,pcsi_list[[1]][g_pcsi]),lwd=4, col="#fb9a99",add=TRUE,lty=1)
@@ -462,4 +471,5 @@ legend("bottomright",legend=c(paste("TCGA: ",round(tcga_roc,digits=2)," (P = ", 
        
        fill=c( "chartreuse3","magenta","#fb9a99","turquoise3","darkgoldenrod1","wheat4","green","red","cornflowerblue","mediumorchid2"),y.intersp = 1, cex=0.9,bty = "n")
 
-#dev.off()
+dev.off()
+
