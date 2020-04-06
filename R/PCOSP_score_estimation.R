@@ -7,7 +7,6 @@
 #' @return A \code{list}
 #' 
 #' @importFrom switchBox SWAP.KTSP.Classify
-#' @export
 pcosp_prob <- function(val_mat){
   val_pred <- list()
   

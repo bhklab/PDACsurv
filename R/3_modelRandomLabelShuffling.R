@@ -12,9 +12,8 @@
 #' 
 #' @return Writes file to disk only
 #'
-#' @import vcdExtra caret forestplot ktspair pROC survcomp survival
-##FIXME:: easyGgplot2 is from GitHub; find out if we can require it?
-#' @import data.table easyGgplot2
+# @import vcdExtra caret forestplot ktspair pROC survcomp survival
+# @import data.table easyGgplot2
 #' 
 #' @importFrom switchBox SWAP.KTSP.Train SWAP.KTSP.Classify
 #' @importFrom reportROC reportROC
@@ -27,25 +26,8 @@ modelRandomLabelShuffling <- function(data, saveDir) {
   icgc_seq_cohort <- data$icgc_seq_cohort
   icgc_array_cohort <- data$icgc_array_cohort
   
-  ##TODO:: What is this for? Should it be an error?
-  rownames(icgc_array_cohort) == rownames(icgc_seq_cohort)
-  
-
   # Excluding samples censored before 1-yr ----------------------------------
-  
-  g1 <- which(as.numeric(as.character(icgc_seq_cohort$OS))<=365 & 
-                as.numeric(as.character(icgc_seq_cohort$OS_Status))==1)
-  g2 <- which(as.numeric(as.character(icgc_seq_cohort$OS))>365)
-  
-  g_ind <- sort(c(g1, g2))
-  
-  icgc_seq_cohort <- icgc_seq_cohort[g_ind, ]
-  icgc_array_cohort <- icgc_array_cohort[g_ind, ]
-  
-  ## Merge common ICGC seq and array data
-  merge_common <- rbind(icgc_seq_cohort,
-                        icgc_array_cohort) 
-  
+  merge_common <- mergeCommonData(icgc_seq_cohort, icgc_array_cohort)
 
   # Training the model on ICGC seq/array common samples cohort --------------
 
@@ -81,7 +63,7 @@ modelRandomLabelShuffling <- function(data, saveDir) {
     # Selecting random 30 samples from group 2
     y5 <- sample(which(merge_common_grp == 1), 40, replace=FALSE) 
     
-    x1=merge_common_mat[c(x5, y5), ]
+    x1 <- merge_common_mat[c(x5, y5), ]
     
     y_index <- c(x5, y5) # Selecting the classes of re-sampled samples
     shuffle_merge_grp <- sample(merge_common_grp) # Shuffling the labels
@@ -90,10 +72,10 @@ modelRandomLabelShuffling <- function(data, saveDir) {
     
     ## Identifying KTSP models
     zzz <- paste('classifier', i, sep="") 
-    model[[i]]<- SWAP.KTSP.Train(t(x1), as.factor(y1))
+    model[[i]] <- SWAP.KTSP.Train(t(x1), as.factor(y1))
     
     ##FIXME:: Functions shouldn't print to console; need to return values
-    print(i);
+    print(i)
     
     ## Finding test samples excluded in training set
     z <- setdiff(seq_len(164), c(x5, y5)) 
