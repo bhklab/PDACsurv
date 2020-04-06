@@ -1,6 +1,6 @@
 #' Build PCOSP Model from input data
 #'
-##TODO:: HEEWON: What does this do? Write a description (two or three seneteces max)
+##TODO:: HEEWON: What does this do? Write a description (two or three senetences max)
 #' 
 #' @examples
 #' # To ensure reproducible results
@@ -14,7 +14,6 @@
 #' 
 #' # Save the object to disk
 #' buldPCOSPmodel(training_cohort, saveDir=tempdir())
-#' 
 #' 
 ##TODO:: Determine where this dataset came from? Is it the ouput of another
 #   package? From a publication?
@@ -33,8 +32,8 @@
 #'
 buildPCOSPmodel <- function(data, saveDir) {
   
-  icgc_seq_cohort = training_cohort$icgc_seq_cohort
-  icgc_array_cohort = training_cohort$icgc_array_cohort
+  icgc_seq_cohort = data$icgc_seq_cohort
+  icgc_array_cohort = data$icgc_array_cohort
   
   rownames(icgc_array_cohort) == rownames(icgc_seq_cohort)
   

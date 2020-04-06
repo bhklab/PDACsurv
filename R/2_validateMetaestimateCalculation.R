@@ -9,8 +9,8 @@
 #' # Run the function
 #' validateMetaestimateCalculation(PCOSP)
 #'
-#' @param data \code{}
-#' @param saveDir \code{character} 
+#' @param data \code{list} of model selection results?
+#' @param saveDir \code{character} The path to save results to
 #'
 ##TODO:: Determine what this does?
 #' @return Write a bunch of pdfs to disk?

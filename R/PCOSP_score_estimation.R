@@ -1,5 +1,13 @@
-
-pcosp_prob = function(val_mat){
+#' Calculate the probability
+#' 
+##TODO:: Heewon add function documentation
+#' 
+#' @param val_mat A \code{matrix} of values
+#'
+#'  
+#'      
+#' @export
+pcosp_prob <- function(val_mat){
   val_pred <- list()
   
   for(i in 1: length(selected_model) ){
