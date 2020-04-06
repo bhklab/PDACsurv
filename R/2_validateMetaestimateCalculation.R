@@ -20,26 +20,31 @@
 #' @import switchBox switchBox vcdExtra caret forestplot ktspair pROC survcomp 
 #' @import survival data.table reportROC verification
 #' 
+#' 
+#' @importFrom survcomp D.index
 validateMetaestimateCalculation <- function(data, saveDir) {
   
   ##  PCOSP score estimations for all validation cohort
-  pcsi_list=pcosp_prob(pcsi_mat)
-  icgc_list=pcosp_prob(icgc_mat)
-  tcga_list=pcosp_prob(tcga_mat)
-  icgc_array_list=pcosp_prob(icgc_array_mat)
-  ouh_list=pcosp_prob(ouh_mat)
-  zhang_list=pcosp_prob(zhang_mat)
-  winter_list=pcosp_prob(winter_mat)
-  unc_list=pcosp_prob(unc_mat)
-  collisson_list=pcosp_prob(collisson_mat)
-  chen_list=pcosp_prob(chen_mat)
-  kirby_list=pcosp_prob(kirby_mat)
+  pcsi_list <- pcosp_prob(pcsi_mat)
+  icgc_list <- pcosp_prob(icgc_mat)
+  tcga_list <- pcosp_prob(tcga_mat)
+  icgc_array_list <- pcosp_prob(icgc_array_mat)
+  ouh_list <- pcosp_prob(ouh_mat)
+  zhang_list <- pcosp_prob(zhang_mat)
+  winter_list <- pcosp_prob(winter_mat)
+  unc_list <- pcosp_prob(unc_mat)
+  collisson_list <- pcosp_prob(collisson_mat)
+  chen_list <- pcosp_prob(chen_mat)
+  kirby_list <- pcosp_prob(kirby_mat)
 
 
   ## Dindex estimate calculation
   
-  dindex_ouh <- D.index(x=ouh_list[[1]], surv.time=as.numeric(as.character(ouh_cohort$OS)), 
-                surv.event=as.numeric(as.character(ouh_cohort$OS_Status)), na.rm=TRUE, alpha = 0.05, method.test = "logrank");
+  dindex_ouh <- D.index(x=ouh_list[[1]], 
+                        surv.time=as.numeric(as.character(ouh_cohort$OS)), 
+                        surv.event=as.numeric(as.character(ouh_cohort$OS_Status)), 
+                        na.rm=TRUE, alpha = 0.05, method.test = "logrank")
+  
   dindex_icgc <- D.index(x=icgc_list[[1]], surv.time=as.numeric(as.character(icgc_cohort$OS)), 
                  surv.event=as.numeric(as.character(icgc_cohort$OS_Status)), na.rm=TRUE, alpha = 0.05, method.test = "logrank");
   dindex_tcga <- D.index(x=tcga_list[[1]], surv.time=as.numeric(as.character(tcga_cohort$OS)), 
