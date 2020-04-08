@@ -1,31 +1,37 @@
 load("PDAC_Expression_dataset.RData")
-########################## ###################### ###################### ###################### ###################### ###################### 
+##########################
 #### Validation cohorts 
 ###################### ICGC
 
-icgc_cohort=rs_coh$ICGC_seq
-icgc_mat<-data.matrix(sapply(icgc_cohort[1:nrow(icgc_cohort) ,1:(ncol(icgc_cohort)-2)], function(xx) as.numeric(as.character(xx))))
-rownames(icgc_mat)=rownames(icgc_cohort)
+icgc_cohort <- rs_coh$ICGC_seq
+icgc_mat <- data.matrix(
+  sapply(icgc_cohort[seq_len(nrow(icgc_cohort)), seq_len(ncol(icgc_cohort)-2)], 
+         function(xx) as.numeric(as.character(xx))))
+rownames(icgc_mat) <- rownames(icgc_cohort)
 
-g1=which(as.numeric(as.character(icgc_cohort$OS))<=365 &  as.numeric(as.character(icgc_cohort$OS_Status))==1);g2=which(as.numeric(as.character(icgc_cohort$OS))>365)
-g_icgc_seq=sort(c(g1,g2))
-icgc_seq_grp=ifelse(as.numeric(as.character(icgc_cohort$OS))>=365,1,0)[g_icgc_seq]
+g1 <- which(as.numeric(as.character(icgc_cohort$OS))<=365 &  as.numeric(as.character(icgc_cohort$OS_Status))==1);g2=which(as.numeric(as.character(icgc_cohort$OS))>365)
+g_icgc_seq <- sort(c(g1,g2))
+icgc_seq_grp <- ifelse(as.numeric(as.character(icgc_cohort$OS))>=365,1,0)[g_icgc_seq]
 
 ###################### TCGA
-tcga_cohort=rs_coh$TCGA
-tcga_mat<-data.matrix(sapply(tcga_cohort[1:nrow(tcga_cohort) ,1:(ncol(tcga_cohort)-2)], function(xx) as.numeric(as.character(xx))))
-rownames(tcga_mat)=rownames(tcga_cohort) 
-g1=which(as.numeric(as.character(tcga_cohort$OS))<=365 &  as.numeric(as.character(tcga_cohort$OS_Status))==1);g2=which(as.numeric(as.character(tcga_cohort$OS))>365)
-g_tcga=sort(c(g1,g2))
-tcga_grp=ifelse(as.numeric(as.character(tcga_cohort$OS))>=365,1,0)[g_tcga]
+tcga_cohort <- rs_coh$TCGA
+tcga_mat <- data.matrix(
+  sapply(tcga_cohort[seq_len(nrow(tcga_cohort)) , seq_len(ncol(tcga_cohort)-2)], 
+         function(xx) as.numeric(as.character(xx))))
+
+rownames(tcga_mat) <- rownames(tcga_cohort) 
+
+g_tcga <- whichNotCensoredBeforeYearOne(rs_coh$TCGA)
+tcga_grp <- ifelse(as(tcga_cohort$OS, "numeric") >= 365, 1, 0)[g_tcga]
 
 ###################### UNC
-unc_cohort=rs_coh$UNC
-unc_mat<-data.matrix(sapply(unc_cohort[1:nrow(unc_cohort) ,1:(ncol(unc_cohort)-2)], function(xx) as.numeric(as.character(xx))))
-rownames(unc_mat)=rownames(unc_cohort)
-g1=which(as.numeric(as.character(unc_cohort$OS))<=365 &  as.numeric(as.character(unc_cohort$OS_Status))==1);g2=which(as.numeric(as.character(unc_cohort$OS))>365)
-g_unc=sort(c(g1,g2))
-unc_grp=ifelse(as.numeric(as.character(unc_cohort$OS))>=365,1,0)[g_unc]
+unc_cohort <- rs_coh$UNC
+unc_mat<-data.matrix(
+  sapply(unc_cohort[seq_len(nrow(unc_cohort)) , seq_len(ncol(unc_cohort) - 2)], 
+         function(xx) as.numeric(as.character(xx))))
+rownames(unc_mat) <- rownames(unc_cohort)
+g_unc <- whichNotCensoredBeforeYearOne(unc_cohort)
+unc_grp=ifelse(as.numeric(as.character(unc_cohort$OS)) >= 365, 1, 0)[g_unc]
 
 ###################### OUH
 ouh_cohort=rs_coh$OUH

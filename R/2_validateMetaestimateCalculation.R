@@ -9,42 +9,42 @@
 #' # Run the function
 #' validateMetaestimateCalculation(PCOSP)
 #'
-#' @param data \code{list} of model selection results?
-#' @param saveDir \code{character} The path to save results to
+#' @param data \code{}
+#' @param saveDir \code{character} 
 #'
 ##TODO:: Determine what this does?
 #' @return Write a bunch of pdfs to disk?
 #' 
+#' 
+# @import switchBox switchBox vcdExtra caret forestplot ktspair pROC survcomp 
+# @import survival data.table reportROC verification
+#' 
+#' @importFrom survcomp D.index concordance.index combine.est
+#' @importFrom forestplot forestplot
+#' @importFrom reportROC reportROC
+#' @importFrom pROC roc
+#' @importFrom verification roc.area
 #' @export
-#' 
-#' @import switchBox switchBox vcdExtra caret forestplot ktspair pROC survcomp 
-#' @import survival data.table reportROC verification
-#' 
-#' 
-#' @importFrom survcomp D.index
 validateMetaestimateCalculation <- function(data, saveDir) {
   
   ##  PCOSP score estimations for all validation cohort
-  pcsi_list <- pcosp_prob(pcsi_mat)
-  icgc_list <- pcosp_prob(icgc_mat)
-  tcga_list <- pcosp_prob(tcga_mat)
-  icgc_array_list <- pcosp_prob(icgc_array_mat)
-  ouh_list <- pcosp_prob(ouh_mat)
-  zhang_list <- pcosp_prob(zhang_mat)
-  winter_list <- pcosp_prob(winter_mat)
-  unc_list <- pcosp_prob(unc_mat)
-  collisson_list <- pcosp_prob(collisson_mat)
-  chen_list <- pcosp_prob(chen_mat)
-  kirby_list <- pcosp_prob(kirby_mat)
+  pcsi_list=pcosp_prob(pcsi_mat)
+  icgc_list=pcosp_prob(icgc_mat)
+  tcga_list=pcosp_prob(tcga_mat)
+  icgc_array_list=pcosp_prob(icgc_array_mat)
+  ouh_list=pcosp_prob(ouh_mat)
+  zhang_list=pcosp_prob(zhang_mat)
+  winter_list=pcosp_prob(winter_mat)
+  unc_list=pcosp_prob(unc_mat)
+  collisson_list=pcosp_prob(collisson_mat)
+  chen_list=pcosp_prob(chen_mat)
+  kirby_list=pcosp_prob(kirby_mat)
 
 
   ## Dindex estimate calculation
   
-  dindex_ouh <- D.index(x=ouh_list[[1]], 
-                        surv.time=as.numeric(as.character(ouh_cohort$OS)), 
-                        surv.event=as.numeric(as.character(ouh_cohort$OS_Status)), 
-                        na.rm=TRUE, alpha = 0.05, method.test = "logrank")
-  
+  dindex_ouh <- D.index(x=ouh_list[[1]], surv.time=as.numeric(as.character(ouh_cohort$OS)), 
+                surv.event=as.numeric(as.character(ouh_cohort$OS_Status)), na.rm=TRUE, alpha = 0.05, method.test = "logrank");
   dindex_icgc <- D.index(x=icgc_list[[1]], surv.time=as.numeric(as.character(icgc_cohort$OS)), 
                  surv.event=as.numeric(as.character(icgc_cohort$OS_Status)), na.rm=TRUE, alpha = 0.05, method.test = "logrank");
   dindex_tcga <- D.index(x=tcga_list[[1]], surv.time=as.numeric(as.character(tcga_cohort$OS)), 
@@ -360,11 +360,6 @@ validateMetaestimateCalculation <- function(data, saveDir) {
   #txt_gp =  fpTxtGp(label = gpar(fontfamily = "Verdana"),ticks = gpar(cex=0.8)), 
   
   #####
-  
-  
-  
-  
-
   # Plotting ROC CURVES -----------------------------------------------------
   
   pcsi_roc=roc(pcsi_grp,pcsi_list[[1]][g_pcsi])$auc[1]
@@ -382,8 +377,8 @@ validateMetaestimateCalculation <- function(data, saveDir) {
   winter_roc=roc(winter_grp,winter_list[[1]][g_winter])$auc[1]
   winter_roc_se=reportROC(winter_grp,winter_list[[1]][g_winter], plot = FALSE)$AUC.SE
   
-  ouh_roc=roc(ouh_grp,ouh_list[[1]][g_ouh])$auc[1]
-  ouh_roc_se=reportROC(ouh_grp,ouh_list[[1]][g_ouh], plot = FALSE)$AUC.SE
+  ouh_roc=roc(ouh_grp, ouh_list[[1]][g_ouh])$auc[1]
+  ouh_roc_se=reportROC(ouh_grp, ouh_list[[1]][g_ouh], plot = FALSE)$AUC.SE
   
   icgc_array_roc=roc(icgc_array_grp,icgc_array_list[[1]][g_icgc_arr])$auc[1]
   icgc_array_roc_se=reportROC(icgc_array_grp,icgc_array_list[[1]][g_icgc_arr], plot = FALSE)$AUC.SE

@@ -1,13 +1,16 @@
-
-predict_meta_estimates = function(pcsi_list, tcga_list, kirby_list,icgc_array_list,unc_list,winter_list,  collisson_list, ouh_list,  
-                                  pcsi_OS, pcsi_OS_Status,  
-                                  tcga_OS, tcga_OS_Status,
-                                  kirby_OS, kirby_OS_Status,  
-                                  icgc_array_OS, icgc_array_OS_Status,  
-                                  unc_OS, unc_OS_Status,
-                                  winter_OS, winter_OS_Status,  
-                                  collisson_OS, collisson_OS_Status,
-                                  ouh_OS, ouh_OS_Status ){
+#' @importFrom survcomp D.index concordance.index combine.est
+#' @importFrom 
+predict_meta_estimates <- function(pcsi_list, tcga_list, kirby_list, 
+                                   icgc_array_list,unc_list,winter_list,  
+                                   collisson_list, ouh_list,  
+                                   pcsi_OS, pcsi_OS_Status,  
+                                   tcga_OS, tcga_OS_Status,
+                                   kirby_OS, kirby_OS_Status,  
+                                   icgc_array_OS, icgc_array_OS_Status,  
+                                   unc_OS, unc_OS_Status,
+                                   winter_OS, winter_OS_Status,  
+                                   collisson_OS, collisson_OS_Status,
+                                   ouh_OS, ouh_OS_Status ){
   
   dindex_ouh <- D.index(x=ouh_list, surv.time=as.numeric(as.character(ouh_OS)), surv.event=as.numeric(as.character(ouh_OS_Status)), na.rm=TRUE, alpha = 0.05, method.test = "logrank");
   dindex_tcga <- D.index(x=tcga_list, surv.time=as.numeric(as.character(tcga_OS)), surv.event=as.numeric(as.character(tcga_OS_Status)), na.rm=TRUE, alpha = 0.05, method.test = "logrank");
@@ -88,7 +91,8 @@ dindex_micro_pval<- 2*pnorm(-abs(log(dindex_micro$estimate)/dindex_micro$se))
       con_micro_pval<- pnorm((con_micro$estimate -0.5)/con_micro$se, lower.tail = con_micro$estimate < 0.5) * 2
 
   
-  results = list(dindex_meta=dindex_meta, dindex_meta_lower=dindex_meta_lower, dindex_meta_upper=dindex_meta_upper, dindex_meta_pval=dindex_meta_pval,
+  results = list(dindex_meta=dindex_meta, dindex_meta_lower=dindex_meta_lower, 
+                 dindex_meta_upper=dindex_meta_upper, dindex_meta_pval=dindex_meta_pval,
                  dindex_seq=dindex_seq,dindex_seq_lower= dindex_seq_lower, dindex_seq_upper=dindex_seq_upper,dindex_seq_pval= dindex_seq_pval,
                  dindex_micro=dindex_micro,dindex_micro_lower= dindex_micro_lower, dindex_micro_upper=dindex_micro_upper,dindex_micro_pval= dindex_micro_pval,
                  con_meta=con_meta,con_meta_lower= con_meta_lower, con_meta_upper=con_meta_upper,con_meta_pval= con_meta_pval,

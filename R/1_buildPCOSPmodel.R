@@ -1,6 +1,9 @@
 #' Build PCOSP Model from input data
 #'
 ##TODO:: HEEWON: What does this do? Write a description (two or three senetences max)
+#'
+#' The script is used for building Pancreatic cancer overall survival predictor 
+#'   using unique 89 samples profiled using microarray and sequencing platform.
 #' 
 #' @examples
 #' # To ensure reproducible results
@@ -24,6 +27,9 @@
 #' @return \code{?} Either returns the model object or, is \code{saveDir} is 
 #'   specified it saves to disk instead and return the path
 #'
+#' @warning This function uses random numbers; remeber to \code{set.seed()}
+#'   before running to ensure reproducible results
+#'
 #' @export
 #' 
 ##TODO:: Convert these to import from!
@@ -35,18 +41,8 @@ buildPCOSPmodel <- function(data, saveDir) {
   icgc_seq_cohort = data$icgc_seq_cohort
   icgc_array_cohort = data$icgc_array_cohort
   
-  rownames(icgc_array_cohort) == rownames(icgc_seq_cohort)
-  
-  ## Excluding samples censored before 1-yr
-  g1 <- which(as.numeric(as.character(icgc_seq_cohort$OS))<=365 & 
-             as.numeric(as.character(icgc_seq_cohort$OS_Status))==1)
-  g2 <- which(as.numeric(as.character(icgc_seq_cohort$OS))>365)
-  g_ind <- sort(c(g1,g2))
-  
-  icgc_seq_cohort <- icgc_seq_cohort[g_ind,]
-  icgc_array_cohort <- icgc_array_cohort[g_ind,]
-  
-  merge_common <- rbind(icgc_seq_cohort,icgc_array_cohort) # Merged common ICGC seq and array data
+  # Merged common ICGC seq and array data
+  merge_common <-mergeCommData(icgc_seq_cohort, icgc_array_cohort)
   
   
   ## Classes for training
