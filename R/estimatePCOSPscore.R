@@ -4,10 +4,10 @@
 #' 
 #' @param val_mat A \code{matrix} of values
 #'
-#' @return A \code{list}
+#' @return A \code{list} containing the probabilities 
 #' 
 #' @importFrom switchBox SWAP.KTSP.Classify
-pcosp_prob <- function(val_mat){
+estimatePCOSPprob <- function(val_mat){
   val_pred <- list()
   
   for(i in seq_along(selected_model)) {
