@@ -31,54 +31,58 @@
 #'   before running to ensure reproducible results
 #'
 #' @export
-#' 
-##TODO:: Convert these to import from!
-#' @import switchBox switchBox vcdExtra caret forestplot ktspair pROC survcomp 
-#' @import survival data.table reportROC verification
-#'
 buildPCOSPmodel <- function(data, saveDir) {
   
   icgc_seq_cohort = data$icgc_seq_cohort
   icgc_array_cohort = data$icgc_array_cohort
   
   # Merged common ICGC seq and array data
-  merge_common <-mergeCommData(icgc_seq_cohort, icgc_array_cohort)
+  merge_common <- mergeCommonData(icgc_seq_cohort, icgc_array_cohort)
+
+  # Training the model on ICGC seq/array common samples cohort  
+  merge_common_mat <- convertCohortToMatrix(merge_common)
+  merge_common_grp <- ifelse(as(merge_common$OS, 'numeric') >= 365, 1, 0)
   
+  selected_model <- .generateTSPmodels(merge_common_mat, merge_common_grp)
   
-  ## Classes for training
-  xx = merge_common
-  xmat <- xx[seq_len(nrow(xx)), seq_len(ncol(xx)-2)] # Removing survival data columns
-  merge_common_mat <- data.matrix(sapply(xmat, function(xx) as.numeric(as.character(xx))))
-  rownames(merge_common_mat) <- rownames(merge_common)
-  merge_common_grp <- ifelse(as.numeric(as.character(xx$OS)) >= 365, 1, 0)
-  
+  # Save to disk or return
+  if (!missing(saveDir)) {
+    save(selected_model, file=saveDir)
+    return(paste0('Saved model to ', saveDir))
+  } else {
+    return(selected_model)
+  }
+}
+
+
+##TODO:: See if we can refactor part of this to be reused in reshuffleRandomModels
+#' @importFrom caret confusionMatrix
+#' @importFrom swtichBox SWAP.KTSP.Train
+.generateTSPmodels <- function(merge_common_mat, merge_common_grp) {
   ## Generating 1000 TSP models
+  ##TODO:: Set some of these as function parameters?
   pred <- list()
-  sel_pred <- list()
   count <- 0;
   b_acc <- vector()
   F1 <- vector()
   i=1
   model <- list()
-  models_no = 1000
+  models_no <- 1000
   count <- 1
   selected_model <- list()
-  set.seed(1987) ##FIXME:: CRAN will complain about this; probably Bioconductor as well
-                  # the recommendation is to have the user set seed OUTSIDE of the function
-  sel_b_acc=list()
-  
-  for(i in seq_len(1000)){
+
+  for(i in seq_len(models_no)){
     
-    x5 <-sample(which(merge_common_grp==0), 40, replace=F) # Selecting random 40 samples from Low survival group
-    y5 <-sample(which(merge_common_grp==1), 40, replace=F) # Selecting random 40 samples from High survival group
-    
-    x1 <- merge_common_mat[c(x5,y5),]                
+    # Selecting random 40 samples from Low survival group
+    x5 <-sample(which(merge_common_grp == 0), 40, replace=FALSE) 
+    # Selecting random 40 samples from High survival group
+    y5 <-sample(which(merge_common_grp == 1), 40, replace=FALSE) 
+    x1 <- merge_common_mat[c(x5,y5),]
     y_index <- c(x5, y5) # Selecting the classes of re-sampled samples
     y1 <- merge_common_grp[y_index]
     
     
     ## Building k-TSP models
-    zzz <- paste0('classifier', i) 
     model[[i]] <- SWAP.KTSP.Train(t(x1), as.factor(y1))
     
     z <- setdiff(1:164,c(x5,y5)) # Finding test samples excluded in training set
@@ -86,24 +90,16 @@ buildPCOSPmodel <- function(data, saveDir) {
     test_grp <-merge_common_grp[z]
     
     ### Testing the model on out of bag samples
-    pred[[i]] <- SWAP.KTSP.Classify(t(test), model[[i]])   ### Predicting the classes of test set
+    ### Predicting the classes of test set
+    pred[[i]] <- SWAP.KTSP.Classify(t(test), model[[i]])
     
-    cc=confusionMatrix(pred[[i]], test_grp,  mode = "prec_recall")
+    cc=confusionMatrix(pred[[i]], test_grp,  mode="prec_recall")
     b_acc[i]=as.numeric(cc$byClass)[11]
     F1[i]=as.numeric(cc$byClass)[7]
     print(i)
   }
   
-  selected_model = model[which(b_acc> 0.60)]
-    
-  ##FIXME:: Do we need this? If so I can make it a message; if not delete it.
-  length(selected_model)
-  
-  if (!missing(saveDir)) {
-    save(selected_model, file=saveDir)
-    return(paste0('Saved model to ', saveDir))
-  } else {
-    return(selected_model)
-  }
+  selected_model <- model[which(b_acc> 0.60)]
+  return(selected_model)
 }
 

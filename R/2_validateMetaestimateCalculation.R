@@ -1,6 +1,8 @@
 #' Validate the Meta Estimate Calculation
 #'
 ##TODO:: HEEWON - what does this function do?
+#' The script calculates D-index and Concordance index for independent cohorts 
+#'   and calculates the meta-estimae of C-index and D-index.
 #'
 #' @example
 #' # Load data
@@ -14,10 +16,6 @@
 #'
 ##TODO:: Determine what this does?
 #' @return Write a bunch of pdfs to disk?
-#' 
-#' 
-# @import switchBox switchBox vcdExtra caret forestplot ktspair pROC survcomp 
-# @import survival data.table reportROC verification
 #' 
 #' @importFrom survcomp D.index concordance.index combine.est
 #' @importFrom forestplot forestplot
@@ -448,35 +446,18 @@ validateMetaestimateCalculation <- function(data, saveDir) {
   #                           w= c( length(ouh_list[[1]][g_ouh]),length(unc_list[[1]][g_unc]), length(zhang_list[[1]][g_zhang]), 
   #                                 length(winter_list[[1]][g_winter]), length(icgc_array_list[[1]][g_icgc_arr]), 
   #                                 length(collisson_list[[1]][g_coll]),length(chen_list[[1]][g_chen])),na.rm=TRUE,method="z.transform")
+
+}
+
+
+
+
+#' The forestplot of  C-index and D-index was plotted for all the cohorts.
+#' 
+#' 
+#' 
+#' 
+forestPlotMetaestimate <- function(data) {
   
-  
-  
-  pdf("/Users/vandanasandhu/Desktop/RS_Remodelling_TSP_project/Figures/New_Figure_AUC.pdf")
-  plot(roc(tcga_grp,tcga_list[[1]][g_tcga]),lwd=4, col="chartreuse3",lty=1)
-  plot(roc(kirby_grp,kirby_list[[1]][g_kirby]),lwd=4, col="magenta",add=TRUE,lty=1)
-  plot(roc(pcsi_grp,pcsi_list[[1]][g_pcsi]),lwd=4, col="#fb9a99",add=TRUE,lty=1)
-  plot(roc(icgc_array_grp,icgc_array_list[[1]][g_icgc_arr]),lwd=4, col="turquoise3",add=TRUE,lty=3)
-  plot(roc(unc_grp,unc_list[[1]][g_unc]),lwd=4, col="darkgoldenrod1",add=TRUE,lty=3)
-  plot(roc(zhang_grp,zhang_list[[1]][g_zhang]),lwd=4, col="wheat4",add=TRUE,lty=3)
-  plot(roc(chen_grp,chen_list[[1]][g_chen]),lwd=4, col="green",add=TRUE,lty=3)
-  plot(roc(collisson_grp,collisson_list[[1]][g_coll]),lwd=4, col="red",add=TRUE,lty=3)
-  plot(roc(winter_grp,winter_list[[1]][g_winter]),lwd=4, col="cornflowerblue",add=TRUE,lty=3)
-  plot(roc(ouh_grp,ouh_list[[1]][g_ouh]),lwd=4, col="mediumorchid2",add=TRUE,lty=3)
-  
-  legend("bottomright",legend=c(paste("TCGA: ",round(tcga_roc,digits=2)," (P = ", sprintf("%.1E", tcga_pval),")", sep=""),
-                                paste("Kirby: ",round(kirby_roc,digits=2)," (P = ", sprintf("%.1E", kirby_pval),")", sep=""),
-                                paste("PCSI: ",round(pcsi_roc,digits=2)," (P = ", sprintf("%.1E", pcsi_pval),")", sep=""),
-                                paste("ICGC-array: ",round(icgc_array_roc,digits=2)," (P = ", sprintf("%.1E", icgc_array_pval),")", sep=""),
-                                paste("UNC: ",round(unc_roc,digits=2)," (P = ", sprintf("%.1E", unc_pval),")", sep=""),
-                                paste("Zhang: ",round(zhang_roc,digits=2)," (P = ", sprintf("%.1E", zhang_pval),")", sep=""),
-                                paste("Chen: ",round(chen_roc,digits=2)," (P = ", sprintf("%.1E", chen_pval),")", sep=""),
-                                paste("Collisson: ",round(collisson_roc,digits=2)," (P = ", sprintf("%.1E", collisson_pval),")", sep=""),
-                                paste("Winter: ",round(winter_roc,digits=2)," (P = ", sprintf("%.1E", winter_pval),")", sep=""),
-                                paste("OUH: ",round(ouh_roc,digits=2)," (P = ", sprintf("%.1E", ouh_pval),")", sep="")),
-         
-         
-         fill=c( "chartreuse3","magenta","#fb9a99","turquoise3","darkgoldenrod1","wheat4","green","red","cornflowerblue","mediumorchid2"),y.intersp = 1, cex=0.9,bty = "n")
-  
-  dev.off()
 }
   
