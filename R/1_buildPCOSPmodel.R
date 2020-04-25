@@ -10,19 +10,20 @@
 #' set.seed(1234)
 #'
 #' # Load the data
-#' data(training_cohort)
+#' data(trainingCohort)
 #'
 #' # Return the object
-#' model <- buildPCOSPmodel(training_cohort)
+#' model <- buildPCOSPmodel(trainingCohort)
 #'
 #' # Save the object to disk
-#' buildPCOSPmodel(training_cohort, saveDir=tempdir())
+#' buildPCOSPmodel(traingCohort, saveDir=tempdir())
 #'
 ##TODO:: Determine where this dataset came from? Is it the ouput of another
 #   package? From a publication?
 #' @param data \code{list} A dataset for which to build the PCOSP model
 #' @param saveDir \code{character} A path to a directory to save the model. If you
 #'   exclude this the function will return the model object instead.
+#' @param mc.cores \code{integer} The number of threads to parralelize across
 #'
 #' @return \code{?} Either returns the model object or, is \code{saveDir} is
 #'   specified it saves to disk instead and return the path
@@ -31,75 +32,112 @@
 #'   before running to ensure reproducible results
 #'
 #' @export
-buildPCOSPmodel <- function(data, saveDir) {
+buildPCOSPmodels <- function(data, saveDir, numModels, mc.cores=1) {
 
-  icgc_seq_cohort <- data$icgc_seq_cohort
-  icgc_array_cohort <- data$icgc_array_cohort
+    seqCohort <- data$icgc_seq_cohort
+    arrayCohort <- data$icgc_array_cohort
 
-  # Merged common ICGC seq and array data
-  merge_common <- mergeCommonData(icgc_seq_cohort, icgc_array_cohort)
+    # Merged common ICGC seq and array data
+    commonData <- mergeCommonData(seqCohort, arrayCohort)
 
-  # Training the model on ICGC seq/array common samples cohort
-  merge_common_mat <- convertCohortToMatrix(merge_common)
-  merge_common_grp <- ifelse(as(merge_common$OS, 'numeric') >= 365, 1, 0)
+    # Training the model on ICGC seq/array common samples cohort
+    cohortMatrix <- convertCohortToMatrix(commonData)
+    cohortMatrixGroups <- ifelse(as.numeric.factor(commonData$OS) >= 365, 1, 0)
 
-  selected_model <- .generateTSPmodels(merge_common_mat, merge_common_grp)
+    selectedModels <- .generateTSPmodels(cohortMatrix, cohortMatrixGroups,
+                                         numModels, mc.cores)
 
-  # Save to disk or return
-  if (!missing(saveDir)) {
-    save(selected_model, file=saveDir)
-    return(paste0('Saved model to ', saveDir))
-  } else {
-    return(selected_model)
-  }
+    # Save to disk or return
+    if (!missing(saveDir)) {
+        saveRDS(selectedModels,
+                file=paste0(file.path(saveDir, 'PCOSPmodels'), '.rds'))
+        return(paste0('Saved model to ', saveDir))
+    } else {
+        return(selectedModels)
+    }
 }
 
 
 ##TODO:: See if we can refactor part of this to be reused in reshuffleRandomModels
 #' @importFrom caret confusionMatrix
 #' @importFrom switchBox SWAP.KTSP.Train
-.generateTSPmodels <- function(merge_common_mat, merge_common_grp) {
-  ## Generating 1000 TSP models
-  ##TODO:: Set some of these as function parameters?
-  pred <- list()
-  count <- 0;
-  b_acc <- vector()
-  F1 <- vector()
-  i=1
-  model <- list()
-  models_no <- 1000
-  count <- 1
-  selected_model <- list()
+.generateTSPmodels <- function(cohortMatrix, cohortMatrixGroups, numModels, mc.cores) {
 
-  for(i in seq_len(models_no)){
-
-    # Selecting random 40 samples from Low survival group
-    x5 <-sample(which(merge_common_grp == 0), 40, replace=FALSE)
-    # Selecting random 40 samples from High survival group
-    y5 <-sample(which(merge_common_grp == 1), 40, replace=FALSE)
-    x1 <- merge_common_mat[c(x5,y5),]
-    y_index <- c(x5, y5) # Selecting the classes of re-sampled samples
-    y1 <- merge_common_grp[y_index]
+    trainingDataRowIdxs <- bplapply(rep(40, numModels),
+                                .randomSampleIndex,
+                                labels=cohortMatrixGroups,
+                                groups=sort(unique(cohortMatrixGroups)))
 
 
-    ## Building k-TSP models
-    model[[i]] <- SWAP.KTSP.Train(t(x1), as.factor(y1))
+    trainedModels <- bplapply(trainingDataRowIdxs,
+                              function(idx, data)
+                                  SWAP.Train.KTSP(t(data[idx, ]), levels(idx)),
+                              data=cohortMatrix)
 
-    z <- setdiff(1:164,c(x5,y5)) # Finding test samples excluded in training set
-    test <- merge_common_mat[z,]
-    test_grp <-merge_common_grp[z]
 
-    ### Testing the model on out of bag samples
-    ### Predicting the classes of test set
-    pred[[i]] <- SWAP.KTSP.Classify(t(test), model[[i]])
+    testingDataRowIdxs <- bplapply(trainingDataRowIdxs,
+                            function(idx, rowIdx, labels)
+                                structure(setdiff(rowIdx, idx),
+                                          .Label=as.factor(
+                                              labels[setdiff(rowIdx, idx)])),
+                            rowIdx=seq_len(nrow(cohortMatrix)),
+                            labels=cohortMatrixGroups)
 
-    cc=confusionMatrix(pred[[i]], test_grp,  mode="prec_recall")
-    b_acc[i]=as.numeric(cc$byClass)[11]
-    F1[i]=as.numeric(cc$byClass)[7]
-    print(i)
-  }
 
-  selected_model <- model[which(b_acc> 0.60)]
-  return(selected_model)
+    predictions <- bplapply(seq_along(testingDataRowIdxs),
+                            function(i, testIdxs, data, models)
+                                SWAP.KTSP.Classify(t(data[testIdxs[[i]], ]),
+                                                   models[[i]]),
+                            testIdxs=testingDataRowIdxs,
+                            data=cohortMatrix,
+                            models=trainedModels
+                            )
+
+
+    confusionMatrices <- bplapply(seq_along(predictions),
+                                  function(i, predictions, labels)
+                                           confusionMatrix(predictions[[i]],
+                                                           levels(labels[[i]]),
+                                                           mode="prec_recall"),
+                                       predictions=predictions,
+                                       labels=testingDataRowIdxs
+                            )
+
+    modelStats <- bplapply(confusionMatrices,
+                           function(confMat) confMat$byClass)
+
+    balancedAcc <- unlist(bplapply(modelStats,
+                              function(model) model[c('Balanced Accuracy')]))
+
+    selectedModels <- trainedModels[which(balancedAcc > 0.60)]
+    return(selectedModels)
 }
+
+##TODO:: Generalize this to n dimensions
+#' Generate a random sample from each group
+#'
+#' Returns a list of
+#'
+#' @param n The sample size
+#' @param labels A \code{vector} of the group labels for all rows of the
+#'
+#' @param groups A vector of group labels for the data to sample from
+#' @param numSamples The number of samples to take
+#'
+#' @return A subset of your object with n random samples from each group in
+#'   groups. The number of rows returned will equal the number of groups times
+#'   the sample size.
+#' @keywords internal
+.randomSampleIndex <- function(n, labels, groups) {
+    rowIndices <-
+        unlist(lapply(groups, function(group, labels, n) {
+            sample(which(labels %in% group), n, replace=FALSE)
+            },
+            labels=labels,
+            n=n))
+    return(structure(rowIndices,
+                     .Label=as.factor(labels[rowIndices])))
+}
+
+
 

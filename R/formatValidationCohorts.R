@@ -36,7 +36,7 @@ formatValidationCohorts <- function(cohortDataList, environment) {
     cohort <- cohortDataList[[i]]
     cohort_mat <- convertCohortToMatrix(cohort)
     cohort_group_labels <- whichNotCensoredBeforeYearOne(cohort)
-    cohort_group <- ifelse(as(cohort$OS, 'numeric') >= 365,
+    cohort_group <- ifelse(as.numeric.factor(cohort$OS) >= 365,
                            1,
                            0)[cohort_group_labels]
 

@@ -92,8 +92,8 @@ validateMetaEstimateCalculation <- function(data, saveDir) {
   structure(lapply(seq_along(validationCohortList), function(i) {
     cohort <- validationCohortList[[i]]
     D.index(x=cohortMatrixList[[i]],
-            surv.time=as(cohort$OS, 'numeric'),
-            surv.event=as(cohort$OS_Status, 'numeric'),
+            surv.time=as.numeric.factor(cohort$OS),
+            surv.event=as.numeric.factor(cohort$OS_Status),
             na.rm=TRUE,
             alpha=0.05,
             method.test="logrank")
@@ -113,8 +113,8 @@ validateMetaEstimateCalculation <- function(data, saveDir) {
 
     cohort <- validationCohortList[[i]]
     concordance.index(x=cohortMatrixList[[i]],
-            surv.time=as(cohort$OS, 'numeric'),
-            surv.event=as(cohort$OS_Status, 'numeric'),
+            surv.time=as.numeric.factor(cohort$OS),
+            surv.event=as.numeric.factor(cohort$OS_Status),
             method="noether")
   }), .Names=names(validationCohortList))
 }

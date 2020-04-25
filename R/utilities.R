@@ -1,13 +1,21 @@
+#' Convert the levels of a factor to number
+#'
+#' A convenience function to converting factor levels into numeric
+#'
+#' @param factor
+#'
+as.numeric.factor <- function(factor) { as.numeric(levels(factor))[factor] }
+
 #' Exclude samples censored before year 1
 #'
 #' @param seqCohort A \code{}
 #'
 #' @return A sorted vector of indices
-whichNotCensoredBeforeYearOne <- function(seqCohort) {
-  idxNotCensored <- which(as(seqCohort$OS, 'numeric') <= 365 &
-                            seqCohort$OS_status == 1)
-  idxNotYearOne <- which(as(seqCohort$OS, 'numeric') > 365)
-  return(sort(c(idxNotCensored, idxNotYearOne)))
+whichNotCensoredYearOne <- function(seqCohort) {
+    idxNotCensored <- which(as.numeric.factor(seqCohort$OS) <= 365 &
+                                as.numeric.factor(seqCohort$OS_Status) == 1)
+    idxNotYearOne <- which(as.numeric.factor(seqCohort$OS) > 365)
+    return(sort(c(idxNotCensored, idxNotYearOne)))
 }
 
 #' Merge common samples not censored before year 1
@@ -21,14 +29,14 @@ whichNotCensoredBeforeYearOne <- function(seqCohort) {
 #'
 #' @export
 mergeCommonData <- function(seqCohort, arrayCohort) {
-  if (!all(rownames(arrayCohort) == rownames(seqCohort))) {
-    stop("Rownames do not match between the seqCohort and arrayCohort!")
-  }
+    if (!all(rownames(arrayCohort) == rownames(seqCohort))) {
+        stop("Rownames do not match between the seqCohort and arrayCohort!")
+    }
 
-  notCensoredYearOne <- whichNotCensoredBeforeYearOne(seqCohort)
-  return(rbind(seqCohort[notCensoredYearOne, ],
-               arrayCohort[notCensoredYearOne, ])
-         )
+    notCensoredYearOne <- whichNotCensoredYearOne(seqCohort)
+    return(rbind(seqCohort[notCensoredYearOne, ],
+                 arrayCohort[notCensoredYearOne, ])
+    )
 }
 
 #' Reshuffle to create 1000 random gene models
@@ -50,65 +58,64 @@ mergeCommonData <- function(seqCohort, arrayCohort) {
 #FIXME:: Can we remove commented out lines?
 reshuffleRandomModels <- function(mergeCommon) {
 
-  ## Classes for training
-  merge_common_mat <- convertCohortToMatrix(mergeCommon)
-  merge_common_grp <- ifelse(as(mergeCommon$OS, 'numeric') >= 365, 1, 0)
+    ## Classes for training
+    merge_common_mat <- convertCohortToMatrix(mergeCommon)
+    merge_common_grp <- ifelse(as.numeric.factor(mergeCommon$OS) >= 365, 1, 0)
 
-  ##TODO:: Make these parameters in the function call
-  pred <- list()
-  #sel_pred <- list()
-  count <- 0;
-  b_acc <- vector()
-  i <- 1
-  model <- list()
-  models_no <- 1000
-  count <- 1
-  selected_model <- list()
-  ##FIXME:: Can't set seed in functions for Bioconductor, user has to do it
-  # set.seed(1987)
-  #sel_b_acc <- list()
+    ##TODO:: Make these parameters in the function call
+    pred <- list()
+    #sel_pred <- list()
+    count <- 0;
+    b_acc <- vector()
+    i <- 1
+    model <- list()
+    models_no <- 1000
+    count <- 1
+    selected_model <- list()
+    ##FIXME:: Can't set seed in functions for Bioconductor, user has to do it
+    # set.seed(1987)
+    #sel_b_acc <- list()
 
-  for (i in seq_len(models_no)) {
-    #set.seed(1)
-    # Selecting random 40 samples from short survival group
-    x5 <-sample(which(merge_common_grp == 0), 40, replace=FALSE)
-    # Selecting random 40 samples from long survival group
-    y5 <-sample(which(merge_common_grp == 1), 40, replace=FALSE)
-    x1 <- merge_common_mat[c(x5,y5),]
+    for (i in seq_len(models_no)) {
+        #set.seed(1)
+        # Selecting random 40 samples from short survival group
+        x5 <-sample(which(merge_common_grp == 0), 40, replace=FALSE)
+        # Selecting random 40 samples from long survival group
+        y5 <-sample(which(merge_common_grp == 1), 40, replace=FALSE)
+        x1 <- merge_common_mat[c(x5,y5),]
 
-    # Selecting the classes of re-sampled samples
-    y_index=c(x5, y5)
-    y1 <- merge_common_grp[y_index]
+        # Selecting the classes of re-sampled samples
+        y_index=c(x5, y5)
+        y1 <- merge_common_grp[y_index]
 
-    ### k-TSP models
-    model[[i]] <- SWAP.KTSP.Train(t(x1), as.factor(y1))
+        ### k-TSP models
+        model[[i]] <- SWAP.KTSP.Train(t(x1), as.factor(y1))
 
-    selected_model[[count]]=model[[i]]
-    selected_model[[count]]$TSPs[, 1] <-
-      sample(colnames(merge_common_mat),
-             length(selected_model[[count]]$TSPs[,1]))
-    selected_model[[count]]$TSPs[, 2] <-
-      sample(colnames(merge_common_mat),
-             length(selected_model[[count]]$TSPs[,1]))
+        selected_model[[count]]=model[[i]]
+        selected_model[[count]]$TSPs[, 1] <-
+            sample(colnames(merge_common_mat),
+                   length(selected_model[[count]]$TSPs[,1]))
+        selected_model[[count]]$TSPs[, 2] <-
+            sample(colnames(merge_common_mat),
+                   length(selected_model[[count]]$TSPs[,1]))
 
-    count <- count + 1
-    print(i)
+        count <- count + 1
+        print(i)
 
-    z <- setdiff(seq_len(164), c(x5, y5)) ### Out of bag samples
-    test <- merge_common_mat[z,]
-    test_grp <- merge_common_grp[z]
+        z <- setdiff(seq_len(164), c(x5, y5)) ### Out of bag samples
+        test <- merge_common_mat[z,]
+        test_grp <- merge_common_grp[z]
 
 
-    ### Predicting on the test samples
-    # Testing on out of bag samples
-    pred[[i]] <- SWAP.KTSP.Classify(t(test), selected_model[[i]])
+        ### Predicting on the test samples
+        # Testing on out of bag samples
+        pred[[i]] <- SWAP.KTSP.Classify(t(test), selected_model[[i]])
 
-    cc <- confusionMatrix(pred[[i]], test_grp,  mode="prec_recall")
-    b_acc[i] <- as.numeric(cc$byClass)[11]
-
-  }
-  random_gene_model <- selected_model
-  return(random_gene_model)
+        cc <- confusionMatrix(pred[[i]], test_grp,  mode="prec_recall")
+        b_acc[i] <- as.numeric(cc$byClass)[11]
+    }
+    random_gene_model <- selected_model
+    return(random_gene_model)
 }
 
 #' Extract all cohorts from a list of cohorts
@@ -127,28 +134,15 @@ reshuffleRandomModels <- function(mergeCommon) {
 #' @export
 ##TODO:: Should I use list2env function instead of assign
 extractAllCohorts <- function(cohortList, environment) {
-  if (missing(environment)) stop("Please set a target environment to assign
+    if (missing(environment)) stop("Please set a target environment to assign
                                  the variables into. We recommend
                                  environment=globalenv()")
-  for (i in seq_along(cohortList)) {
-    assign(tolower(paste0(names(cohortList)[i], '_cohort')),
-           cohortList[[i]],
-           envir=environment
-           )
-  }
-}
-
-
-
-
-#' Removes samples with surival less than or equal to one year
-#'
-#' @param cohort A \code{}
-#'
-#' @return The cohort subsetted to
-#'
-removeLowSurvival <- function(cohort) {
-  g <- whichLowSurvival(cohort)
+    for (i in seq_along(cohortList)) {
+        assign(tolower(paste0(names(cohortList)[i], '_cohort')),
+               cohortList[[i]],
+               envir=environment
+        )
+    }
 }
 
 
@@ -162,18 +156,14 @@ removeLowSurvival <- function(cohort) {
 #'
 #' @export
 convertCohortToMatrix <- function(cohort) {
-  cohortMatrix <-
-    vapply(cohort[seq_len(nrow(cohort)), seq_len(ncol(cohort) - 2)],
-           function(x) as(x, 'numeric'),
-           FUN.VALUE=numeric(nrow(cohort))
-           )
-  rownames(cohortMatrix) <- rownames(cohort)
-  return(cohortMatrix)
+    cohortMatrix <-
+        vapply(cohort[seq_len(nrow(cohort)), seq_len(ncol(cohort) - 2)],
+               function(x) as.numeric(x),
+               FUN.VALUE=numeric(nrow(cohort))
+        )
+    rownames(cohortMatrix) <- rownames(cohort)
+    return(cohortMatrix)
 }
-
-
-
-
 
 
 
