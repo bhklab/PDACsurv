@@ -1,3 +1,4 @@
+
 #' Convert the levels of a factor to number
 #'
 #' A convenience function to converting factor levels into numeric
@@ -166,7 +167,6 @@ convertCohortToMatrix <- function(cohort) {
     rownames(cohortMatrix) <- rownames(cohort)
     return(cohortMatrix)
 }
-
 
 
 

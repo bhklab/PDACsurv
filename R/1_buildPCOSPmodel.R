@@ -13,7 +13,7 @@
 #' data(trainingCohorts)
 #'
 #' # Return the object
-#' selectedModels <- buildPCOSPmodels(trainingCohorts, numModels=10)
+#' selectedModels <- buildPCOSPmodels(trainingCohorts, numModels=10, nthread=1)
 #'
 #' # Save the object to disk
 #' buildPCOSPmodel(traingCohort, numModels=10, saveDir=tempdir())

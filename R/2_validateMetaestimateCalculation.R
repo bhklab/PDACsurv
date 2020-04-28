@@ -12,7 +12,7 @@
 #' data(selectedModels)
 #'
 #' # Validate the meta-estimate calculation
-#' validateMetaEstimateCalculation(validationCohorts, selectedModels,
+#' validationStats <- validateMetaEstimateCalculation(validationCohorts, selectedModels,
 #'     seqCohorts=c("PCSI", "TCGA", "Kirby"), nthread=1)
 #'
 #' @param validationCohorts A named \code{list} of validation cohorts
@@ -37,11 +37,71 @@
 #' @importFrom pROC roc
 #' @importFrom verification roc.area
 #' @export
+##FIXME:: This should be called predictMetaEstimates
 validateMetaEstimateCalculation <- function(validationCohorts, selectedModels,
-                                            arrayCohorts,
+                                            seqCohorts,
                                             nthread, saveDir) {
 
+
+  PCOSPscoreList <- calculatePCOSPscores(validationCohorts, selectedModels, nthread)
+
+  ## Dindex estimate calculation
+  DindexList <- .estimateDindex(PCOSPscoreList, validationCohorts)
+
+  ## Concordance index calculation
+  concordanceIndexList <- .estimateConcordanceIndex(PCOSPscoreList,
+                                                    validationCohorts)
+
+  ## Calculating meta-estimates of D-index and Concordance index
+
+  ##  Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR OVERALL DATA
+  combinedStats <- metaEstimateStats(validationCohorts,
+                                     DindexList,
+                                     concordanceIndexList)
+
+  ## Determine which cohorts are for microarrya data
+  isSeq <- names(validationCohorts) %in% seqCohorts
+
+  ## Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR sequencing cohort
+  sequencingStats <- metaEstimateStats(validationCohorts[isSeq],
+                                       DindexList[isSeq],
+                                       concordanceIndexList[isSeq])
+
+  ## Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR microarray cohort
+  arrayStats <- metaEstimateStats(validationCohorts[!isSeq],
+                                  DindexList[!isSeq],
+                                  concordanceIndexList[!isSeq])
+
+
+
+  list(
+    "dIndexDF"=data.frame(
+
+    ),
+    "concIndexDF"=data.frame(
+
+    )
+  )
+}
+
+#' Calculate the cohort-wise PCOSP score from a list of validation cohorts
+#'
+#' @param validationCohorts A \code{list} of validation cohorts
+#' @param selectedModels A \code{list} of selected models, as returned by the
+#'   `buildPCOSPmodels` function.
+#' @param nthread
+#'
+#' @return A \code{list} of PCOSP scores for each validation cohorot
+#'
+#' @export
+calculatePCOSPscores <- function(validationCohorts, selectedModels, nthread) {
+
   formattedValCohorts <- formatValidationCohorts(validationCohorts)
+
+  # Temporily change number of cores to parallelize over
+  opts <- options()
+  options("mc.cores"=nthread)
+  on.exit(options(opts))
 
   ## Extract matrices from the cohort list
   cohortMatrixList <- lapply(formattedValCohorts, function(cohort) cohort$mat)
@@ -53,48 +113,25 @@ validateMetaEstimateCalculation <- function(validationCohorts, selectedModels,
                              function(cohortMat, selectedModels)
                                estimatePCOSPprob(cohortMat, selectedModels),
                              selectedModels=selectedModels)
-
-  ## Dindex estimate calculation
-  DindexList <- .estimateDindex(PCOSPscoreList, validationCohorts)
-
-
-  ## Concordance index calculation
-  concordanceIndexList <- .estimateConcordanceIndex(PCOSPscoreList,
-                                                    validationCohorts)
-
-  ## Calculating meta-estimates of D-index and Concordance index
-
-  ##  Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR OVERALL DATA
-  DindexMetaEstimateAll <- .metaEstimateDindex(DindexList)
-  concordanceIndexMetaEstimateAll <-
-    .metaEstimateConcordanceIndex(concordanceIndexList)
-  combinedStats <- mapply(list, DindexMetaEstimateAll,
-                          concordanceIndexMetaEstimateAll, simplify=FALSE)
-
-  ## Determine which cohorts are for microarrya data
-  isSeq <- names(validationCohorts) %in% arrayCohorts
-
-  ## Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR sequencing cohort
-  DindexMetaEstimateSeq <- .metaEstimateDindex(DindexList[isSeq])
-  concordanceIndexMetaEstimateSeq <-
-    .metaEstimateConcordanceIndex(concordanceIndexList[isSeq])
-  sequencingStats <- mapply(list, DindexMetaEstimateAll,
-                            concordanceIndexMetaEstimateAll, simplify=FALSE)
-
-  ### Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR microarray cohort
-  DindexMetaEstimateArray <- .metaEstimateDindex(DindexList[!isSeq])
-  concordanceIndexMetaEstimateArray <-
-    .metaEstimateConcordanceIndex(concordanceIndexList[!isSeq])
-  arrayStats <- mapply(list, DindexMetaEstimateAll,
-                       concordanceIndexMetaEstimateAll, simplify=FALSE)
-
-  return(list("combinedCohorts"=combinedStats,
-              "sequencingCohorts"=sequencingStats,
-              "microarrayCohorts"=arrayStats))
+  return(PCOSPscoreList)
 }
 
+#'
+#'
+#'
+#'
+metaEstimateStats <- function(validationCohorts, DindexList, concordanceIndexList) {
+  DindexMetaEstimate <- .metaEstimateDindex(DindexList)
+  concordanceIndexMetaEstimate <-
+    .metaEstimateConcordanceIndex(concordanceIndexList)
+  stats <- .zipLists(DindexMetaEstimate,
+                     concordanceIndexMetaEstimate,
+                     sublistNames=c("dIndex", "cIndex"))
+  return(stats)
+}
 
 #' Estimate the D-index for a list of validation cohorts
+#'
 #'
 #'
 #' @importFrom survcomp D.index
@@ -178,17 +215,45 @@ validateMetaEstimateCalculation <- function(validationCohorts, selectedModels,
     "upperTail"=conIndexMetaEstimate$estimate + qnorm(0.025, lower.tail=FALSE) *
       conIndexMetaEstimate$se,
     "pValue"=2*pnorm(-abs(log(conIndexMetaEstimate$estimate)/conIndexMetaEstimate$se)),
-    "cohortNames"=names(conIndexList)
+    "cohortNames"=names(concordanceIndexList)
   ))
+}
+
+#' Merge n lists element-wise into a list of sublists n items long
+#'
+#' Take n lists and combine them element-wise into a single list with each sublist
+#'   containing the corresponding elements of the original lists. Assigns
+#'   sublistNames as the names of the new zipped sublists.
+#'
+#' @param ... Two or more \code{list}s to zip together element-wise. New list
+#'     is named using first list.
+#' @param sublistNames A \code{character} vector n items long, specifying the
+#'     labels for the zipped items
+#'
+#' @keywords internal
+.zipLists <- function(..., sublistNames) {
+  # Error checking
+  if (length(list(...)) != length(sublistNames))
+    stop("Must be as many names as lists!")
+
+  # Merge lists into sublists element-wise
+  zipped <- mapply(list, ..., SIMPLIFY=FALSE)
+
+  # Name each zipped item in the sublist
+  zipped <- lapply(zipped, function(stat) structure(stat, .Names=sublistNames))
+  return(zipped)
 }
 
 #' Draw a forest plot using the statistics calcualted in validation metaestimate
 #'
 #'
-#'
-#'
-forestPlotMetaestimate <- function(validationStats, validationCohorts) {
+forestPlotMetaEstimate <- function(validationStats, validationCohorts) {
+  formattedValCohorts <- formatValidationCohorts(validationCohorts)
 
+  ## Extract matrices from the cohort list
+  cohortMatrixList <- lapply(formattedValCohorts, function(cohort) cohort$mat)
+  ##TODO:: This is not used here, do we need it?
+  cohortGroupList <- lapply(formattedValCohorts, function(cohort) cohort$grp)
 }
 
 
@@ -198,7 +263,12 @@ forestPlotMetaestimate <- function(validationStats, validationCohorts) {
 #'
 #'
 rocCurveMetaestimate <- function(validationStats, validationCohorots) {
+  formattedValCohorts <- formatValidationCohorts(validationCohorts)
 
+  ## Extract matrices from the cohort list
+  cohortMatrixList <- lapply(formattedValCohorts, function(cohort) cohort$mat)
+  ##TODO:: This is not used here, do we need it?
+  cohortGroupList <- lapply(formattedValCohorts, function(cohort) cohort$grp)
 }
 
 
