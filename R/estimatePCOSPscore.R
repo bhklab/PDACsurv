@@ -2,7 +2,7 @@
 #'
 ##TODO:: HEEWON add function documentation
 #'
-#' @param val_mat A \code{matrix} of values
+#' @param A A \code{matrix} of values
 #' @param selectedModels a \code{list} of models selected using the
 #'   `buildPCOSPmodel` function
 #'

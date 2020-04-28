@@ -12,18 +12,24 @@
 #' data(selectedModels)
 #'
 #' # Validate the meta-estimate calculation
-#' validateMetaEstimateCalculation(validationCohorts, selectedModels)
+#' validateMetaEstimateCalculation(validationCohorts, selectedModels,
+#'     seqCohorts=c("PCSI", "TCGA", "Kirby"), nthread=1)
 #'
 #' @param validationCohorts A named \code{list} of validation cohorts
 #' @param selectedModels A \code{list} of selected models from the
-#'   `buildPCOSPmodels` function
+#'     `buildPCOSPmodels` function
+#' @param seqCohorts A \code{character} vector specifying which cohorts
+#'     are from sequencing data. It is assumed that non-sequencing cohorts
+#'     are from micro-array cohorts.
 #' @param nthread A \code{numeric} vector with an integer number of thread to
-#'   parallelize across.
+#'     parallelize across.
 #' @param saveDir A \code{character} vector specifying the directory in which
-#'   to save results. If missing the function returns the data.
+#'     to save results. If missing the function returns the data.
 #'
-#' @return A named \code{list} of meta-estimates for the supplied validation
-#'   cohorts
+#' @return A named \code{list} of statistical meta-estimates for the combined,
+#'   sequencing and microarray cohorts supplied in validationCohorts. Top level
+#'   list labels indicate which cohorts, with the subsequent list level
+#'   indicating the type of statistic (i.e., dindex vs concordance index)
 #'
 #' @importFrom survcomp D.index concordance.index combine.est
 #' @importFrom forestplot forestplot
@@ -31,12 +37,15 @@
 #' @importFrom pROC roc
 #' @importFrom verification roc.area
 #' @export
-validateMetaEstimateCalculation <- function(validationCohorts, selectedModels, nthread, saveDir) {
+validateMetaEstimateCalculation <- function(validationCohorts, selectedModels,
+                                            arrayCohorts,
+                                            nthread, saveDir) {
 
   formattedValCohorts <- formatValidationCohorts(validationCohorts)
 
   ## Extract matrices from the cohort list
   cohortMatrixList <- lapply(formattedValCohorts, function(cohort) cohort$mat)
+  ##TODO:: This is not used here, do we need it?
   cohortGroupList <- lapply(formattedValCohorts, function(cohort) cohort$grp)
 
   # Estimate PCOSP scores from cohort matrixes
@@ -59,39 +68,29 @@ validateMetaEstimateCalculation <- function(validationCohorts, selectedModels, n
   DindexMetaEstimateAll <- .metaEstimateDindex(DindexList)
   concordanceIndexMetaEstimateAll <-
     .metaEstimateConcordanceIndex(concordanceIndexList)
+  combinedStats <- mapply(list, DindexMetaEstimateAll,
+                          concordanceIndexMetaEstimateAll, simplify=FALSE)
+
+  ## Determine which cohorts are for microarrya data
+  isSeq <- names(validationCohorts) %in% arrayCohorts
 
   ## Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR sequencing cohort
-  DindexMetaEstimateSeq <- .metaEstimateDindex(DindexList[cohortGroupList == 1])
+  DindexMetaEstimateSeq <- .metaEstimateDindex(DindexList[isSeq])
   concordanceIndexMetaEstimateSeq <-
-    .metaEstimateConcordanceIndex(DindexList[cohortGroupList == 1])
+    .metaEstimateConcordanceIndex(concordanceIndexList[isSeq])
+  sequencingStats <- mapply(list, DindexMetaEstimateAll,
+                            concordanceIndexMetaEstimateAll, simplify=FALSE)
 
   ### Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR microarray cohort
-  dindex_micro <- combine.est(c(dindex_ouh$d.index,dindex_winter$d.index,
-                                dindex_zhang$d.index, dindex_unc$d.index,
-                                dindex_icgc_array$d.index,
-                                dindex_collisson$d.index, dindex_chen$d.index),
-                              c(dindex_ouh$se, dindex_winter$se,
-                                dindex_zhang$se, dindex_unc$se,
-                                dindex_icgc_array$se, dindex_collisson$se,
-                                dindex_chen$se),
-                              na.rm = TRUE,
-                              hetero = FALSE)
+  DindexMetaEstimateArray <- .metaEstimateDindex(DindexList[!isSeq])
+  concordanceIndexMetaEstimateArray <-
+    .metaEstimateConcordanceIndex(concordanceIndexList[!isSeq])
+  arrayStats <- mapply(list, DindexMetaEstimateAll,
+                       concordanceIndexMetaEstimateAll, simplify=FALSE)
 
-  dindex_micro_lower <- dindex_micro$estimate + qnorm(0.025, lower.tail=TRUE) *  dindex_micro$se
-  dindex_micro_upper <- dindex_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  dindex_micro$se
-
-  dindex_micro_pval<- 2*pnorm(-abs(log(dindex_micro$estimate)/dindex_micro$se))
-
-
-  con_micro <- combine.est(c(con_ouh$c.index,con_winter$c.index,con_zhang$c.index,
-                             con_unc$c.index,con_icgc_array$c.index, con_collisson$c.index,  con_chen$c.index),
-                           c(con_ouh$se,con_winter$se,con_zhang$se,
-                             con_unc$se,con_icgc_array$se, con_collisson$se, con_chen$se),na.rm = TRUE, hetero = FALSE)
-  con_micro_lower <- con_micro$estimate + qnorm(0.025, lower.tail=TRUE) *  con_micro$se
-  con_micro_upper <- con_micro$estimate + qnorm(0.025, lower.tail=FALSE) *  con_micro$se
-
-  con_micro_pval<-pnorm((con_micro$estimate - 0.5)/con_micro$se, lower.tail = con_micro$estimate < 0.5) * 2
-
+  return(list("combinedCohorts"=combinedStats,
+              "sequencingCohorts"=sequencingStats,
+              "microarrayCohorts"=arrayStats))
 }
 
 
@@ -176,16 +175,31 @@ validateMetaEstimateCalculation <- function(validationCohorts, selectedModels, n
     "metaEstimate"= conIndexMetaEstimate,
     "lowerTail"=conIndexMetaEstimate$estimate + qnorm(0.025, lower.tail=TRUE) *
       conIndexMetaEstimate$se,
-    "upperTail"=DindexMetaEstimate$estimate + qnorm(0.025, lower.tail=FALSE) *
+    "upperTail"=conIndexMetaEstimate$estimate + qnorm(0.025, lower.tail=FALSE) *
       conIndexMetaEstimate$se,
     "pValue"=2*pnorm(-abs(log(conIndexMetaEstimate$estimate)/conIndexMetaEstimate$se)),
     "cohortNames"=names(conIndexList)
   ))
 }
 
+#' Draw a forest plot using the statistics calcualted in validation metaestimate
+#'
+#'
+#'
+#'
+forestPlotMetaestimate <- function(validationStats, validationCohorts) {
+
+}
 
 
+#' Draw a ROC curve using statistics calculated in validation metaestimate
+#'
+#'
+#'
+#'
+rocCurveMetaestimate <- function(validationStats, validationCohorots) {
 
+}
 
 
 
