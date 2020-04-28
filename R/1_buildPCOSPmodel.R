@@ -10,34 +10,41 @@
 #' set.seed(1234)
 #'
 #' # Load the data
-#' data(trainingCohort)
+#' data(trainingCohorts)
 #'
 #' # Return the object
-#' model <- buildPCOSPmodel(trainingCohort)
+#' selectedModels <- buildPCOSPmodels(trainingCohorts, numModels=10)
 #'
 #' # Save the object to disk
-#' buildPCOSPmodel(traingCohort, saveDir=tempdir())
+#' buildPCOSPmodel(traingCohort, numModels=10, saveDir=tempdir())
 #'
 ##TODO:: Determine where this dataset came from? Is it the ouput of another
 #   package? From a publication?
-#' @param data \code{list} A dataset for which to build the PCOSP model
+#' @param trainingCohorts A named \code{list} of training cohorts for which
+#'   to fit and select PCOSP models.
 #' @param saveDir \code{character} A path to a directory to save the model. If you
 #'   exclude this the function will return the model object instead.
-#' @param mc.cores \code{integer} The number of threads to parralelize across
+#' @param nthread \code{integer} The number of threads to parallelize across
 #'
 #' @return \code{?} Either returns the model object or, is \code{saveDir} is
 #'   specified it saves to disk instead and return the path
 #'
-#' @warning This function uses random numbers; remeber to \code{set.seed()}
-#'   before running to ensure reproducible results
+#' @section Warning: This function uses random numbers; remember to
+#'   \code{set.seed()} before running to ensure reproducible results
 #'
 #' @export
-buildPCOSPmodels <- function(data, saveDir, numModels, mc.cores=1) {
+buildPCOSPmodels <- function(trainingCohorts, numModels, nthread, saveDir) {
 
-    seqCohort <- data$icgc_seq_cohort
-    arrayCohort <- data$icgc_array_cohort
+    # Set number of threads to parallelize over
+    ops <- options()
+    options("mc.cores"=nthread)
+    on.exit(options(ops))
 
-    # Merged common ICGC seq and array data
+    # Extract cohorts from trainingCohorts
+    seqCohort <- trainingCohorts$icgc_seq_cohort
+    arrayCohort <- trainingCohorts$icgc_array_cohort
+
+    # Merged common ICGC seq and array trainingCohorts
     commonData <- mergeCommonData(seqCohort, arrayCohort)
 
     # Training the model on ICGC seq/array common samples cohort
@@ -138,6 +145,3 @@ buildPCOSPmodels <- function(data, saveDir, numModels, mc.cores=1) {
     return(structure(rowIndices,
                      .Label=as.factor(labels[rowIndices])))
 }
-
-
-

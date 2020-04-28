@@ -8,14 +8,19 @@
 #'
 #' @example
 #' # Load validation data
-#' data(PCOSPexpressionData)
+#' data(validationCohorts)
+#' data(selectedModels)
 #'
 #' # Validate the meta-estimate calculation
-#' validateMetaEstimateCalculation(PDACexpressionData)
+#' validateMetaEstimateCalculation(validationCohorts, selectedModels)
 #'
-#' @param data A \code{list} of formated validation cohorts
+#' @param validationCohorts A named \code{list} of validation cohorts
+#' @param selectedModels A \code{list} of selected models from the
+#'   `buildPCOSPmodels` function
+#' @param nthread A \code{numeric} vector with an integer number of thread to
+#'   parallelize across.
 #' @param saveDir A \code{character} vector specifying the directory in which
-#'   to save results. If missing the function returns the data
+#'   to save results. If missing the function returns the data.
 #'
 #' @return A named \code{list} of meta-estimates for the supplied validation
 #'   cohorts
@@ -26,22 +31,27 @@
 #' @importFrom pROC roc
 #' @importFrom verification roc.area
 #' @export
-validateMetaEstimateCalculation <- function(data, saveDir) {
+validateMetaEstimateCalculation <- function(validationCohorts, selectedModels, nthread, saveDir) {
 
-  validationCohorts <- formatValidationCohorts(data)
+  formattedValCohorts <- formatValidationCohorts(validationCohorts)
 
   ## Extract matrices from the cohort list
-  cohortMatrixList <- lapply(validationCohorts, function(cohort) cohort$mat)
-  cohortGroupList <- lapply(validationCohorts, function(cohort) cohort$grp)
+  cohortMatrixList <- lapply(formattedValCohorts, function(cohort) cohort$mat)
+  cohortGroupList <- lapply(formattedValCohorts, function(cohort) cohort$grp)
+
+  # Estimate PCOSP scores from cohort matrixes
+  PCOSPscoreList <- bplapply(cohortMatrixList,
+                             function(cohortMat, selectedModels)
+                               estimatePCOSPprob(cohortMat, selectedModels),
+                             selectedModels=selectedModels)
 
   ## Dindex estimate calculation
-  DindexList <- .estimateDindex(cohortMatrixList, validationCohorts)
+  DindexList <- .estimateDindex(PCOSPscoreList, validationCohorts)
 
 
   ## Concordance index calculation
-  concordanceIndexList <- .estimateConcordanceIndex(cohortMatrixList,
+  concordanceIndexList <- .estimateConcordanceIndex(PCOSPscoreList,
                                                     validationCohorts)
-
 
   ## Calculating meta-estimates of D-index and Concordance index
 
@@ -51,8 +61,8 @@ validateMetaEstimateCalculation <- function(data, saveDir) {
     .metaEstimateConcordanceIndex(concordanceIndexList)
 
   ## Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR sequencing cohort
-  DindexMetaEstimateAll <- .metaEstimateDindex(DindexList[cohortGroupList == 1])
-  concordanceIndexMetaEstimateAll <-
+  DindexMetaEstimateSeq <- .metaEstimateDindex(DindexList[cohortGroupList == 1])
+  concordanceIndexMetaEstimateSeq <-
     .metaEstimateConcordanceIndex(DindexList[cohortGroupList == 1])
 
   ### Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR microarray cohort
@@ -84,42 +94,46 @@ validateMetaEstimateCalculation <- function(data, saveDir) {
 
 }
 
-#' Estimate the D-index for
+
+#' Estimate the D-index for a list of validation cohorts
 #'
 #'
 #' @importFrom survcomp D.index
-.estimateDindex <- function(cohortMatrixList, validationCohortList) {
-  structure(lapply(seq_along(validationCohortList), function(i) {
-    cohort <- validationCohortList[[i]]
-    D.index(x=cohortMatrixList[[i]],
+.estimateDindex <- function(PCOSPscoreList, validationCohorts) {
+  structure(lapply(seq_along(PCOSPscoreList), function(i) {
+    cohort <- validationCohorts[[i]]
+    PCOSPscore <- PCOSPscoreList[[i]]
+    D.index(x=PCOSPscore$predicted_probabilities,
             surv.time=as.numeric.factor(cohort$OS),
             surv.event=as.numeric.factor(cohort$OS_Status),
             na.rm=TRUE,
             alpha=0.05,
             method.test="logrank")
-  }), .Names=names(validationCohortList))
+  }), .Names=names(PCOSPscoreList))
 }
 
-#' Estimate the concordance index for
+#' Estimate the concordance index for a list of validation cohorts
 #'
-#' @param
-#' @param
+#' @param PSCOSPscoreList A named \code{list} of PCOSPscores as calculated
+#'   with `estimatePCOSPscore`
+#' @param validationCohorts A named \code{list} of validation cohorts
 #'
 #' @return
 #'
 #' @importFrom survcomp concordance.index
-.estimateConcordanceIndex <- function(cohortMatrixList, validationCohortList) {
-  structure(lapply(seq_along(validationCohortList), function(i) {
+.estimateConcordanceIndex <- function(PSCOPscoreList, validationCohorts) {
+  structure(lapply(seq_along(validationCohorts), function(i) {
 
-    cohort <- validationCohortList[[i]]
-    concordance.index(x=cohortMatrixList[[i]],
+    cohort <- validationCohorts[[i]]
+    PCOSPscore <- PCOSPscoreList[[i]]
+    concordance.index(x=PCOSPscore$predicted_probabilities,
             surv.time=as.numeric.factor(cohort$OS),
             surv.event=as.numeric.factor(cohort$OS_Status),
             method="noether")
-  }), .Names=names(validationCohortList))
+  }), .Names=names(validationCohorts))
 }
 
-#' Meta-estimate the Dindex for
+#' Meta-estimate the Dindex for a list of validation cohorts
 #'
 #'
 #'
@@ -150,22 +164,22 @@ validateMetaEstimateCalculation <- function(data, saveDir) {
 #' @importFrom survcomp concordance.index
 .metaEstimateConcordanceIndex <- function(concordanceIndexList) {
 
-  conIndexes <- vapply(concordanceIndexList, function(cohort) cohort$d.index,
+  conIndexes <- vapply(concordanceIndexList, function(cohort) cohort$c.index,
                      FUN.VALUE=numeric(1))
   conIndexSEs <- vapply(concordanceIndexList, function(cohort) cohort$se,
                       FUN.VALUE=numeric(1))
 
-  DindexMetaEstimate <- combine.est(Dindexes, DindexSEs, na.rm=TRUE, hetero=TRUE)
+  conIndexMetaEstimate <- combine.est(conIndexes, conIndexSEs, na.rm=TRUE, hetero=TRUE)
 
   ##TODO:: Define a metaestimate S4 object? Can then dispatch plots on it
   return(list(
-    "metaEstimate"= DindexMetaEstimate,
-    "lowerTail"=DindexMetaEstimate$estimate + qnorm(0.025, lower.tail=TRUE) *
-      DindexMetaEstimate$se,
+    "metaEstimate"= conIndexMetaEstimate,
+    "lowerTail"=conIndexMetaEstimate$estimate + qnorm(0.025, lower.tail=TRUE) *
+      conIndexMetaEstimate$se,
     "upperTail"=DindexMetaEstimate$estimate + qnorm(0.025, lower.tail=FALSE) *
-      DindexMetaEstimate$se,
-    "pValue"=2*pnorm(-abs(log(DindexMetaEstimate$estimate)/DindexMetaEstimate$se)),
-    "cohortNames"=names(DindexList)
+      conIndexMetaEstimate$se,
+    "pValue"=2*pnorm(-abs(log(conIndexMetaEstimate$estimate)/conIndexMetaEstimate$se)),
+    "cohortNames"=names(conIndexList)
   ))
 }
 

@@ -4,9 +4,11 @@
 #'
 #' @param factor
 #'
-as.numeric.factor <- function(factor) { as.numeric(levels(factor))[factor] }
+##FIXME:: Make sure all the data is either a factor, or not a factor?
+##FIXME:: This breaks when written with levels because not all of them are factors
+as.numeric.factor <- function(factor) { as.numeric(as.character(factor)) }
 
-#' Exclude samples censored before year 1
+    #' Exclude samples censored before year 1
 #'
 #' @param seqCohort A \code{}
 #'
