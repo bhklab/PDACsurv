@@ -1,0 +1,52 @@
+---
+title: "PCOSP"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Run the script
+
+```{r build_and_select_models}
+require(switchBox)
+library(vcdExtra)
+library(caret)
+library(forestplot)
+library(pROC)
+library(survcomp)
+library(survival)
+args(SWAP.Train.KTSP)
+require(data.table)
+library(reportROC)
+library(verification)
+
+source(file.path("..", "R", "1_buildPCOSPmodel.R"))
+source(file.path("..", "R", "utilities.R"))
+source(file.path("..", "R", "formatValidationCohorts.R"))
+source(file.path("..", "R", "estimatePCOSPscore.R"))
+load(file.path("..", "data", "trainingCohorts.rda"))
+
+set.seed(1987)
+selectedModels <- buildPCOSPmodels(trainingCohorts, numModels=1000, nthread=15)
+
+source(file.path("..", "R", "2_validateMetaestimateCalculation.R"))
+load(file.path("..", "data", "validationCohorts.rda"))
+
+validationStats <- validateMetaEstimateCalculation(validationCohorts, 
+                                                   selectedModels, 
+                                                   seqCohorts=c("PCSI", "TCGA", "Kirby"),
+                                                   nthread=15)
+
+```
+
+
+```{r forst_plots}
+forestPlotMetaEstimate(validationStats, 
+                       stat="dIndex", 
+                       isSummary=c(rep(FALSE, 12), rep(TRUE, 3)),
+                       filePath=".",
+                       fileName="testPlot.pdf")
+```
+
