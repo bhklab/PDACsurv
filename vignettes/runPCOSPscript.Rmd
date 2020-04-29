@@ -21,32 +21,44 @@ args(SWAP.Train.KTSP)
 require(data.table)
 library(reportROC)
 library(verification)
+library(grid)
+library(ggplot2)
+library(BiocParallel)
 
 source(file.path("..", "R", "1_buildPCOSPmodel.R"))
 source(file.path("..", "R", "utilities.R"))
 source(file.path("..", "R", "formatValidationCohorts.R"))
 source(file.path("..", "R", "estimatePCOSPscore.R"))
+```
+
+```{r train_models}
 load(file.path("..", "data", "trainingCohorts.rda"))
 
 set.seed(1987)
 selectedModels <- buildPCOSPmodels(trainingCohorts, numModels=1000, nthread=15)
+```
 
+```{r calculate_stats}
 source(file.path("..", "R", "2_validateMetaestimateCalculation.R"))
 load(file.path("..", "data", "validationCohorts.rda"))
+
 
 validationStats <- validateMetaEstimateCalculation(validationCohorts, 
                                                    selectedModels, 
                                                    seqCohorts=c("PCSI", "TCGA", "Kirby"),
                                                    nthread=15)
-
 ```
 
 
-```{r forst_plots}
-forestPlotMetaEstimate(validationStats, 
+```{r forest_plots}
+source(file.path('..', 'R', 'forestPlotMetaEstimate.R'))
+
+cohorts <- c("TCGA", "PCSI", "Kirby", "ICGC_arr", "UNC", "Chen", "OUH", 
+             "Zhang", "Winter", "Collisson")
+
+forestPlotMetaEstimate(validationStats,
+                       cohorts=cohorts,
                        stat="dIndex", 
-                       isSummary=c(rep(FALSE, 12), rep(TRUE, 3)),
-                       filePath=".",
-                       fileName="testPlot.pdf")
+                       isSummary=c(rep(FALSE, 12), rep(TRUE, 3)))
 ```
 

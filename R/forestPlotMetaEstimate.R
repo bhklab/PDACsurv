@@ -22,13 +22,24 @@
 #' @importFrom grid unit grid.grabExpr grid.draw
 #' @importFrom ggplot2 ggsave
 #' @export
-forestPlotMetaEstimate <- function(validationStats, stat, isSummary,
+forestPlotMetaEstimate <- function(validationStats, cohorts, stat, isSummary,
                                    filePath, fileName, ...) {
 
+    # Get names of all cohorts
+    allCohorts <- names(validationStats$PCOSPscores)
+    if (missing(cohorts)) {
+        cohorts=allCohorts
+    }
+    # Subset of cohorts to plot
+    whichCohorts <- which(allCohorts %in% cohorts)
+    keepCohorts <- c(cohorts, 'seqCohorts', 'arrayCohorts', 'allCohorts')
+
     # Extract necessary statistics for plotting
-    validationStatsDF <- validationStats[[stat]]
-    PCOSPscoreList <- validationStats$PCOSPscores
-    isSeq <- validationStats$isSequencing
+    validationStatsDF <- validationStats[[stat]][keepCohorts, ]
+    PCOSPscoreList <- validationStats$PCOSPscores[whichCohorts]
+    isSeq <- validationStats$isSequencing[whichCohorts]
+    isSummary <- isSummary[c(whichCohorts,
+                           length(isSummary)-2, length(isSummary)-1, length(isSummary))]
 
     # Construct the forest plot table
     labelText <- data.frame(
@@ -48,21 +59,21 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary,
     if(missing(...)) {
         if (stat=="dIndex") {
             plot <- .forestPlotDindex(labelText, validationStatsDF, isSeq,
-                                      boxSizes)
+                                      isSummary, boxSizes)
         } else if (stat=="cIndex") {
             plot <- .forestPlotCindex(labelText, validationStatsDF, isSeq,
-                                      boxSizes)
+                                      isSummary, boxSizes)
         } else {
             stop(paste0("There is no statistic called: ", stat))
         }
     # Allow user to specify custom parameters
     } else {
         if (stat=="dIndex") {
-            plot <- .forestPlotDindex(labelText, validationStatsDF, isSeq, boxSizes,
-                              ...)
+            plot <- .forestPlotDindex(labelText, validationStatsDF, isSeq,
+                                      isSummary, boxSizes, ...)
         } else if (stat=="cIndex") {
-            plot <- .forestPlotCindex(labelText, validationStatsDF, isSeq, boxSizes,
-                              ...)
+            plot <- .forestPlotCindex(labelText, validationStatsDF, isSeq,
+                                      isSummary, boxSizes, ...)
         } else {
             stop(paste0("There is no statistic called: ", stat))
         }
@@ -77,7 +88,7 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary,
 }
 
 
-.forestPlotDindex <- function(labelText, validationStatsDF, isSeq, boxSizes,
+.forestPlotDindex <- function(labelText, validationStatsDF, isSeq, isSummary, boxSizes,
                               ...) {
 
     if (!missing(...)) {
@@ -92,11 +103,9 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary,
             isSeq=isSeq
             b_clrs=ifelse(isSeq, "#FF7F00", "#1F78B4")
             l_clrs=ifelse(isSeq, "#FF7F00", "#1F78B4")
-            #s_clrs =c(rep("red",10),"green","pink","yellow","orange")
             function(..., clr.line, clr.marker){
                 i <<- i + 1
                 fpDrawNormalCI(..., clr.line = l_clrs[i], clr.marker = b_clrs[i])
-                #fpDrawSummaryCI(...,col=s_clrs[i])
             }
         })
         sumFun <- local({
@@ -112,7 +121,7 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary,
                                validationStatsDF[, c("mean", "lower", "upper")],
                                xlab="Log2 HR",
                                is.summary=isSummary,
-                               clip=c(-1, 1.25),
+                               clip=c(-1, 2.5),
                                txt_gp=fpTxtGp(label=gpar(fontfamily="Helvetica"),
                                               ticks=gpar(cex=0.8),
                                               xlab=gpar(fontfamily="Helvetica",
@@ -130,7 +139,7 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary,
     }
 }
 
-.forestPlotCindex <- function(label, validationStatsDF, isSummary, boxSizes,
+.forestPlotCindex <- function(label, validationStatsDF, isSeq, isSummary, boxSizes,
                               ...) {
     if (!missing(...)) {
         forestplot::forestplot(labelText,
