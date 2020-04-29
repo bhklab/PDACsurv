@@ -11,9 +11,10 @@
 #' data(validationCohorts)
 #' data(selectedModels)
 #'
+#TODO:: Set nthread to 1
 #' # Validate the meta-estimate calculation
 #' validationStats <- validateMetaEstimateCalculation(validationCohorts, selectedModels,
-#'     seqCohorts=c("PCSI", "TCGA", "Kirby"), nthread=1)
+#'     seqCohorts=c("PCSI", "TCGA", "Kirby"), nthread=15)
 #'
 #' @param validationCohorts A named \code{list} of validation cohorts
 #' @param selectedModels A \code{list} of selected models from the
@@ -42,7 +43,6 @@ validateMetaEstimateCalculation <- function(validationCohorts, selectedModels,
                                             seqCohorts,
                                             nthread, saveDir) {
 
-
   PCOSPscoreList <- calculatePCOSPscores(validationCohorts, selectedModels, nthread)
 
   ## Dindex estimate calculation
@@ -59,7 +59,7 @@ validateMetaEstimateCalculation <- function(validationCohorts, selectedModels,
                                      DindexList,
                                      concordanceIndexList)
 
-  ## Determine which cohorts are for microarrya data
+  ## Determine which cohorts are from sequencing data
   isSeq <- names(validationCohorts) %in% seqCohorts
 
   ## Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR sequencing cohort
@@ -72,15 +72,40 @@ validateMetaEstimateCalculation <- function(validationCohorts, selectedModels,
                                   DindexList[!isSeq],
                                   concordanceIndexList[!isSeq])
 
-
-
+  # Extract statistics for Dindex and concordanceIndex into a list of data.frames
   list(
-    "dIndexDF"=data.frame(
-
+    "dIndex"=data.frame(
+      "mean"=c(vapply(DindexList, function(x) log2(x$d.index), FUN.VALUE=numeric(1)),
+               vapply(list(combinedStats, sequencingStats, arrayStats),
+                      function(x) log2(x$metaEstimate$dIndex$estimate), FUN.VALUE=numeric(1))),
+      "lower"=c(vapply(DindexList, function(x) log2(x$lower), FUN.VALUE=numeric(1)),
+                vapply(list(combinedStats, sequencingStats, arrayStats),
+                       function(x) log2(x$lowerTail$dIndex), FUN.VALUE=numeric(1))),
+      "upper"=c(vapply(DindexList, function(x) log2(x$upper), FUN.VALUE=numeric(1)),
+                 vapply(list(combinedStats, sequencingStats, arrayStats),
+                        function(x) log2(x$upperTail$dIndex), FUN.VALUE=numeric(1))),
+      "pval"=c(vapply(DindexList, function(x) x$p.value, FUN.VALUE=numeric(1)),
+               vapply(list(sequencingStats, arrayStats, combinedStats),
+                      function(x) x$pValue$dIndex, FUN.VALUE=numeric(1))),
+      row.names=c(names(DindexList), "seqCohorts", "arrayCohorts", "allCohorts")
     ),
-    "concIndexDF"=data.frame(
-
-    )
+    "cIndex"=data.frame(
+      "mean"=c(vapply(concordanceIndexList, function(x) log2(x$c.index), FUN.VALUE=numeric(1)),
+               vapply(list(combinedStats, sequencingStats, arrayStats),
+                      function(x) log2(x$metaEstimate$dIndex$estimate), FUN.VALUE=numeric(1))),
+      "lower"=c(vapply(concordanceIndexList, function(x) log2(x$lower), FUN.VALUE=numeric(1)),
+                vapply(list(combinedStats, sequencingStats, arrayStats),
+                       function(x) log2(x$lowerTail$dIndex), FUN.VALUE=numeric(1))),
+      "upper"=c(vapply(concordanceIndexList, function(x) log2(x$upper), FUN.VALUE=numeric(1)),
+                vapply(list(combinedStats, sequencingStats, arrayStats),
+                       function(x) log2(x$upperTail$dIndex), FUN.VALUE=numeric(1))),
+      "pval"=c(vapply(concordanceIndexList, function(x) x$p.value, FUN.VALUE=numeric(1)),
+               vapply(list(combinedStats, sequencingStats, arrayStats),
+                      function(x) x$pValue$dIndex, FUN.VALUE=numeric(1))),
+      row.names=c(names(concordanceIndexList), "seqCohorts", "arrayCohorts", "allCohorts")
+    ),
+    "PCOSPscores"=PCOSPscoreList,
+    "isSequencing"=isSeq
   )
 }
 
@@ -157,9 +182,8 @@ metaEstimateStats <- function(validationCohorts, DindexList, concordanceIndexLis
 #' @return
 #'
 #' @importFrom survcomp concordance.index
-.estimateConcordanceIndex <- function(PSCOPscoreList, validationCohorts) {
+.estimateConcordanceIndex <- function(PCOSPscoreList, validationCohorts) {
   structure(lapply(seq_along(validationCohorts), function(i) {
-
     cohort <- validationCohorts[[i]]
     PCOSPscore <- PCOSPscoreList[[i]]
     concordance.index(x=PCOSPscore$predicted_probabilities,
@@ -190,6 +214,7 @@ metaEstimateStats <- function(validationCohorts, DindexList, concordanceIndexLis
       DindexMetaEstimate$se,
     "upperTail"=DindexMetaEstimate$estimate + qnorm(0.025, lower.tail=FALSE) *
       DindexMetaEstimate$se,
+    "se"=DindexMetaEstimate$se,
     "pValue"=2*pnorm(-abs(log(DindexMetaEstimate$estimate)/DindexMetaEstimate$se)),
     "cohortNames"=names(DindexList)
   ))
@@ -214,11 +239,14 @@ metaEstimateStats <- function(validationCohorts, DindexList, concordanceIndexLis
       conIndexMetaEstimate$se,
     "upperTail"=conIndexMetaEstimate$estimate + qnorm(0.025, lower.tail=FALSE) *
       conIndexMetaEstimate$se,
-    "pValue"=2*pnorm(-abs(log(conIndexMetaEstimate$estimate)/conIndexMetaEstimate$se)),
+    "se"=conIndexMetaEstimate$se,
+    "pValue"=2*pnorm((conIndexMetaEstimate$estimate - 0.5)/conIndexMetaEstimate$se,
+                     lower.tail= conIndexMetaEstimate$estimate < 0.5),
     "cohortNames"=names(concordanceIndexList)
   ))
 }
 
+##TODO:: Should this go in utilties?
 #' Merge n lists element-wise into a list of sublists n items long
 #'
 #' Take n lists and combine them element-wise into a single list with each sublist
@@ -244,18 +272,6 @@ metaEstimateStats <- function(validationCohorts, DindexList, concordanceIndexLis
   return(zipped)
 }
 
-#' Draw a forest plot using the statistics calcualted in validation metaestimate
-#'
-#'
-forestPlotMetaEstimate <- function(validationStats, validationCohorts) {
-  formattedValCohorts <- formatValidationCohorts(validationCohorts)
-
-  ## Extract matrices from the cohort list
-  cohortMatrixList <- lapply(formattedValCohorts, function(cohort) cohort$mat)
-  ##TODO:: This is not used here, do we need it?
-  cohortGroupList <- lapply(formattedValCohorts, function(cohort) cohort$grp)
-}
-
 
 #' Draw a ROC curve using statistics calculated in validation metaestimate
 #'
@@ -270,9 +286,6 @@ rocCurveMetaestimate <- function(validationStats, validationCohorots) {
   ##TODO:: This is not used here, do we need it?
   cohortGroupList <- lapply(formattedValCohorts, function(cohort) cohort$grp)
 }
-
-
-
 
 
 

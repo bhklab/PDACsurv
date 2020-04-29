@@ -36,9 +36,11 @@
 buildPCOSPmodels <- function(trainingCohorts, numModels, nthread, saveDir) {
 
     # Set number of threads to parallelize over
-    ops <- options()
-    options("mc.cores"=nthread)
-    on.exit(options(ops))
+    if (!missing(nthread)) {
+      ops <- options()
+      options("mc.cores"=nthread)
+      on.exit(options(ops))
+    }
 
     # Extract cohorts from trainingCohorts
     seqCohort <- trainingCohorts$icgc_seq_cohort
