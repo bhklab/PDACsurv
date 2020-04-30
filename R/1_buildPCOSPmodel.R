@@ -7,7 +7,7 @@
 #'
 #' @examples
 #' # To ensure reproducible results
-#' set.seed(1234)
+#' set.seed(1987)
 #'
 #' # Load the data
 #' data(trainingCohorts)
@@ -15,7 +15,7 @@
 #' # Return the object
 #' selectedModels <- buildPCOSPmodels(trainingCohorts, numModels=10, nthread=1)
 #'
-#' # Save the object to disk
+#' # OR Save the object to disk
 #' buildPCOSPmodel(traingCohort, numModels=10, saveDir=tempdir())
 #'
 ##TODO:: Determine where this dataset came from? Is it the ouput of another
@@ -54,7 +54,7 @@ buildPCOSPmodels <- function(trainingCohorts, numModels, nthread, saveDir) {
     cohortMatrixGroups <- ifelse(as.numeric.factor(commonData$OS) >= 365, 1, 0)
 
     selectedModels <- .generateTSPmodels(cohortMatrix, cohortMatrixGroups,
-                                         numModels, mc.cores)
+                                         numModels)
 
     # Save to disk or return
     if (!missing(saveDir)) {
@@ -70,13 +70,12 @@ buildPCOSPmodels <- function(trainingCohorts, numModels, nthread, saveDir) {
 ##TODO:: See if we can refactor part of this to be reused in reshuffleRandomModels
 #' @importFrom caret confusionMatrix
 #' @importFrom switchBox SWAP.KTSP.Train
-.generateTSPmodels <- function(cohortMatrix, cohortMatrixGroups, numModels, mc.cores) {
+.generateTSPmodels <- function(cohortMatrix, cohortMatrixGroups, numModels) {
 
-    trainingDataRowIdxs <- bplapply(rep(40, numModels),
+    trainingDataRowIdxs <- lapply(rep(40, numModels),
                                 .randomSampleIndex,
                                 labels=cohortMatrixGroups,
                                 groups=sort(unique(cohortMatrixGroups)))
-
 
     trainedModels <- bplapply(trainingDataRowIdxs,
                               function(idx, data)
@@ -84,7 +83,7 @@ buildPCOSPmodels <- function(trainingCohorts, numModels, nthread, saveDir) {
                               data=cohortMatrix)
 
 
-    testingDataRowIdxs <- bplapply(trainingDataRowIdxs,
+    testingDataRowIdxs <- lapply(trainingDataRowIdxs,
                             function(idx, rowIdx, labels)
                                 structure(setdiff(rowIdx, idx),
                                           .Label=as.factor(
@@ -138,12 +137,10 @@ buildPCOSPmodels <- function(trainingCohorts, numModels, nthread, saveDir) {
 #'   the sample size.
 #' @keywords internal
 .randomSampleIndex <- function(n, labels, groups) {
-    rowIndices <-
-        unlist(lapply(groups, function(group, labels, n) {
-            sample(which(labels %in% group), n, replace=FALSE)
-            },
-            labels=labels,
-            n=n))
+    rowIndices <- unlist(mapply(function(x, n, labels) sample(which(labels==x), n, replace=FALSE),
+                         x=groups,
+                         MoreArgs=list(n=n, labels=labels),
+                         SIMPLIFY=FALSE))
     return(structure(rowIndices,
                      .Label=as.factor(labels[rowIndices])))
 }

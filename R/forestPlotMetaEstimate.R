@@ -32,19 +32,21 @@ forestPlotMetaEstimate <- function(validationStats, cohorts, stat, isSummary,
     }
     # Subset of cohorts to plot
     whichCohorts <- which(allCohorts %in% cohorts)
-    keepCohorts <- c(cohorts, 'seqCohorts', 'arrayCohorts', 'allCohorts')
+    keepCohorts <- c(cohorts, 'Sequencing', 'Microarray', 'Overall')
 
     # Extract necessary statistics for plotting
     validationStatsDF <- validationStats[[stat]][keepCohorts, ]
+    validationStatsDF <- rbind(rep(NA, ncol(validationStatsDF)),
+                               validationStatsDF)
     PCOSPscoreList <- validationStats$PCOSPscores[whichCohorts]
     isSeq <- validationStats$isSequencing[whichCohorts]
-    isSummary <- isSummary[c(whichCohorts,
-                           length(isSummary)-2, length(isSummary)-1, length(isSummary))]
+    isSummary <- c(TRUE, isSummary[c(whichCohorts,
+                           length(isSummary)-2, length(isSummary)-1, length(isSummary))])
 
     # Construct the forest plot table
     labelText <- data.frame(
-        "cohort"=rownames(validationStatsDF),
-        "pvalue"=scientific(validationStatsDF$pval, 2)
+        "cohort"=c("Cohort", rownames(validationStatsDF)[-1]),
+        "pvalue"=c("Pvalue", scientific(validationStatsDF$pval[-1], 1))
     )
 
     # Extract box sizes
@@ -57,7 +59,7 @@ forestPlotMetaEstimate <- function(validationStats, cohorts, stat, isSummary,
 
     # Match correct plot function to call
     if(missing(...)) {
-        if (stat=="dIndex") {
+        if (stat == "dIndex") {
             plot <- .forestPlotDindex(labelText, validationStatsDF, isSeq,
                                       isSummary, boxSizes)
         } else if (stat=="cIndex") {
@@ -68,7 +70,7 @@ forestPlotMetaEstimate <- function(validationStats, cohorts, stat, isSummary,
         }
     # Allow user to specify custom parameters
     } else {
-        if (stat=="dIndex") {
+        if (stat == "dIndex") {
             plot <- .forestPlotDindex(labelText, validationStatsDF, isSeq,
                                       isSummary, boxSizes, ...)
         } else if (stat=="cIndex") {
@@ -142,27 +144,28 @@ forestPlotMetaEstimate <- function(validationStats, cohorts, stat, isSummary,
 .forestPlotCindex <- function(label, validationStatsDF, isSeq, isSummary, boxSizes,
                               ...) {
     if (!missing(...)) {
-        forestplot::forestplot(labelText,
+        plot <- grid.grabExpr(forestplot::forestplot(labelText,
                                validationStatsDF[, c("mean", "lower", "upper")],
-                               ...)
+                               ...))
     } else {
         # Set plot colouring functions
         # ##TODO:: Determine if there is a more readable way to write this?
-        .normFun <-  local({
+        normFun <- local({
             i = 0
-            boxClrs <- ifelse(isSummary, "orange", "blue")
-            lineClrs <- ifelse(isSummary, "orange", "blue")
+            isSeq=isSeq
+            b_clrs=ifelse(isSeq, "#FF7F00", "#1F78B4")
+            l_clrs=ifelse(isSeq, "#FF7F00", "#1F78B4")
             function(..., clr.line, clr.marker){
                 i <<- i + 1
-                fpDrawNormalCI(..., clr.line=lineClrs[i], clr.marker=boxClrs[i])
+                fpDrawNormalCI(..., clr.line = l_clrs[i], clr.marker = b_clrs[i])
             }
         })
-        .sumFun <- local({
+        sumFun <- local({
             i = 0
-            summaryClrs =c("orange", "blue", "grey")
+            s_clrs =c("#FF7F00","#1F78B4","grey57")
             function(..., col){
                 i <<- i + 1
-                fpDrawSummaryCI(..., col=summaryClrs[i])
+                fpDrawSummaryCI(...,col=s_clrs[i])
             }
         })
         # Make the plot

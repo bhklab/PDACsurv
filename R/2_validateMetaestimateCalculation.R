@@ -16,9 +16,9 @@
 #' validationStats <- validateMetaEstimateCalculation(validationCohorts, selectedModels,
 #'     seqCohorts=c("PCSI", "TCGA", "Kirby"), nthread=15)
 #'
-#' @param validationCohorts A named \code{list} of validation cohorts
+#' @param validationCohorts A named \code{list} of validation cohorts.
 #' @param selectedModels A \code{list} of selected models from the
-#'     `buildPCOSPmodels` function
+#'     `buildPCOSPmodels` function.
 #' @param seqCohorts A \code{character} vector specifying which cohorts
 #'     are from sequencing data. It is assumed that non-sequencing cohorts
 #'     are from micro-array cohorts.
@@ -87,7 +87,7 @@ validateMetaEstimateCalculation <- function(validationCohorts, selectedModels,
       "pval"=c(vapply(DindexList, function(x) x$p.value, FUN.VALUE=numeric(1)),
                vapply(list(sequencingStats, arrayStats, combinedStats),
                       function(x) x$pValue$dIndex, FUN.VALUE=numeric(1))),
-      row.names=c(names(DindexList), "seqCohorts", "arrayCohorts", "allCohorts")
+      row.names=c(names(DindexList), "Sequencing", "Microarray", "Overall")
     ),
     "cIndex"=data.frame(
       "mean"=c(vapply(concordanceIndexList, function(x) log2(x$c.index), FUN.VALUE=numeric(1)),
@@ -102,7 +102,7 @@ validateMetaEstimateCalculation <- function(validationCohorts, selectedModels,
       "pval"=c(vapply(concordanceIndexList, function(x) x$p.value, FUN.VALUE=numeric(1)),
                vapply(list(combinedStats, sequencingStats, arrayStats),
                       function(x) x$pValue$dIndex, FUN.VALUE=numeric(1))),
-      row.names=c(names(concordanceIndexList), "seqCohorts", "arrayCohorts", "allCohorts")
+      row.names=c(names(concordanceIndexList), "Sequencing", "Microarray", "Overall")
     ),
     "PCOSPscores"=PCOSPscoreList,
     "isSequencing"=isSeq

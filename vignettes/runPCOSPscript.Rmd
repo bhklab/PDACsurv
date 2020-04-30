@@ -42,9 +42,8 @@ selectedModels <- buildPCOSPmodels(trainingCohorts, numModels=1000, nthread=15)
 source(file.path("..", "R", "2_validateMetaestimateCalculation.R"))
 load(file.path("..", "data", "validationCohorts.rda"))
 
-
-validationStats <- validateMetaEstimateCalculation(validationCohorts, 
-                                                   selectedModels, 
+validationStats <- validateMetaEstimateCalculation(validationCohorts,
+                                                   selectedModels,
                                                    seqCohorts=c("PCSI", "TCGA", "Kirby"),
                                                    nthread=15)
 ```
@@ -60,5 +59,6 @@ forestPlotMetaEstimate(validationStats,
                        cohorts=cohorts,
                        stat="dIndex", 
                        isSummary=c(rep(FALSE, 12), rep(TRUE, 3)))
+
 ```
 
