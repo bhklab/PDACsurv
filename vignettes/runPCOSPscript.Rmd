@@ -22,7 +22,9 @@ library(reportROC)
 library(verification)
 library(grid)
 library(ggplot2)
+library(scales)
 library(BiocParallel)
+library(microbenchmark)
 
 source(file.path("..", "R", "1_buildPCOSPmodel.R"))
 source(file.path("..", "R", "utilities.R"))
@@ -47,15 +49,18 @@ source(file.path("..", "R", "2_validateMetaestimateCalculation.R"))
 load(file.path("..", "data", "validationCohorts.rda"))
 
 # Select the validation cohorts we want to includ
-include <- c("PCSI", "TCGA", "Kirby", "ICGC_arr", "UNC", "Chen", "OUH", 
+include <- c("TCGA", "PCSI", "Kirby", "ICGC_arr", "UNC", "Chen", "OUH", 
              "Zhang", "Winter", "Collisson")
 
 validationCohorts <- validationCohorts[include]
 
-validationStats <- calculateValidationStats(validationCohorts,
+system.time({
+        validationStats <- calculateValidationStats(validationCohorts,
                                             selectedModels,
                                             seqCohorts=c("PCSI", "TCGA", "Kirby"),
                                             nthread=15)
+})
+
 ```
 
 
@@ -63,9 +68,8 @@ validationStats <- calculateValidationStats(validationCohorts,
 source(file.path('..', 'R', 'forestPlotMetaEstimate.R'))
 
 forestPlotMetaEstimate(validationStats,
-                       #cohorts=cohorts,
-                       stat="dIndex", 
-                       isSummary=c(rep(FALSE, 12), rep(TRUE, 3)))
+                       stat="dIndex",
+                       isSummary=c(rep(FALSE, 10), rep(TRUE, 3)))
 
 ```
 

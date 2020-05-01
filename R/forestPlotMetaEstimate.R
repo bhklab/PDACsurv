@@ -22,26 +22,16 @@
 #' @importFrom grid unit grid.grabExpr grid.draw
 #' @importFrom ggplot2 ggsave
 #' @export
-forestPlotMetaEstimate <- function(validationStats, cohorts, stat, isSummary,
-                                   filePath, fileName, ...) {
-
-    # Get names of all cohorts
-    allCohorts <- names(validationStats$PCOSPscores)
-    if (missing(cohorts)) {
-        cohorts=allCohorts
-    }
-    # Subset of cohorts to plot
-    whichCohorts <- which(allCohorts %in% cohorts)
-    keepCohorts <- c(cohorts, 'Sequencing', 'Microarray', 'Overall')
+forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
+                                   fileName, ...) {
 
     # Extract necessary statistics for plotting
-    validationStatsDF <- validationStats[[stat]][keepCohorts, ]
+    validationStatsDF <- validationStats[[stat]]
     validationStatsDF <- rbind(rep(NA, ncol(validationStatsDF)),
                                validationStatsDF)
-    PCOSPscoreList <- validationStats$PCOSPscores[whichCohorts]
-    isSeq <- validationStats$isSequencing[whichCohorts]
-    isSummary <- c(TRUE, isSummary[c(whichCohorts,
-                           length(isSummary)-2, length(isSummary)-1, length(isSummary))])
+    PCOSPscoreList <- validationStats$PCOSPscores
+    isSeq <- validationStats$isSequencing
+    isSummary <- c(TRUE, isSummary)
 
     # Construct the forest plot table
     labelText <- data.frame(
@@ -52,7 +42,7 @@ forestPlotMetaEstimate <- function(validationStats, cohorts, stat, isSummary,
     # Extract box sizes
     lengthSeq <- length(unlist(PCOSPscoreList[isSeq]))
     lengthArray <- length(unlist(PCOSPscoreList[!isSeq]))
-    boxSizes <- c(vapply(PCOSPscoreList, function(score) length(unlist(score)),
+    boxSizes <- c(NA, vapply(PCOSPscoreList, function(score) length(unlist(score)),
                          FUN.VALUE=numeric(1)),
                   lengthSeq, lengthArray,
                   lengthSeq + lengthArray) / 1000
