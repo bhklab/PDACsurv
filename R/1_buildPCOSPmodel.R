@@ -26,7 +26,7 @@
 #'   exclude this the function will return the model object instead.
 #' @param nthread \code{integer} The number of threads to parallelize across
 #'
-#' @return \code{?} Either returns the model object or, is \code{saveDir} is
+#' @return \code{list} Either returns the model object or, is \code{saveDir} is
 #'   specified it saves to disk instead and return the path
 #'
 #' @section Warning: This function uses random numbers; remember to
@@ -76,12 +76,12 @@ buildPCOSPmodels <- function(trainingCohorts, numModels, nthread, saveDir) {
                                 .randomSampleIndex,
                                 labels=cohortMatrixGroups,
                                 groups=sort(unique(cohortMatrixGroups)))
-
+    system.time({
     trainedModels <- bplapply(trainingDataRowIdxs,
                               function(idx, data)
-                                  SWAP.Train.KTSP(t(data[idx, ]), levels(idx)),
+                                  SWAP.KTSP.Train(t(data[idx, ]), levels(idx)),
                               data=cohortMatrix)
-
+    })
 
     testingDataRowIdxs <- lapply(trainingDataRowIdxs,
                             function(idx, rowIdx, labels)

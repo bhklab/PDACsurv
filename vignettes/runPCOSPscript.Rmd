@@ -17,7 +17,6 @@ library(forestplot)
 library(pROC)
 library(survcomp)
 library(survival)
-args(SWAP.Train.KTSP)
 require(data.table)
 library(reportROC)
 library(verification)
@@ -34,8 +33,13 @@ source(file.path("..", "R", "estimatePCOSPscore.R"))
 ```{r train_models}
 load(file.path("..", "data", "trainingCohorts.rda"))
 
-set.seed(1987)
+# Set seed for calculation (using old R < 3.6 RNG)
+set.seed(1987, sample.kind="Rounding")
+
+# Build the models using the selected random seed
+system.time({
 selectedModels <- buildPCOSPmodels(trainingCohorts, numModels=1000, nthread=15)
+})
 ```
 
 ```{r calculate_stats}

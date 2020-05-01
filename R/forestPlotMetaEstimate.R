@@ -46,7 +46,7 @@ forestPlotMetaEstimate <- function(validationStats, cohorts, stat, isSummary,
     # Construct the forest plot table
     labelText <- data.frame(
         "cohort"=c("Cohort", rownames(validationStatsDF)[-1]),
-        "pvalue"=c("Pvalue", scientific(validationStatsDF$pval[-1], 1))
+        "pvalue"=c("Pvalue", scientific(validationStatsDF$pval[-1], 2))
     )
 
     # Extract box sizes
