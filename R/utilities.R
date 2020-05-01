@@ -161,7 +161,7 @@ extractAllCohorts <- function(cohortList, environment) {
 convertCohortToMatrix <- function(cohort) {
     cohortMatrix <-
         vapply(cohort[seq_len(nrow(cohort)), seq_len(ncol(cohort) - 2)],
-               function(x) as.numeric(x),
+               function(x) as.numeric.factor(x),
                FUN.VALUE=numeric(nrow(cohort))
         )
     rownames(cohortMatrix) <- rownames(cohort)
