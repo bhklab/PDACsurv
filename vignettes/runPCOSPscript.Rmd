@@ -9,6 +9,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Run the script
 
+## 1. Build the PCOSP model
+
 ```{r build_and_select_models}
 require(switchBox)
 library(vcdExtra)
@@ -44,6 +46,8 @@ selectedModels <- buildPCOSPmodels(trainingCohorts, numModels=1000, nthread=15)
 })
 ```
 
+## 2. Calcualte and Validate Meta-Estimate Statistics
+
 ```{r calculate_stats}
 source(file.path("..", "R", "2_validateMetaestimateCalculation.R"))
 load(file.path("..", "data", "validationCohorts.rda"))
@@ -53,6 +57,8 @@ include <- c("TCGA", "PCSI", "Kirby", "ICGC_arr", "UNC", "Chen", "OUH",
              "Zhang", "Winter", "Collisson")
 
 validationCohorts <- validationCohorts[include]
+names(validationCohorts) <- gsub("_arr", "-array", names(validationCohorts))
+
 
 system.time({
         validationStats <- calculateValidationStats(validationCohorts,
@@ -72,4 +78,8 @@ forestPlotMetaEstimate(validationStats,
                        isSummary=c(rep(FALSE, 10), rep(TRUE, 3)))
 
 ```
-
+```{r }
+forestPlotMetaEstimate(validationStats,
+                       stat="cIndex",
+                       isSummary=c(rep(FALSE, 10), rep(TRUE, 3)))
+```

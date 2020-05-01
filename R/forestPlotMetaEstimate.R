@@ -35,8 +35,8 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
 
     # Construct the forest plot table
     labelText <- data.frame(
-        "cohort"=c("Cohort", rownames(validationStatsDF)[-1]),
-        "pvalue"=c("Pvalue", scientific(validationStatsDF$pval[-1], 2))
+        "cohort"=c("Cohorts", rownames(validationStatsDF)[-1]),
+        "pvalue"=c("P value", scientific(validationStatsDF$pval[-1], 2))
     )
 
     # Extract box sizes
@@ -84,9 +84,9 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
                               ...) {
 
     if (!missing(...)) {
-        forestplot::forestplot(labelText,
+        plot <- grid.grabExpr(forestplot::forestplot(labelText,
                                validationStatsDF[, c("mean", "lower", "upper")],
-                               ...)
+                               ...))
     } else {
         # Set plot colouring functions
         # ##TODO:: Determine if there is a more readable way to write this?
@@ -121,20 +121,21 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
                                col=fpColors(box="black"),
                                title=" ",
                                new_page=FALSE,
-                               fn.ci_norm=normFun, fn.ci_sum=sumFun,
+                               fn.ci_norm=normFun,
+                               fn.ci_sum=sumFun,
                                zero=0,
                                graphwidth=unit(2, "inches"),
                                align=c("l"),
                                pch=16,
                                boxsize=boxSizes + 0.2))
-        return(plot)
     }
+    return(plot)
 }
 
-.forestPlotCindex <- function(label, validationStatsDF, isSeq, isSummary, boxSizes,
+.forestPlotCindex <- function(labelText, validationStatsDF, isSeq, isSummary, boxSizes,
                               ...) {
     if (!missing(...)) {
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+       plot <- grid.grabExpr(forestplot::forestplot(labelText,
                                validationStatsDF[, c("mean", "lower", "upper")],
                                ...))
     } else {
@@ -160,24 +161,24 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
         })
         # Make the plot
         plot <- grid.grabExpr(forestplot::forestplot(labelText,
-                               validationStatsDF[, c("mean", "lower", "upper")],
-                               xlab="Log2 HR",
-                               is.summary=isSummary,
-                               clip=c(-1, 1.25),
-                               txt_gp=fpTxtGp(label=gpar(fontfamily="Helvetica"),
-                                              ticks=gpar(cex=0.8),
-                                              xlab=gpar(fontfamily="Helvetica",
-                                                        cex=1)),
-                               col=fpColors(text="black"),
-                               title=" ",
-                               new_page=FALSE,
-                               fun.ci_norm=.normFun,
-                               fun.ci_sum=.sumFun,
-                               zero=0,
-                               graphwidth=unit(2, "inches"),
-                               align=c("l"),
-                               pch=16,
-                               boxsize=boxSizes + 0.2))
-        return(plot)
+                                                     validationStatsDF[, c("mean", "lower", "upper")],
+                                                     xlab="C-index",
+                                                     is.summary=isSummary,
+                                                     clip=c(0.3, 0.8),
+                                                     txt_gp=fpTxtGp(label=gpar(fontfamily="Helvetica"),
+                                                                    ticks=gpar(cex=0.9),
+                                                                    xlab=gpar(fontfamily="Helvetica",
+                                                                              cex=1)),
+                                                     col=fpColors(box="black"),
+                                                     title=" ",
+                                                     new_page=FALSE,
+                                                     fn.ci_norm=normFun,
+                                                     fn.ci_sum=sumFun,
+                                                     zero=0.5,
+                                                     graphwidth=unit(2, "inches"),
+                                                     align=c("l"),
+                                                     pch=16,
+                                                     boxsize=boxSizes + 0.2))
     }
+    return(plot)
 }

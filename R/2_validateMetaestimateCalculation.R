@@ -38,7 +38,6 @@
 #' @importFrom pROC roc
 #' @importFrom verification roc.area
 #' @export
-##FIXME:: This should be called predictMetaEstimates
 calculateValidationStats <- function(validationCohorts, selectedModels, seqCohorts,
                                 nthread, saveDir) {
 
@@ -88,18 +87,18 @@ calculateValidationStats <- function(validationCohorts, selectedModels, seqCohor
       row.names=c(names(DindexList), "Sequencing", "Microarray", "Overall")
     ),
     "cIndex"=data.frame(
-      "mean"=c(vapply(concordanceIndexList, function(x) log2(x$c.index), FUN.VALUE=numeric(1)),
+      "mean"=c(vapply(concordanceIndexList, function(x) x$c.index, FUN.VALUE=numeric(1)),
                vapply(list(sequencingStats, arrayStats, combinedStats),
-                      function(x) log2(x$metaEstimate$dIndex$estimate), FUN.VALUE=numeric(1))),
-      "lower"=c(vapply(concordanceIndexList, function(x) log2(x$lower), FUN.VALUE=numeric(1)),
+                      function(x) x$metaEstimate$cIndex$estimate, FUN.VALUE=numeric(1))),
+      "lower"=c(vapply(concordanceIndexList, function(x) x$lower, FUN.VALUE=numeric(1)),
                 vapply(list(sequencingStats, arrayStats, combinedStats),
-                       function(x) log2(x$lowerTail$dIndex), FUN.VALUE=numeric(1))),
-      "upper"=c(vapply(concordanceIndexList, function(x) log2(x$upper), FUN.VALUE=numeric(1)),
+                       function(x) x$lowerTail$cIndex, FUN.VALUE=numeric(1))),
+      "upper"=c(vapply(concordanceIndexList, function(x) x$upper, FUN.VALUE=numeric(1)),
                 vapply(list(sequencingStats, arrayStats, combinedStats),
-                       function(x) log2(x$upperTail$dIndex), FUN.VALUE=numeric(1))),
+                       function(x) x$upperTail$cIndex, FUN.VALUE=numeric(1))),
       "pval"=c(vapply(concordanceIndexList, function(x) x$p.value, FUN.VALUE=numeric(1)),
                vapply(list(sequencingStats, arrayStats, combinedStats),
-                      function(x) x$pValue$dIndex, FUN.VALUE=numeric(1))),
+                      function(x) x$pValue$cIndex, FUN.VALUE=numeric(1))),
       row.names=c(names(concordanceIndexList), "Sequencing", "Microarray", "Overall")
     ),
     "PCOSPscores"=PCOSPscoreList,
@@ -269,23 +268,6 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
   zipped <- lapply(zipped, function(stat) structure(stat, .Names=sublistNames))
   return(zipped)
 }
-
-
-#' Draw a ROC curve using statistics calculated in validation metaestimate
-#'
-#'
-#'
-#'
-rocCurveMetaestimate <- function(validationStats, validationCohorots) {
-  formattedValCohorts <- formatValidationCohorts(validationCohorts)
-
-  ## Extract matrices from the cohort list
-  cohortMatrixList <- lapply(formattedValCohorts, function(cohort) cohort$mat)
-  ##TODO:: This is not used here, do we need it?
-  cohortGroupList <- lapply(formattedValCohorts, function(cohort) cohort$grp)
-}
-
-
 
 
 
