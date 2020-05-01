@@ -39,9 +39,8 @@
 #' @importFrom verification roc.area
 #' @export
 ##FIXME:: This should be called predictMetaEstimates
-validateMetaEstimateCalculation <- function(validationCohorts, selectedModels,
-                                            seqCohorts,
-                                            nthread, saveDir) {
+calculateValidationStats <- function(validationCohorts, selectedModels, seqCohorts,
+                                nthread, saveDir) {
 
   PCOSPscoreList <- calculatePCOSPscores(validationCohorts, selectedModels, nthread)
 
@@ -55,22 +54,21 @@ validateMetaEstimateCalculation <- function(validationCohorts, selectedModels,
   ## Calculating meta-estimates of D-index and Concordance index
 
   ##  Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR OVERALL DATA
-  combinedStats <- metaEstimateStats(validationCohorts,
-                                     DindexList,
-                                     concordanceIndexList)
+  combinedStats <- metaEstimateStats(DindexList, concordanceIndexList,
+                                     hetero=TRUE)
 
   ## Determine which cohorts are from sequencing data
   isSeq <- names(validationCohorts) %in% seqCohorts
 
   ## Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR sequencing cohort
-  sequencingStats <- metaEstimateStats(validationCohorts[isSeq],
-                                       DindexList[isSeq],
-                                       concordanceIndexList[isSeq])
+  sequencingStats <- metaEstimateStats(DindexList[isSeq],
+                                       concordanceIndexList[isSeq],
+                                       hetero=FALSE)
 
   ## Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR microarray cohort
-  arrayStats <- metaEstimateStats(validationCohorts[!isSeq],
-                                  DindexList[!isSeq],
-                                  concordanceIndexList[!isSeq])
+  arrayStats <- metaEstimateStats(DindexList[!isSeq],
+                                  concordanceIndexList[!isSeq],
+                                  hetero=FALSE)
 
   # Extract statistics for Dindex and concordanceIndex into a list of data.frames
   list(
@@ -145,10 +143,10 @@ calculatePCOSPscores <- function(validationCohorts, selectedModels, nthread) {
 #'
 #'
 #'
-metaEstimateStats <- function(validationCohorts, DindexList, concordanceIndexList) {
-  DindexMetaEstimate <- .metaEstimateDindex(DindexList)
+metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
+  DindexMetaEstimate <- .metaEstimateDindex(DindexList, hetero)
   concordanceIndexMetaEstimate <-
-    .metaEstimateConcordanceIndex(concordanceIndexList)
+    .metaEstimateConcordanceIndex(concordanceIndexList, hetero)
   stats <- .zipLists(DindexMetaEstimate,
                      concordanceIndexMetaEstimate,
                      sublistNames=c("dIndex", "cIndex"))
@@ -198,14 +196,14 @@ metaEstimateStats <- function(validationCohorts, DindexList, concordanceIndexLis
 #'
 #'
 #' @importFrom survcomp combine.est
-.metaEstimateDindex <- function(DindexList) {
+.metaEstimateDindex <- function(DindexList, hetero) {
 
   Dindexes <- vapply(DindexList, function(cohort) cohort$d.index,
                      FUN.VALUE=numeric(1))
   DindexSEs <- vapply(DindexList, function(cohort) cohort$se,
                       FUN.VALUE=numeric(1))
 
-  DindexMetaEstimate <- combine.est(Dindexes, DindexSEs, na.rm=TRUE, hetero=TRUE)
+  DindexMetaEstimate <- combine.est(Dindexes, DindexSEs, na.rm=TRUE, hetero=hetero)
 
   ##TODO:: Define a metaestimate S4 object? Can then dispatch plots on it
   return(list(
@@ -223,14 +221,14 @@ metaEstimateStats <- function(validationCohorts, DindexList, concordanceIndexLis
 #' Meta-estimate the concordance index for
 #'
 #' @importFrom survcomp concordance.index
-.metaEstimateConcordanceIndex <- function(concordanceIndexList) {
+.metaEstimateConcordanceIndex <- function(concordanceIndexList, hetero) {
 
   conIndexes <- vapply(concordanceIndexList, function(cohort) cohort$c.index,
                      FUN.VALUE=numeric(1))
   conIndexSEs <- vapply(concordanceIndexList, function(cohort) cohort$se,
                       FUN.VALUE=numeric(1))
 
-  conIndexMetaEstimate <- combine.est(conIndexes, conIndexSEs, na.rm=TRUE, hetero=TRUE)
+  conIndexMetaEstimate <- combine.est(conIndexes, conIndexSEs, na.rm=TRUE, hetero=hetero)
 
   ##TODO:: Define a metaestimate S4 object? Can then dispatch plots on it
   return(list(
