@@ -42,7 +42,7 @@ buildRandomLabelShufflingModel <- function(trainingCohorts, numModels, nthread,
   # Save to disk or return
   if (!missing(saveDir)) {
     saveRDS(selectedModels,
-            file=paste0(file.path(saveDir, 'PCOSPmodels'), '.rds'))
+            file=paste0(file.path(saveDir, 'RLSmodels'), '.rds'))
     return(paste0('Saved model to ', saveDir))
   } else {
     return(selectedModels)
@@ -65,41 +65,44 @@ buildRandomLabelShufflingModel <- function(trainingCohorts, numModels, nthread,
                               data=cohortMatrix)
   })
 
-  testingDataRowIdxs <- lapply(trainingDataRowIdxs,
-                               function(idx, rowIdx, labels)
-                                 structure(setdiff(rowIdx, idx),
-                                           .Label=as.factor(
-                                             labels[setdiff(rowIdx, idx)])),
-                               rowIdx=seq_len(nrow(cohortMatrix)),
-                               labels=cohortMatrixGroups)
+  selectedModels <- trainedModels
 
-
-  predictions <- bplapply(seq_along(testingDataRowIdxs),
-                          function(i, testIdxs, data, models)
-                            SWAP.KTSP.Classify(t(data[testIdxs[[i]], ]),
-                                               models[[i]]),
-                          testIdxs=testingDataRowIdxs,
-                          data=cohortMatrix,
-                          models=trainedModels
-  )
-
-
-  confusionMatrices <- bplapply(seq_along(predictions),
-                                function(i, predictions, labels)
-                                  confusionMatrix(predictions[[i]],
-                                                  levels(labels[[i]]),
-                                                  mode="prec_recall"),
-                                predictions=predictions,
-                                labels=testingDataRowIdxs
-  )
-
-  modelStats <- bplapply(confusionMatrices,
-                         function(confMat) confMat$byClass)
-
-  balancedAcc <- unlist(bplapply(modelStats,
-                                 function(model) model[c('Balanced Accuracy')]))
-
-  selectedModels <- trainedModels[which(balancedAcc > 0.60)]
+  ## TODO:: Do we not need any of this?
+  # testingDataRowIdxs <- lapply(trainingDataRowIdxs,
+  #                              function(idx, rowIdx, labels)
+  #                                structure(setdiff(rowIdx, idx),
+  #                                          .Label=as.factor(
+  #                                            labels[setdiff(rowIdx, idx)])),
+  #                              rowIdx=seq_len(nrow(cohortMatrix)),
+  #                              labels=cohortMatrixGroups)
+  #
+  #
+  # predictions <- bplapply(seq_along(testingDataRowIdxs),
+  #                         function(i, testIdxs, data, models)
+  #                           SWAP.KTSP.Classify(t(data[testIdxs[[i]], ]),
+  #                                              models[[i]]),
+  #                         testIdxs=testingDataRowIdxs,
+  #                         data=cohortMatrix,
+  #                         models=trainedModels
+  # )
+  #
+  #
+  # confusionMatrices <- bplapply(seq_along(predictions),
+  #                               function(i, predictions, labels)
+  #                                 confusionMatrix(predictions[[i]],
+  #                                                 levels(labels[[i]]),
+  #                                                 mode="prec_recall"),
+  #                               predictions=predictions,
+  #                               labels=testingDataRowIdxs
+  # )
+  #
+  # modelStats <- bplapply(confusionMatrices,
+  #                        function(confMat) confMat$byClass)
+  #
+  # balancedAcc <- unlist(bplapply(modelStats,
+  #                                function(model) model[c('Balanced Accuracy')]))
+  #
+  # selectedModels <- trainedModels[which(balancedAcc > 0.60)]
   return(selectedModels)
 }
 

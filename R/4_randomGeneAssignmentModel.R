@@ -1,74 +1,146 @@
-#' Fit a random gene assignment model?
+#' Build PCOSP models with the group labels randomly shuffled
 #'
-##TODO:: HEEWON - documentation
+## TODO:: HEEWON Document this function
 #'
-#' @examples
-#' data(training_cohorts)
-#' randomGeneAssignmentModel(training_cohorts)
+#' @param trainingCohorts A named \code{list} of training cohorts for which
+#'   to fit and select PCOSP models.
+#' @param saveDir \code{character} A path to a directory to save the model. If you
+#'   exclude this the function will return the model object instead.
+#' @param nthread \code{integer} The number of threads to parallelize across
 #'
-#' @param data A \code{} containing stuff
-#' @param saveDir A \code{character} vector containing the path to the desired
-#'   save directory
+#' @return \code{list} Either returns the model object or, is \code{saveDir} is
+#'   specified it saves to disk instead and return the path
 #'
-#' @return A \code{}
+#' @section Warning: This function uses random numbers; remember to
+#'   \code{set.seed()} before running to ensure reproducible results
 #'
-#' @importFrom switchBox SWAP.KTSP.Classify
-#' @importFrom reportROC reportROC
 #' @export
-randomGeneAssignmentModel <- function(data, saveDir) {
+buildRandomGeneAssignmentModels <- function(trainingCohorts, numModels, nthread,
+                                           saveDir) {
 
-  icgc_seq_cohort <- data$icgc_seq_cohort
-  icgc_array_cohort <- data$icgc_array_cohort
+  # Set number of threads to parallelize over
+  if (!missing(nthread)) {
+    ops <- options()
+    options("mc.cores"=nthread)
+    on.exit(options(ops))
+  }
 
-  # Excluding samples censored before 1-yr ----------------------------------
-  merge_common <- mergeCommonData(icgc_seq_cohort,
-                                  icgc_array_cohort)
+  # Extract cohorts from trainingCohorts
+  seqCohort <- trainingCohorts$icgc_seq_cohort
+  arrayCohort <- trainingCohorts$icgc_array_cohort
 
-  # Training the model on ICGC seq/array common samples cohort --------------
+  # Merged common ICGC seq and array trainingCohorts
+  commonData <- mergeCommonData(seqCohort, arrayCohort)
 
-  # Generating 1000 random models by re-shuffling the labels
-  random_gene_model <- reshuffleRandomModels(merge_common)
+  # Training the model on ICGC seq/array common samples cohort
+  cohortMatrix <- convertCohortToMatrix(commonData)
+  cohortMatrixGroups <- ifelse(as.numeric.factor(commonData$OS) >= 365, 1, 0)
 
+  selectedModels <- .generateRGAmodels(cohortMatrix, cohortMatrixGroups,
+                                       numModels)
+
+  # Save to disk or return
   if (!missing(saveDir)) {
-    saveRDS(random_gene_model,
-            file=file.path(saveDir, 'randomGeneModel.rds'),
-            compress='bzip2')
+    saveRDS(selectedModels,
+            file=paste0(file.path(saveDir, 'RGAmodels'), '.rds'))
+    return(paste0('Saved model to ', saveDir))
+  } else {
+    return(selectedModels)
   }
+}
 
-  # Predicting probabliliets using random model for all the validation cohorts
+##TODO:: See if we can refactor part of this to be reused in reshuffleRandomModels
+#' @importFrom caret confusionMatrix
+#' @importFrom switchBox SWAP.KTSP.Train
+.generateRGAmodels <- function(cohortMatrix, cohortMatrixGroups, numModels) {
 
-  validationCohorts <- formatValidationCohorts(PDCAexpressionData)
+  trainingDataRowIdxs <- lapply(rep(40, numModels),
+                                .randomSampleIndexShuffle,
+                                labels=cohortMatrixGroups,
+                                groups=sort(unique(cohortMatrixGroups)))
+  system.time({
+    trainedModels <- bplapply(trainingDataRowIdxs,
+                              function(idx, data)
+                                SWAP.KTSP.Train(t(data[idx, ]), levels(idx)),
+                              data=cohortMatrix)
+  })
 
-  ktspPredictionList <-
+  geneNames <- colnames(cohortMatrix)
+  numGenes <- vapply(trainedModels, function(m) nrow(m$TSPs), FUN.VALUE=numeric(1))
 
-  pcsi_list=predict_ktsp(pcsi_mat, pcsi_grp)
-  chen_list=predict_ktsp(chen_mat, chen_grp)
-  kirby_list=predict_ktsp(kirby_mat, kirby_grp)
-  collisson_list=predict_ktsp(collisson_mat, collisson_grp)
-  ouh_list=predict_ktsp(ouh_mat, ouh_grp)
-  winter_list=predict_ktsp(winter_mat, winter_grp)
-  tcga_list=predict_ktsp(tcga_mat, tcga_grp)
-  unc_list=predict_ktsp(unc_mat, unc_grp)
-  zhang_list=predict_ktsp(zhang_mat, zhang_grp)
-  icgc_arr_list=predict_ktsp(icgc_array_mat,icgc_array_grp )
+  RGAmodels <- lapply(seq_along(trainedModels),
+                               function(idx, models, n, genes) {
+                                  models[[idx]]$TSPs[, 1] <- sample(geneNames, n[idx])
+                                  models[[idx]]$TSPs[, 2] <- sample(geneNames, n[idx])
+                                  return(models[[idx]])
+                               },
+                               models=trainedModels,
+                               n=numGenes,
+                               genes=geneNames)
 
-  ###################### Calculating meta-estimates for all the 1000 models using all the cohorts
+  ##TODO:: Do we need this? Not selecting models based on balanced accuray?
+  # testingDataRowIdxs <- lapply(trainingDataRowIdxs,
+  #                              function(idx, rowIdx, labels)
+  #                                structure(setdiff(rowIdx, idx),
+  #                                          .Label=as.factor(
+  #                                            labels[setdiff(rowIdx, idx)])),
+  #                              rowIdx=seq_len(nrow(cohortMatrix)),
+  #                              labels=cohortMatrixGroups)
+  #
+  #
+  # predictions <- bplapply(seq_along(testingDataRowIdxs),
+  #                         function(i, testIdxs, data, models)
+  #                           SWAP.KTSP.Classify(t(data[testIdxs[[i]], ]),
+  #                                              models[[i]]),
+  #                         testIdxs=testingDataRowIdxs,
+  #                         data=cohortMatrix,
+  #                         models=trainedModels
+  # )
+  #
+  #
+  # confusionMatrices <- bplapply(seq_along(predictions),
+  #                               function(i, predictions, labels)
+  #                                 confusionMatrix(predictions[[i]],
+  #                                                 levels(labels[[i]]),
+  #                                                 mode="prec_recall"),
+  #                               predictions=predictions,
+  #                               labels=testingDataRowIdxs
+  # )
+  #
+  # modelStats <- bplapply(confusionMatrices,
+  #                        function(confMat) confMat$byClass)
+  #
+  # balancedAcc <- unlist(bplapply(modelStats,
+  #                                function(model) model[c('Balanced Accuracy')]))
+  #
+  # selectedModels <- trainedModels[which(balancedAcc > 0.60)]
 
-  meta_auc=list()
-  seq_auc=list()
-  microarray_auc=list()
+  return(RGAmodels)
+}
 
-  for( i in 1:1000){
-    meta_auc[[i]] = combine.est(c(pcsi_list[[2]][i],
-                                  tcga_list[[2]][i],
-                                  unc_list[[2]][i],
-                                  zhang_list[[2]][i],
-                                  winter_list[[2]][i],
-                                  ouh_list[[2]][i],
-                                  icgc_arr_list[[2]][i], chen_list[[2]][i], kirby_list[[2]][i], collisson_list[[2]][i]), c( pcsi_list[[3]][i], tcga_list[[3]][i], unc_list[[3]][i], zhang_list[[3]][i], winter_list[[3]][i], ouh_list[[3]][i],icgc_arr_list[[3]][i], chen_list[[3]][i], kirby_list[[3]][i], collisson_list[[3]][i]),na.rm=TRUE)$estimate
-    seq_auc[[i]] = combine.est(c(pcsi_list[[2]][i], tcga_list[[2]][i], kirby_list[[2]][i]), c( pcsi_list[[3]][i], tcga_list[[3]][i],kirby_list[[3]][i]),na.rm=TRUE)$estimate
-    microarray_auc[[i]] = combine.est(c( unc_list[[2]][i], zhang_list[[2]][i],winter_list[[2]][i], ouh_list[[2]][i],icgc_arr_list[[2]][i], chen_list[[2]][i], collisson_list[[2]][i]), c( unc_list[[3]][i], zhang_list[[3]][i], winter_list[[3]][i], ouh_list[[3]][i],icgc_arr_list[[3]][i], chen_list[[3]][i], collisson_list[[3]][i]),na.rm=TRUE)$estimate
+#'
+#'
+#'
+#'
+#'
+buildRGAmodels <- function(cohortMatrix, cohortMatrixGroups, numModels) {
+  randomGeneModels <- lapply(rep(40, numModels),
+                             .fitRGAModel,
+                             data=cohortMatrix,
+                             labels=cohortMatrixGroups
+  )
+  return(randomGeneModels)
+}
 
-  }
-
+.fitRGAModel <- function(n, data, labels) {
+  idx <- unlist(mapply(function(grp, labs) sample(which(labs == grp), n, replace=FALSE),
+                       grp=sort(unique(labels)),
+                       MoreArgs=list(labs=labels),
+                       SIMPLIFY=FALSE))
+  data <- data[idx, ]
+  labels <- labels[idx]
+  model <- SWAP.KTSP.Train(t(data), as.factor(labels))
+  model$TSPs <- cbind(sample(colnames(data), nrow(model$TSPs)),
+                      sample(colnames(data), nrow(model$TSPs)))
+  return(model)
 }

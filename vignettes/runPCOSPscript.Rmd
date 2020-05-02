@@ -34,9 +34,11 @@ source(file.path("..", "R", "formatValidationCohorts.R"))
 source(file.path("..", "R", "estimatePCOSPscore.R"))
 ```
 
-```{r train_models}
+```{r load_data}
 load(file.path("..", "data", "trainingCohorts.rda"))
+```
 
+```{r train_model}
 # Set seed for calculation (using old R < 3.6 RNG)
 set.seed(1987, sample.kind="Rounding")
 
@@ -112,5 +114,15 @@ system.time({
     randomLabelModels <- buildRandomLabelShufflingModel(trainingCohorts, 
                                                     numModels=1000, nthread=15)
 })
+```
 
+
+```{r 4_random_gene_assignment_models}
+source(file.path("..", "R", "4_randomGeneAssignmentModel.R"))
+set.seed(1987, sample.kind="Rounding")
+
+system.time({
+    randomGeneModels <- buildRandomGeneAssignmentModel(trainingCohorts, 
+                                                    numModels=1000, nthread=15)
+})
 ```
