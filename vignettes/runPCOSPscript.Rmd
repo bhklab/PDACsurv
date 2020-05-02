@@ -93,3 +93,25 @@ aucStats <- aucMetaEstimates(validationCohorts, validationStats,
                             seqCohorts=seqCohorts)
 ```
 
+```{r plot_ROC_curve}
+source(file.path("..", "R", "plotROCcurves.R"))
+
+formattedValCohorts <- formatValidationCohorts(validationCohorts)
+PCOSPscores <- .extractPCOSPscores(validationStats)
+colours <- c("chartreuse3", "magenta", "#fb9a99", "turquoise3", "darkgoldenrod1",
+             "wheat4", "green", "red", "cornflowerblue", "mediumorchid2")
+
+plotROCcurves(formattedValCohorts, PCOSPscores, colours)
+```
+
+```{r 3_model_random_label_shuffling}
+source(file.path("..", "R", "3_modelRandomLabelShuffling.R"))
+set.seed(1987, sample.kind="Rounding")
+
+system.time({
+    randomLabelModels <- buildRandomLabelShufflingModel(trainingCohorts, 
+                                                    numModels=1000, nthread=15)
+})
+
+
+```

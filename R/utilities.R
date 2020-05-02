@@ -42,6 +42,15 @@ mergeCommonData <- function(seqCohort, arrayCohort) {
     )
 }
 
+#'
+#'
+#'
+.extractPCOSPscores <- function(validationStats) {
+    return(structure(lapply(validationStats$PCOSPscores,
+                            function(cohort) cohort$predicted_probabilities),
+                     .Names=names(validationStats$PCOSPscores)))
+}
+
 #' Reshuffle to create 1000 random gene models
 #'
 #' Take in a \code{data.frame} of merged cohorts and generate 1000 random
