@@ -56,19 +56,21 @@ load(file.path("..", "data", "validationCohorts.rda"))
 include <- c("TCGA", "PCSI", "Kirby", "ICGC_arr", "UNC", "Chen", "OUH", 
              "Zhang", "Winter", "Collisson")
 
+#
 validationCohorts <- validationCohorts[include]
 names(validationCohorts) <- gsub("_arr", "-array", names(validationCohorts))
 
+# 
+seqCohorts <- c("PCSI", "TCGA", "Kirby")
 
 system.time({
         validationStats <- calculateValidationStats(validationCohorts,
                                             selectedModels,
-                                            seqCohorts=c("PCSI", "TCGA", "Kirby"),
+                                            seqCohorts=seqCohorts,
                                             nthread=15)
 })
 
 ```
-
 
 ```{r forest_plots}
 source(file.path('..', 'R', 'forestPlotMetaEstimate.R'))
@@ -83,3 +85,11 @@ forestPlotMetaEstimate(validationStats,
                        stat="cIndex",
                        isSummary=c(rep(FALSE, 10), rep(TRUE, 3)))
 ```
+
+```{r}
+source(file.path("..", "R", "aucMetaEstimates.R"))
+
+aucStats <- aucMetaEstimates(validationCohorts, validationStats, 
+                            seqCohorts=seqCohorts)
+```
+

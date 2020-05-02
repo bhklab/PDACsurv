@@ -47,13 +47,13 @@ formatValidationCohorts <- function(validationCohorts, environment) {
       assign(paste0(names(validationCohorts)[i], '_grp'),
              cohort_group,
              envir=environment)
-      assign(paste0(names(validationCohorts)[i], '_idx'),
+      assign(paste0(names(validationCohorts)[i], '_grpIndex'),
              cohort_group,
              envir=environment)
     } else {
       cohortList[[i]] <- list("mat"=cohort_mat,
                               "grp"=cohort_group,
-                              ""=)
+                              "grpIndex"=cohort_group_labels)
     }
   }
 
