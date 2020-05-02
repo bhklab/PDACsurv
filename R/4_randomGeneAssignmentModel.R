@@ -72,22 +72,3 @@ randomGeneAssignmentModel <- function(data, saveDir) {
   }
 
 }
-
-.predict_ktsp <- function(list){
-  val_pred <- list()
-  val_pred_freq<- list()
-  auc=vector()
-  auc_se=vector()
-
-  for(i in 1: length(random_gene_model) ){
-    val_pred[[i]] <- SWAP.KTSP.Classify(t(val_mat), random_gene_model[[i]])
-
-    a <- reportROC(val_grp, as.numeric(as.character(val_pred[[i]])),plot = FALSE)
-    auc[i]=a$AUC
-    auc_se[i]=a$AUC.SE
-
-  }
-
-  ret_list=list(val_pred, auc, auc_se)
-  return(ret_list)
-}
