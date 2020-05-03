@@ -58,20 +58,22 @@ load(file.path("..", "data", "validationCohorts.rda"))
 include <- c("TCGA", "PCSI", "Kirby", "ICGC_arr", "UNC", "Chen", "OUH", 
              "Zhang", "Winter", "Collisson")
 
-#
+# Subset to selected cohorts
 validationCohorts <- validationCohorts[include]
+
+# Fix names to look nice
 names(validationCohorts) <- gsub("_arr", "-array", names(validationCohorts))
 
-# 
+# Identify which cohorts contain sequencing data
 seqCohorts <- c("PCSI", "TCGA", "Kirby")
 
+# Calculate your validation statistics
 system.time({
         validationStats <- calculateValidationStats(validationCohorts,
                                             selectedModels,
                                             seqCohorts=seqCohorts,
                                             nthread=15)
 })
-
 ```
 
 ```{r forest_plots}
@@ -82,7 +84,9 @@ forestPlotMetaEstimate(validationStats,
                        isSummary=c(rep(FALSE, 10), rep(TRUE, 3)))
 
 ```
-```{r }
+
+
+```{r forest_plot_cIndex}
 forestPlotMetaEstimate(validationStats,
                        stat="cIndex",
                        isSummary=c(rep(FALSE, 10), rep(TRUE, 3)))
@@ -99,7 +103,7 @@ aucStats <- aucMetaEstimates(validationCohorts, validationStats,
 source(file.path("..", "R", "plotROCcurves.R"))
 
 formattedValCohorts <- formatValidationCohorts(validationCohorts)
-PCOSPscores <- .extractPCOSPscores(validationStats)
+PCOSPscores <- validationStats$PCOSPscores
 colours <- c("chartreuse3", "magenta", "#fb9a99", "turquoise3", "darkgoldenrod1",
              "wheat4", "green", "red", "cornflowerblue", "mediumorchid2")
 
@@ -116,13 +120,26 @@ system.time({
 })
 ```
 
+```{r density_plot}
+source(file.path("..", "R", "densityPlot.R"))
+
+densityPlotModel(formattedValCohorts, selectedModels=randomLabelModels, seqCohorts, 
+                 vlines=c(0.69, 0.72, 0.70), nthread=15)
+```
 
 ```{r 4_random_gene_assignment_models}
 source(file.path("..", "R", "4_randomGeneAssignmentModel.R"))
 set.seed(1987, sample.kind="Rounding")
 
+## These results will differ from the Code Ocean capsule due to sampling
+## For the original results use: buildRGAModels; this is not parallelized and
+##     as such will be slow
 system.time({
-    randomGeneModels <- buildRandomGeneAssignmentModel(trainingCohorts, 
+    randomGeneModels <- buildRandomGeneAssignmentModels(trainingCohorts, 
                                                     numModels=1000, nthread=15)
 })
+```
+
+```{r}
+
 ```

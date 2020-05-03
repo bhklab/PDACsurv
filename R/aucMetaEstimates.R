@@ -41,6 +41,7 @@ aucMetaEstimates <- function(validationCohorts, validationStats,
 #' @export
 AUCstats <- function(formattedValCohorts, PCOSPscores) {
 
+    suppressMessages(
     structure(lapply(seq_along(formattedValCohorts),
                      function(i, cohorts, scores)
                          list("AUC"=roc(cohorts[[i]]$grp,
@@ -53,7 +54,7 @@ AUCstats <- function(formattedValCohorts, PCOSPscores) {
                               ),
                    cohorts=formattedValCohorts,
                    scores=PCOSPscores),
-                   .Names=names(formattedValCohorts))
+                   .Names=names(formattedValCohorts)))
 }
 
 #' Generate a meta estimate of AUC for from a list of cohort statistics

@@ -111,7 +111,8 @@ calculateValidationStats <- function(validationCohorts, selectedModels, seqCohor
 #' @param validationCohorts A \code{list} of validation cohorts
 #' @param selectedModels A \code{list} of selected models, as returned by the
 #'   `buildPCOSPmodels` function.
-#' @param nthread
+#' @param nthread A \code{numeric} vector containing the integer number of threads
+#'     to a parallelize across.
 #'
 #' @return A \code{list} of PCOSP scores for each validation cohorot
 #'
@@ -120,21 +121,16 @@ calculatePCOSPscores <- function(validationCohorts, selectedModels, nthread) {
 
   formattedValCohorts <- formatValidationCohorts(validationCohorts)
 
-  # Temporily change number of cores to parallelize over
-  opts <- options()
-  options("mc.cores"=nthread)
-  on.exit(options(opts))
-
   ## Extract matrices from the cohort list
   cohortMatrixList <- lapply(formattedValCohorts, function(cohort) cohort$mat)
   ##TODO:: This is not used here, do we need it?
   cohortGroupList <- lapply(formattedValCohorts, function(cohort) cohort$grp)
 
   # Estimate PCOSP scores from cohort matrixes
-  PCOSPscoreList <- bplapply(cohortMatrixList,
-                             function(cohortMat, selectedModels)
-                               estimatePCOSPprob(cohortMat, selectedModels),
-                             selectedModels=selectedModels)
+  PCOSPscoreList <- lapply(cohortMatrixList,
+                           function(cohortMat, selectedModels, nthread)
+                             estimatePCOSPprob(cohortMat, selectedModels, nthread),
+                           selectedModels=selectedModels, nthread=nthread)
   return(PCOSPscoreList)
 }
 
@@ -161,7 +157,7 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
   structure(lapply(seq_along(PCOSPscoreList), function(i) {
     cohort <- validationCohorts[[i]]
     PCOSPscore <- PCOSPscoreList[[i]]
-    D.index(x=PCOSPscore$predicted_probabilities,
+    D.index(x=PCOSPscore,
             surv.time=as.numeric.factor(cohort$OS),
             surv.event=as.numeric.factor(cohort$OS_Status),
             na.rm=TRUE,
@@ -183,7 +179,7 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
   structure(lapply(seq_along(validationCohorts), function(i) {
     cohort <- validationCohorts[[i]]
     PCOSPscore <- PCOSPscoreList[[i]]
-    concordance.index(x=PCOSPscore$predicted_probabilities,
+    concordance.index(x=PCOSPscore,
             surv.time=as.numeric.factor(cohort$OS),
             surv.event=as.numeric.factor(cohort$OS_Status),
             method="noether")

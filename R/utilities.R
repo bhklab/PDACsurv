@@ -42,15 +42,6 @@ mergeCommonData <- function(seqCohort, arrayCohort) {
     )
 }
 
-#'
-#'
-#'
-.extractPCOSPscores <- function(validationStats) {
-    return(structure(lapply(validationStats$PCOSPscores,
-                            function(cohort) cohort$predicted_probabilities),
-                     .Names=names(validationStats$PCOSPscores)))
-}
-
 #' Extract all cohorts from a list of cohorts
 #'
 #' Input a named list of cohorts to be modelled and assign each cohort to an
@@ -103,23 +94,32 @@ convertCohortToMatrix <- function(cohort) {
 #'
 #' @importFrom switchBox SWAP.KTSP.Classify
 #' @importFrom pROC reportROC
-.predictKTSP <- function(formattedValCohort, selectedModels){
+.predictKTSP <- function(formattedValCohort, selectedModels, nthread){
 
-    predictions <- lapply(selectedModels,
-                          function(model, valMat) SWAP.KTSP.Classify(t(valMat), model),
-                          valMat=formattedValCohort$mat)
+    # Temporily change number of cores to parallelize over
+    opts <- options()
+    options("mc.cores"=nthread)
+    on.exit(options(opts))
 
-    aucReport <- lapply(predictions,
-                        function(pred) reportROC(group,
-                                                 as.numeric.factor(pred),
-                                                 plot=FALSE),
-                        group=formattedValCohort$grp)
+    grpIdx <- formattedValCohort$grpIndex
 
-    list(
+    predictions <- bplapply(selectedModels,
+                          function(model, valMat)
+                              SWAP.KTSP.Classify(t(valMat), model),
+                          valMat=formattedValCohort$mat[grpIdx,])
+
+    aucReports <- suppressMessages(lapply(predictions,
+                        function(pred, group)
+                            reportROC(group,
+                                      as.numeric.factor(pred),
+                                      plot=FALSE),
+                        group=formattedValCohort$grp))
+
+    return(list(
         "predictions"=predictions,
-        "AUCs"=aucReport$auc[1],
-        "aucSEs"=aucReport$AUC.SE
-    )
+        "AUCs"=vapply(aucReports, function(rep) as.numeric(rep$AUC), FUN.VALUE=numeric(1)),
+        "aucSEs"=vapply(aucReports, function(rep) as.numeric(rep$AUC.SE), FUN.VALUE=numeric(1))
+    ))
 }
 
 
