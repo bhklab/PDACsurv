@@ -16,7 +16,7 @@ aucMetaEstimates <- function(validationCohorts, validationStats,
 
     PCOSPscores <- structure(lapply(validationStats$PCOSPscores,
                                     function(cohort)
-                                        cohort$predicted_probabilities),
+                                        cohort),
                              .Names=names(validationStats$PCOSPscores))
 
     ## FIXME:: Can we ignore the wilcox.test ties warning?

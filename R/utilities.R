@@ -101,24 +101,25 @@ convertCohortToMatrix <- function(cohort) {
 #'
 #'
 #'
-#'
-.predict_ktsp <- function(list){
-    val_pred <- list()
-    val_pred_freq<- list()
-    auc=vector()
-    auc_se=vector()
+#' @importFrom switchBox SWAP.KTSP.Classify
+#' @importFrom pROC reportROC
+.predictKTSP <- function(formattedValCohort, selectedModels){
 
-    for(i in 1: length(random_gene_model) ){
-        val_pred[[i]] <- SWAP.KTSP.Classify(t(val_mat), random_gene_model[[i]])
+    predictions <- lapply(selectedModels,
+                          function(model, valMat) SWAP.KTSP.Classify(t(valMat), model),
+                          valMat=formattedValCohort$mat)
 
-        a <- reportROC(val_grp, as.numeric(as.character(val_pred[[i]])),plot = FALSE)
-        auc[i]=a$AUC
-        auc_se[i]=a$AUC.SE
+    aucReport <- lapply(predictions,
+                        function(pred) reportROC(group,
+                                                 as.numeric.factor(pred),
+                                                 plot=FALSE),
+                        group=formattedValCohort$grp)
 
-    }
-
-    ret_list=list(val_pred, auc, auc_se)
-    return(ret_list)
+    list(
+        "predictions"=predictions,
+        "AUCs"=aucReport$auc[1],
+        "aucSEs"=aucReport$AUC.SE
+    )
 }
 
 

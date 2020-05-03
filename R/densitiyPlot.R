@@ -1,26 +1,32 @@
+densityPlotModel <- function() {
 
-g=ggplot2.density(data=dd,
-                  xName='BAC',
-                  groupName='platforms',
-                  legendPosition="top",
-                  faceting=TRUE,
-                  facetingVarNames="platforms",
-                  removePanelGrid=TRUE,
-                  removePanelBorder=TRUE,
-                  showLegend=FALSE,
-                  backgroundColor="white",
-                  fillGroupDensity = TRUE,
-                  colorGroupDensityLine = TRUE,
-                  xTickLabelFont=c(6, "plain", "black"),
-                  yTickLabelFont=c(6, "plain", "black")) +
-    labs(x = "Balanced Accuracy", y="Density")+
-    ggtitle("Random reshuffling of labels") +
-    theme(plot.title = element_text(hjust = 0.5)) +
-    geom_vline(data=vline.dat,
-               aes(xintercept=v1,
-                   color= platforms),
-               linetype="dashed",
-               size=1.5)
+    .densityStats()
+
+    g=ggplot2.density(data=dd,
+                      xName='BAC',
+                      groupName='platforms',
+                      legendPosition="top",
+                      faceting=TRUE,
+                      facetingVarNames="platforms",
+                      removePanelGrid=TRUE,
+                      removePanelBorder=TRUE,
+                      showLegend=FALSE,
+                      backgroundColor="white",
+                      fillGroupDensity = TRUE,
+                      colorGroupDensityLine = TRUE,
+                      xTickLabelFont=c(6, "plain", "black"),
+                      yTickLabelFont=c(6, "plain", "black")) +
+        labs(x = "Balanced Accuracy", y="Density")+
+        ggtitle("Random reshuffling of labels") +
+        theme(plot.title = element_text(hjust = 0.5)) +
+        geom_vline(data=vline.dat,
+                   aes(xintercept=v1,
+                       color= platforms),
+                   linetype="dashed",
+                   size=1.5)
+}
+
+.densityStats()
 
 # easyGgplot2/R/ggplot2.densitity.R ---------------------------------------
 
