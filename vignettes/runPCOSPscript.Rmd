@@ -131,15 +131,75 @@ densityPlotModel(formattedValCohorts, selectedModels=randomLabelModels, seqCohor
 source(file.path("..", "R", "4_randomGeneAssignmentModel.R"))
 set.seed(1987, sample.kind="Rounding")
 
-## These results will differ from the Code Ocean capsule due to sampling
-## For the original results use: buildRGAModels; this is not parallelized and
-##     as such will be slow
+## These results will differ from the Code Ocean capsule due to sampling.
+## For the original results use: original = TRUE; this will be about 10x slower
+##     than the new method.
 system.time({
-    randomGeneModels <- buildRandomGeneAssignmentModels(trainingCohorts, 
-                                                    numModels=1000, nthread=15)
+    randomGeneModels1 <- buildRandomGeneAssignmentModels(trainingCohorts, 
+                                                         numModels=1000,
+                                                         nthread=15,
+                                                         original=FALSE)
 })
 ```
 
-```{r}
+```{r random_gene_assignment_density}
+densityPlotModel(formattedValCohorts, selectedModels=randomGeneModels1, seqCohorts, 
+                 vlines=c(0.69, 0.72, 0.70), nthread=15)
+```
+
+```{r hyper_gsea_models}
+source(file.path("..", "R", "5_hyperGSApathwayAnalysis.R"))
+
+dataDir <- file.path("..", "data")
+pathwayDataDir <- file.path(dataDir, "Pathway_db_files")
+referenceGenes <- read.table(file.path(pathwayDataDir, "reference_genes.txt"))[, 1]
+PCOSPgenes <- read.table(file.path(pathwayDataDir, "pcosp_genes.txt"))[, 1]
+
+GSCfiles <- c("hallmark.h.all.v6.1.symbols.gmt",
+              "canonical.c2.cp.v6.1.symbols.gmt",
+              "GOmolecular.c5.mf.v6.1.symbols.gmt",
+              "GOcellular.c5.cc.v6.1.symbols.gmt")
+
+GSCpaths <- vapply(GSCfiles, 
+                   function(file, pathwayDataDir) file.path(pathwayDataDir, file),
+                   pathwayDataDir,
+                   FUN.VALUE=character(1))
+
+results <- lapply(GSCpaths,
+                  function(filePath, PCOSPgenes, referenceGenes, adjMethod) 
+                      fitGSEAtoGeneSetCollection(filePath=filePath, 
+                                                 PCOSPgenes=PCOSPgenes, 
+                                                 referenceGenes=referenceGenes,
+                                                 adjMethod=adjMethod),
+                  PCOSPgenes=PCOSPgenes,
+                  referenceGenes=referenceGenes,
+                  adjMethod="fdr"
+                  )
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

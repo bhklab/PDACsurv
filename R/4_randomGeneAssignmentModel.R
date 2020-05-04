@@ -3,10 +3,15 @@
 ## TODO:: HEEWON Document this function
 #'
 #' @param trainingCohorts A named \code{list} of training cohorts for which
-#'   to fit and select PCOSP models.
+#'     to fit and select PCOSP models.
+#' @param numModels A code{numeric} vector with an integer number of models
+#'     to run.
 #' @param saveDir \code{character} A path to a directory to save the model. If you
 #'   exclude this the function will return the model object instead.
 #' @param nthread \code{integer} The number of threads to parallelize across
+#' @param original A \code{logical} vector, if true this function calls
+#'    the deprecated (and slow) function used in the original PCOSP paper.
+#'    This is inlcuded to ensure the paper is reproducible using this pacakge.
 #'
 #' @return \code{list} Either returns the model object or, is \code{saveDir} is
 #'   specified it saves to disk instead and return the path
@@ -16,7 +21,7 @@
 #'
 #' @export
 buildRandomGeneAssignmentModels <- function(trainingCohorts, numModels, nthread,
-                                           saveDir) {
+                                           saveDir, original) {
 
   # Set number of threads to parallelize over
   if (!missing(nthread)) {
@@ -36,8 +41,12 @@ buildRandomGeneAssignmentModels <- function(trainingCohorts, numModels, nthread,
   cohortMatrix <- convertCohortToMatrix(commonData)
   cohortMatrixGroups <- ifelse(as.numeric.factor(commonData$OS) >= 365, 1, 0)
 
-  selectedModels <- .generateRGAmodels(cohortMatrix, cohortMatrixGroups,
-                                       numModels)
+  if (missing(original) || original == FALSE ) {
+    selectedModels <- .generateRGAmodels(cohortMatrix, cohortMatrixGroups,
+                                         numModels)
+  } else {
+    selectedModels <- .buildRGAmodels(cohortMatrix, cohortMatrixGroups, numModels)
+  }
 
   # Save to disk or return
   if (!missing(saveDir)) {
@@ -118,12 +127,15 @@ buildRandomGeneAssignmentModels <- function(trainingCohorts, numModels, nthread,
   return(RGAmodels)
 }
 
+#' Uses non parallelized computation of the random gene assignment model to
+#'     replicate the results from the original PCOSP paper. This method is much
+#'     slower when multiple cores are available and should only be used to
+#'     reproduce the results of the PCOSP paper.
+#'
+#' @param
 #'
 #'
-#'
-#'
-#'
-buildRGAmodels <- function(cohortMatrix, cohortMatrixGroups, numModels) {
+.buildRGAmodels <- function(cohortMatrix, cohortMatrixGroups, numModels) {
   randomGeneModels <- lapply(rep(40, numModels),
                              .fitRGAModel,
                              data=cohortMatrix,
