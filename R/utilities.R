@@ -122,6 +122,34 @@ convertCohortToMatrix <- function(cohort) {
     ))
 }
 
+##TODO:: Should this go in utilties?
+#' Merge n lists element-wise into a list of sublists n items long
+#'
+#' Take n lists and combine them element-wise into a single list with each sublist
+#'   containing the corresponding elements of the original lists. Assigns
+#'   sublistNames as the names of the new zipped sublists.
+#'
+#' @param ... Two or more \code{list}s to zip together element-wise. New list
+#'     is named using first list.
+#' @param sublistNames A \code{character} vector n items long, specifying the
+#'     labels for the zipped items
+#'
+#' @keywords internal
+.zipLists <- function(..., sublistNames) {
+
+    ## FIXME:: Error checking
+    # lengths <- vapply(as.list(...), length, FUN.VALUE=numeric(1))
+    # if (!all(lengths==length(sublistNames)))
+    #     stop("Please ensure sublistNames is the same length as the lists you
+    #          are zipping!")
+
+    # Merge lists into sublists element-wise
+    zipped <- mapply(list, ..., SIMPLIFY=FALSE)
+
+    # Name each zipped item in the sublist
+    zipped <- lapply(zipped, function(stat) structure(stat, .Names=sublistNames))
+    return(zipped)
+}
 
 
 

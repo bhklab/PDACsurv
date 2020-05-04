@@ -239,32 +239,6 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
   ))
 }
 
-##TODO:: Should this go in utilties?
-#' Merge n lists element-wise into a list of sublists n items long
-#'
-#' Take n lists and combine them element-wise into a single list with each sublist
-#'   containing the corresponding elements of the original lists. Assigns
-#'   sublistNames as the names of the new zipped sublists.
-#'
-#' @param ... Two or more \code{list}s to zip together element-wise. New list
-#'     is named using first list.
-#' @param sublistNames A \code{character} vector n items long, specifying the
-#'     labels for the zipped items
-#'
-#' @keywords internal
-.zipLists <- function(..., sublistNames) {
-  # Error checking
-  if (length(list(...)) != length(sublistNames))
-    stop("Must be as many names as lists!")
-
-  # Merge lists into sublists element-wise
-  zipped <- mapply(list, ..., SIMPLIFY=FALSE)
-
-  # Name each zipped item in the sublist
-  zipped <- lapply(zipped, function(stat) structure(stat, .Names=sublistNames))
-  return(zipped)
-}
-
 
 
 

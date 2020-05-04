@@ -167,7 +167,7 @@ GSCpaths <- vapply(GSCfiles,
 
 results <- lapply(GSCpaths,
                   function(filePath, PCOSPgenes, referenceGenes, adjMethod) 
-                      fitGSEAtoGeneSetCollection(filePath=filePath, 
+                      fitGSAtoGeneSetCollection(filePath=filePath, 
                                                  PCOSPgenes=PCOSPgenes, 
                                                  referenceGenes=referenceGenes,
                                                  adjMethod=adjMethod),
@@ -175,13 +175,26 @@ results <- lapply(GSCpaths,
                   referenceGenes=referenceGenes,
                   adjMethod="fdr"
                   )
-
+names(results) <- gsub("\\..*", "", GSCfiles)
 ```
 
+```{r clinical_model_comparison}
+source(file.path("..", "R", "5_hyperGSApathwayAnalysis.R"))
+load(file.path(dataDir, "clinicalFeatures.rda"))
+load(file.path(dataDir, "cohortClasses.rda"))
+
+tcgaModel <- summarizeClinicalModels(clinicalFeatures, cohorts=c("tcga"))
+
+resultsDir <- file.path("..", "results")
+save(tcgaModel$tcga$model, file=file.path(resultsDir, "TCGAclinicalModel.rda"))
+```
+```{r }
+compareClinicalModels(clinicalFeatures, cohortClasses, models="icgc_clinical",
+                      cohorts=c("pcsi", "tcga", "icgc_arr", "ouh"))
 
 
 
-
+```
 
 
 

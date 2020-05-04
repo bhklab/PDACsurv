@@ -24,7 +24,7 @@
 #' @importFrom piano loadGSC runGSAhyper
 #' @export
 ##TODO:: Add ... to allow setting piano method parameters
-fitGSEAtoGeneSetCollection <- function(PCOSPgenes, GSC, referenceGenes,
+fitGSAtoGeneSetCollection <- function(PCOSPgenes, GSC, referenceGenes,
                                        adjMethod, filePath)
   {
   if (missing(GSC) && !missing(filePath)) {
