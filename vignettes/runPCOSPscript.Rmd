@@ -27,6 +27,7 @@ library(ggplot2)
 library(scales)
 library(BiocParallel)
 library(microbenchmark)
+library(piano)
 
 source(file.path("..", "R", "1_buildPCOSPmodel.R"))
 source(file.path("..", "R", "utilities.R"))
@@ -48,14 +49,14 @@ selectedModels <- buildPCOSPmodels(trainingCohorts, numModels=1000, nthread=15)
 })
 ```
 
-## 2. Calcualte and Validate Meta-Estimate Statistics
+## 2. Calculate and Validate Meta-Estimate Statistics
 
 ```{r calculate_stats}
 source(file.path("..", "R", "2_validateMetaestimateCalculation.R"))
 load(file.path("..", "data", "validationCohorts.rda"))
 
 # Select the validation cohorts we want to includ
-include <- c("TCGA", "PCSI", "Kirby", "ICGC_arr", "UNC", "Chen", "OUH", 
+include <- c("TCGA", "PCSI", "Kirby", "ICGC_arr", "UNC", "Chen", "OUH",
              "Zhang", "Winter", "Collisson")
 
 # Subset to selected cohorts
@@ -76,6 +77,8 @@ system.time({
 })
 ```
 
+### forestPlotMetaEstimates
+
 ```{r forest_plots}
 source(file.path('..', 'R', 'forestPlotMetaEstimate.R'))
 
@@ -91,6 +94,8 @@ forestPlotMetaEstimate(validationStats,
                        stat="cIndex",
                        isSummary=c(rep(FALSE, 10), rep(TRUE, 3)))
 ```
+
+### Calculate AUC Distribution and Plot ROC Curves
 
 ```{r}
 source(file.path("..", "R", "aucMetaEstimates.R"))
@@ -110,6 +115,8 @@ colours <- c("chartreuse3", "magenta", "#fb9a99", "turquoise3", "darkgoldenrod1"
 plotROCcurves(formattedValCohorts, PCOSPscores, colours)
 ```
 
+## 3. Model Random Label Shuffling
+
 ```{r 3_model_random_label_shuffling}
 source(file.path("..", "R", "3_modelRandomLabelShuffling.R"))
 set.seed(1987, sample.kind="Rounding")
@@ -126,6 +133,8 @@ source(file.path("..", "R", "densityPlot.R"))
 densityPlotModel(formattedValCohorts, selectedModels=randomLabelModels, seqCohorts, 
                  vlines=c(0.69, 0.72, 0.70), nthread=15)
 ```
+
+## 4. Random Gene Assignment Model
 
 ```{r 4_random_gene_assignment_models}
 source(file.path("..", "R", "4_randomGeneAssignmentModel.R"))
@@ -146,6 +155,8 @@ system.time({
 densityPlotModel(formattedValCohorts, selectedModels=randomGeneModels1, seqCohorts, 
                  vlines=c(0.69, 0.72, 0.70), nthread=15)
 ```
+
+## 5. HyperGSA Pathway Analysis
 
 ```{r hyper_gsea_models}
 source(file.path("..", "R", "5_hyperGSApathwayAnalysis.R"))
@@ -176,7 +187,7 @@ results <- lapply(GSCpaths,
                   adjMethod="fdr"
                   )
 names(results) <- gsub("\\..*", "", GSCfiles)
-str(results)
+names(results)
 ```
 
 ```{r clinical_model_comparison}
@@ -184,8 +195,10 @@ source(file.path("..", "R", "6_clinicalModelComparison.R"))
 load(file.path(dataDir, "clinicalFeatures.rda"))
 load(file.path(dataDir, "cohortClasses.rda"))
 
+# Rename clinical features for plots and reorder them
 names(clinicalFeatures) <- c("PCSI", "ICGCclinical", "TCGA", "ICGCarray", "OUH")
 clinicalFeatures <- clinicalFeatures[c("PCSI", "TCGA", "ICGCarray", "OUH", "ICGCclinical")]
+
 fitClinicalModels <- summarizeClinicalModels(clinicalFeatures, cohorts=c("ICGCclinical"))
 
 ICGCclinicalModel <- fitClinicalModels$ICGCclinical
@@ -243,14 +256,43 @@ forestPlotModelComparision(clinicalModelStats,
                            isSummary=c(rep(FALSE, 4), rep(TRUE, 3)))
 ```
 
-## 9. Existing Classifier Forestplots
+## 8. Existing Classifier Score Calculations
 
 ```{r existing_classifier_forest_plots}
+source(file.path("..", "R", "8_existingClassifiersScoreCalculation.R"))
 
+dataDir <- file.path("..", "data", "Classifier_Comparison")
 
+# Birnbaum data
 
+fileNames1 <- list.files(file.path(dataDir, "Birnbaum"))[-1]
+geneCoefFile1 <-"bmc_genes.txt"
+    
+birnbaumScores <- parseGenefuFiles(file.path(dataDir, "Birnbaum"), fileNames1, geneCoefFile1)
+
+# Chen data
+fileNames2 <- list.files(file.path(dataDir, "Chen"))[-1]
+geneCoefFile2 <- "chen_genes.txt"
+
+chenScores <- parseGenefuFiles(file.path(dataDir, "Chen"), fileNames2, geneCoefFile2)
+
+# Haider data (provided by author)
+load(file.path("..", "data", "haiderScores.rda"))
+
+# PCOSP data
+PCOSPscores <- validationStats$probabilities
+```
+
+## 9. Existing Classifier Forestplots
+
+```{r }
+load(file.path(dataDir, ))
+```
+
+## 10. Subtype Specific 
+
+```{r }
 
 
 ```
 
-## 10. Subtype Specific 

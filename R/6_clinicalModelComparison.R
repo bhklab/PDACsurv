@@ -221,7 +221,8 @@ metaEstimateComparisonAUCs <- function(modelComparisonStats, model=1, seqCohorts
     isSeq <- grepl(paste(seqCohorts, collapse="|"), names(comparisonStats))
 
     pred1Estimates <- .metaEstimateModelAUCs(comparisonStats,
-                                             subsets=list(isSeq, !isSeq, c(isSeq, !isSeq)),
+                                             subsets=list(isSeq, !isSeq,
+                                                          c(which(isSeq), which(!isSeq))),
                                              subsetNames=c("Sequencing",
                                                            "Microarray",
                                                            "Overall"),
@@ -230,7 +231,7 @@ metaEstimateComparisonAUCs <- function(modelComparisonStats, model=1, seqCohorts
                                              prediction=1)
 
     pred2Estimates <- .metaEstimateModelAUCs(comparisonStats,
-                                             subsets=list(isSeq, !isSeq, c(isSeq, !isSeq)),
+                                             subsets=list(isSeq, !isSeq, c(which(isSeq), which(!isSeq))),
                                              subsetNames=c("Sequencing",
                                                            "Microarray",
                                                            "Overall"),
@@ -247,8 +248,8 @@ metaEstimateComparisonAUCs <- function(modelComparisonStats, model=1, seqCohorts
                 lower.tail = subset$prediction$estimate < 0.5))
 
     return(list(
-        "prediction1"=pred1Pvals ,
-        "prediction2"=pred2Pvals
+        "clinical"=pred1Pvals ,
+        "PCOSP"=pred2Pvals
     ))
 }
 

@@ -32,11 +32,7 @@
 #'   list labels indicate which cohorts, with the subsequent list level
 #'   indicating the type of statistic (i.e., dindex vs concordance index)
 #'
-#' @importFrom survcomp D.index concordance.index combine.est
-#' @importFrom forestplot forestplot
-#' @importFrom reportROC reportROC
-#' @importFrom pROC roc
-#' @importFrom verification roc.area
+
 #' @export
 calculateValidationStats <- function(validationCohorts, selectedModels, seqCohorts,
                                 nthread, saveDir) {
@@ -46,11 +42,19 @@ calculateValidationStats <- function(validationCohorts, selectedModels, seqCohor
   constructMetaEstimatesDF(PCOSPscoreList, validationCohorts, seqCohorts)
 }
 
+#' Calculate Dindex, Cindex and cohort meta-estimates from a list of cohorts
+#'     and associated probabilities.
 #'
+#' @param probList
+#' @param cohortData
+#' @param seqCohorts
 #'
-#'
-#'
-#'
+#' @importFrom survcomp D.index concordance.index combine.est
+#' @importFrom forestplot forestplot
+#' @importFrom reportROC reportROC
+#' @importFrom pROC roc
+#' @importFrom verification roc.area
+#' @export
 constructMetaEstimatesDF <- function(probList, cohortData, seqCohorts) {
 
   ## Dindex estimate calculation
@@ -144,8 +148,12 @@ calculatePCOSPscores <- function(validationCohorts, selectedModels, nthread) {
   return(PCOSPscoreList)
 }
 
+#' Predict meta-estimates of Dindex and Cindex from an equal length list of
+#'     each.
 #'
-#'
+#' @param DindexList
+#' @param concordanceIndexList
+#' @param hetero
 #'
 #'
 metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
@@ -201,6 +209,8 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
 
 #' Meta-estimate the Dindex for a list of validation cohorts
 #'
+#' @param DindexList
+#' @param hetero
 #'
 #'
 #' @importFrom survcomp combine.est
@@ -227,6 +237,9 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
 }
 
 #' Meta-estimate the concordance index for
+#'
+#' @param concordanceIndexList
+#' @param hetero
 #'
 #' @importFrom survcomp concordance.index
 .metaEstimateConcordanceIndex <- function(concordanceIndexList, hetero) {
