@@ -138,7 +138,7 @@ system.time({
     randomGeneModels1 <- buildRandomGeneAssignmentModels(trainingCohorts, 
                                                          numModels=1000,
                                                          nthread=15,
-                                                         original=FALSE)
+                                                         original=TRUE)
 })
 ```
 
@@ -184,9 +184,11 @@ source(file.path("..", "R", "6_clinicalModelComparison.R"))
 load(file.path(dataDir, "clinicalFeatures.rda"))
 load(file.path(dataDir, "cohortClasses.rda"))
 
-fitClinicalModels <- summarizeClinicalModels(clinicalFeatures, cohorts=c("icgc_clinical"))
+names(clinicalFeatures) <- c("PCSI", "ICGCclinical", "TCGA", "ICGCarray", "OUH")
+clinicalFeatures <- clinicalFeatures[c("PCSI", "TCGA", "ICGCarray", "OUH", "ICGCclinical")]
+fitClinicalModels <- summarizeClinicalModels(clinicalFeatures, cohorts=c("ICGCclinical"))
 
-ICGCclinicalModel <- fitClinicalModels$icgc_clinical
+ICGCclinicalModel <- fitClinicalModels$ICGCclinical
 
 resultsDir <- file.path("..", "results")
 #save(tcgaModel$tcga$model, file=file.path(resultsDir, "TCGAclinicalModel.rda"))
@@ -194,50 +196,61 @@ resultsDir <- file.path("..", "results")
 
 
 ```{r }
-cohorts <- c("pcsi", "tcga", "icgc_arr", "ouh")
+cohorts <- c("PCSI", "TCGA", "ICGCarray", "OUH")
 
 modelComparisonStats <- compareClinicalModels(clinicalFeatures, cohortClasses,
-                                   models="icgc_clinical",
+                                   models="ICGCclinical",
                       cohorts=cohorts)
 ```
 
 ```{r barplot_model_comparison}
-barplotModelComparison(modelComparisonStats, model="icgc_clinical",
-                 names=c("TCGA","PCSI","ICGC-array","OUH"),
+barplotModelComparison(modelComparisonStats, model="ICGCclinical",
+                 names=c("TCGA","PCSI","ICGCarray","OUH"),
                  colours=c("palevioletred1", "darkgrey"))
 ```
 
 ```{r }
 modelComparisonPvals <- metaEstimateComparisonAUCs(modelComparisonStats,
-                                                   model="icgc_clinical",
-                                                   seqCohorts=c("pcsi", "tcga"))
+                                                   model="ICGCclinical",
+                                                   seqCohorts=c("PCSI", "TCGA"))
 modelComparisonPvals
 ```
 
 ```{r clinical_model_dindex_cindex}
-source(file.path("..", "R", "7_clinicalModelDindexCindex"))
-
+source(file.path("..", "R", "7_clinicalModelDindexCindex.R"))
+    
 clinicalFeatures <- clinicalFeatures[grepl(paste(cohorts, collapse="|"), names(clinicalFeatures))]
+names(clinicalFeatures) <- cohorts
 
 modelProbabilities <- calcualteCohortProbabilties(fitClinicalModels, clinicalFeatures)
 
 clinicalModelStats <- calculateModelDandCindex(modelProbabilities, 
                                                clinicalFeatures,
-                                               seqCohorts=c("pcsi", "tcga"),
-                                               model="icgc_clinical")
+                                               seqCohorts=c("PCSI", "TCGA"),
+                                               model="ICGCclinical")
 ```
 
-```{r model_comparison_forest_plot}
-
+```{r model_comparison_forest_plot_dindex}
+forestPlotModelComparision(clinicalModelStats, 
+                           stat="dIndex",
+                           isSummary=c(rep(FALSE, 4), rep(TRUE, 3)))
 ```
 
 
+```{r model_comparison_forest_plot_cindex}
+forestPlotModelComparision(clinicalModelStats, 
+                           stat="cIndex", 
+                           isSummary=c(rep(FALSE, 4), rep(TRUE, 3)))
+```
+
+## 9. Existing Classifier Forestplots
+
+```{r existing_classifier_forest_plots}
 
 
 
 
 
+```
 
-
-
-
+## 10. Subtype Specific 

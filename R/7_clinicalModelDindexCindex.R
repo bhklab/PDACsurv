@@ -37,10 +37,10 @@ calculateModelDandCindex <- function(modelProbabilities, clinicalFeatures,
 
 ###########################
 
-pcosp_clinical_cindex = cindex.comp.meta(list.cindex1 = list(con_pcsi1, con_tcga1, con_ouh1, con_icgc_array1),
-                                  list.cindex2 = list(con_pcsi, con_tcga, con_ouh, con_icgc_array))
-pcosp_clinical_cindex
-
-pcosp_clinical_dindex = dindex.comp.meta(list.dindex1 = list(dindex_pcsi1, dindex_tcga1, dindex_ouh1, dindex_icgc_array1),
-                                  list.dindex2 = list(dindex_pcsi, dindex_tcga, dindex_ouh, dindex_icgc_array))
-pcosp_clinical_dindex
+# pcosp_clinical_cindex = cindex.comp.meta(list.cindex1 = list(con_pcsi1, con_tcga1, con_ouh1, con_icgc_array1),
+#                                   list.cindex2 = list(con_pcsi, con_tcga, con_ouh, con_icgc_array))
+# pcosp_clinical_cindex
+#
+# pcosp_clinical_dindex = dindex.comp.meta(list.dindex1 = list(dindex_pcsi1, dindex_tcga1, dindex_ouh1, dindex_icgc_array1),
+#                                   list.dindex2 = list(dindex_pcsi, dindex_tcga, dindex_ouh, dindex_icgc_array))
+# pcosp_clinical_dindex

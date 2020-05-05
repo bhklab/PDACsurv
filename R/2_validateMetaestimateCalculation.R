@@ -164,7 +164,7 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
 ## FIXME:: Make parameter names general enough to use with clinical models
 #' @importFrom survcomp D.index
 .estimateDindex <- function(PCOSPscoreList, validationCohorts) {
-  structure(lapply(seq_along(PCOSPscoreList), function(i) {
+  structure(lapply(seq_along(PCOSPscoreList), function(i, PCOSPscoreList, validationCohorts) {
     cohort <- validationCohorts[[i]]
     PCOSPscore <- PCOSPscoreList[[i]]
     D.index(x=PCOSPscore,
@@ -173,7 +173,10 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
             na.rm=TRUE,
             alpha=0.05,
             method.test="logrank")
-  }), .Names=names(PCOSPscoreList))
+  },
+  validationCohorts=validationCohorts,
+  PCOSPscoreList=PCOSPscoreList),
+  .Names=names(PCOSPscoreList))
 }
 
 #' Estimate the concordance index for a list of validation cohorts
