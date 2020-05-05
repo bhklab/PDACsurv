@@ -194,10 +194,11 @@ resultsDir <- file.path("..", "results")
 
 
 ```{r }
+cohorts <- c("pcsi", "tcga", "icgc_arr", "ouh")
+
 modelComparisonStats <- compareClinicalModels(clinicalFeatures, cohortClasses,
                                    models="icgc_clinical",
-                      cohorts=c("pcsi", "tcga", "icgc_arr", "ouh"))
-
+                      cohorts=cohorts)
 ```
 
 ```{r barplot_model_comparison}
@@ -214,14 +215,21 @@ modelComparisonPvals
 ```
 
 ```{r clinical_model_dindex_cindex}
-modelProbabilities <- calcualteCohortProbabilties(fitClinicalModels, clinicalFeatures, model="icgc_clinical")
+source(file.path("..", "R", "7_clinicalModelDindexCindex"))
 
-modelDandCindex(modelProbablities, clinicalFeatures, model="icgc_clinical")
+clinicalFeatures <- clinicalFeatures[grepl(paste(cohorts, collapse="|"), names(clinicalFeatures))]
+
+modelProbabilities <- calcualteCohortProbabilties(fitClinicalModels, clinicalFeatures)
+
+clinicalModelStats <- calculateModelDandCindex(modelProbabilities, 
+                                               clinicalFeatures,
+                                               seqCohorts=c("pcsi", "tcga"),
+                                               model="icgc_clinical")
 ```
 
+```{r model_comparison_forest_plot}
 
-
-
+```
 
 
 

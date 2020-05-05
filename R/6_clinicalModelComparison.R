@@ -31,7 +31,7 @@ compareClinicalModels <- function(clinicalFeatures, cohortClasses, cohorts,
     cClasses <- cohortClasses[grep(paste(cohorts, collapse="|"),
                                    names(cohortClasses))]
 
-    cohortProbs <- calcualteCohortProbabilties(fitModels, clinicalFeatures, model=1)
+    cohortProbs <- calcualteCohortProbabilties(fitModels, cFeatures)
 
     modelComparisonStats <- .estimateModelAUCs(cFeatures, cohortProbs)
 
@@ -144,12 +144,12 @@ summarizeClinicalModels <- function(clinicalFeatures, cohorts,
 
     list(
         "roc1"=list(
-            "roc"=reportROC(coh[names(preds$pred1),]$binary_grp, preds$pred1, plot=FALSE),
-            "pval"=roc.area(coh[names(preds$pred1),]$binary_grp, preds$pred1)$p.value
+            "roc"=reportROC(coh[names(preds$clinical),]$binary_grp, preds$clinical, plot=FALSE),
+            "pval"=roc.area(coh[names(preds$clinical),]$binary_grp, preds$clinical)$p.value
         ),
         "roc2"=list(
-            "roc"=reportROC(coh[names(preds$pred1),]$binary_grp, preds$pred2, plot=FALSE),
-            "pval"=roc.area(coh[names(preds$pred1),]$binary_grp, preds$pred2)$p.value
+            "roc"=reportROC(coh[names(preds$clinical),]$binary_grp, preds$PCOSP, plot=FALSE),
+            "pval"=roc.area(coh[names(preds$clinical),]$binary_grp, preds$PCOSP)$p.value
         )
     )
 }
@@ -161,12 +161,10 @@ summarizeClinicalModels <- function(clinicalFeatures, cohorts,
 #'     `summarizeClinicalModels`
 #' @param clinicalCohorts A \code{list} of clinical cohorts to calculate
 #'     probabilties under the given models
-#' @param model A \code{character} vector with the model name or a \code{numeric}
-#'     vector with the integer index of the model in `fitModels`.
 #'
 #' @return A \code{list} of
 #'
-calcualteCohortProbabilties <- function(fitModels, clinicalCohorts, model=1) {
+calcualteCohortProbabilties <- function(fitModels, clinicalCohorts) {
     lapply(fitModels,
            function(model, clinicalCohorts)
                lapply(clinicalCohorts,

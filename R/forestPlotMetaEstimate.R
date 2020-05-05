@@ -103,15 +103,24 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
 #' @importFrom grid unit grid.grabExpr grid.draw
 #' @importFrom ggplot2 ggsave
 #' @export
-forestPlotModelComparision <- function(validationStats, stat, isSummary, filePath,
+forestPlotModelComparision <- function(clinicalModelStats, stat, isSummary, filePath,
                                    fileName, ...) {
 
-    # Extract necessary statistics for plotting
-    validationStatsDF <- validationStats[[stat]]
-    validationStatsDF <- rbind(rep(NA, ncol(validationStatsDF)),
-                               validationStatsDF)
-    PCOSPscoreList <- validationStats$probabilities
-    isSeq <- validationStats$isSequencing
+    indexClinical <- as.matrix(clinicalModelStats$clinical[[stat]])
+    indexPCOSP <- as.matrix(clinicalModelStats$PCOSP[[stat]])
+
+    spacing <- rbind(rep(NA, 3), rep(NA, 3))
+    plotData <- matrix(nrow=0, ncol=3)
+    for (i in seq_len(nrow(indexClinical))) {
+        plotData <-
+            rbind(
+                plotData,
+                spacing,
+                indexClinical[i, 1:3],
+                indexPCOSP[i, 1:3]
+        )
+    }
+
     isSummary <- c(TRUE, isSummary)
 
     # Construct the forest plot table
