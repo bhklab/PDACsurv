@@ -97,9 +97,9 @@ buildRandomGeneAssignmentModels <- function(trainingCohorts, numModels, nthread,
 #'     slower when multiple CPU threads are available and should only be used to
 #'     reproduce the results of the PCOSP paper.
 #'
-#' @param cohortMatrix
-#' @param cohortMatrixGorups
-#' @param numModels
+#' @param cohortMatrix A
+#' @param cohortMatrixGorups A
+#' @param numModels A
 #'
 #' @keywords internal
 .buildRGAmodels <- function(cohortMatrix, cohortMatrixGroups, numModels) {
@@ -111,13 +111,7 @@ buildRandomGeneAssignmentModels <- function(trainingCohorts, numModels, nthread,
   return(randomGeneModels)
 }
 
-#'
-#'
-#'
-#'
-#'
-#'
-#'
+
 .fitRGAModel <- function(n, data, labels) {
   idx <- unlist(mapply(function(grp, labs) sample(which(labs == grp), n, replace=FALSE),
                        grp=sort(unique(labels)),

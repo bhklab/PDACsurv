@@ -3,7 +3,7 @@
 #'
 #' A convenience function to converting factor levels into numeric
 #'
-#' @param factor
+#' @param factor A
 #'
 ##FIXME:: Make sure all the data is either a factor, or not a factor?
 ##FIXME:: This breaks when written with levels because not all of them are factors
@@ -93,7 +93,7 @@ convertCohortToMatrix <- function(cohort) {
 #'
 #'
 #' @importFrom switchBox SWAP.KTSP.Classify
-#' @importFrom pROC reportROC
+#' @importFrom reportROC reportROC
 .predictKTSP <- function(formattedValCohort, selectedModels, nthread){
 
     # Temporily change number of cores to parallelize over

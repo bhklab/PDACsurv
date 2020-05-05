@@ -45,9 +45,9 @@ calculateValidationStats <- function(validationCohorts, selectedModels, seqCohor
 #' Calculate Dindex, Cindex and cohort meta-estimates from a list of cohorts
 #'     and associated probabilities.
 #'
-#' @param probList
-#' @param cohortData
-#' @param seqCohorts
+#' @param probList A
+#' @param cohortData A
+#' @param seqCohorts A
 #'
 #' @importFrom survcomp D.index concordance.index combine.est
 #' @importFrom forestplot forestplot
@@ -151,9 +151,9 @@ calculatePCOSPscores <- function(validationCohorts, selectedModels, nthread) {
 #' Predict meta-estimates of Dindex and Cindex from an equal length list of
 #'     each.
 #'
-#' @param DindexList
-#' @param concordanceIndexList
-#' @param hetero
+#' @param DindexList A
+#' @param concordanceIndexList A
+#' @param hetero A
 #'
 #'
 metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
@@ -209,8 +209,8 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
 
 #' Meta-estimate the Dindex for a list of validation cohorts
 #'
-#' @param DindexList
-#' @param hetero
+#' @param DindexList A
+#' @param hetero A
 #'
 #'
 #' @importFrom survcomp combine.est
@@ -238,8 +238,8 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
 
 #' Meta-estimate the concordance index for
 #'
-#' @param concordanceIndexList
-#' @param hetero
+#' @param concordanceIndexList A
+#' @param hetero A
 #'
 #' @importFrom survcomp concordance.index
 .metaEstimateConcordanceIndex <- function(concordanceIndexList, hetero) {

@@ -1,9 +1,9 @@
 #' Draw an ROC curve for each cohort in validationCohorts
 #'
-#' @param validationCohorts
-#' @param validationStats
-#' @param colours
-#' @param legendLoc
+#' @param validationCohorts A
+#' @param validationStats A
+#' @param colours A
+#' @param legendLoc A
 #'
 #' @return None, draws a plot
 #'

@@ -3,13 +3,13 @@
 #' Create a density plot of the distrubtion of AUCs between the overall,
 #'    sequencing and microarray cohorts in a PCOSP model.
 #'
-#' @param formattedValCohorts
-#' @param selectedModels
-#' @param seqCohorts
-#' @param vlines
-#' @param nthread
-#' @param saveDir
-#' @param fileName
+#' @param formattedValCohorts A
+#' @param selectedModels A
+#' @param seqCohorts A
+#' @param vlines A
+#' @param nthread A
+#' @param saveDir A
+#' @param fileName A
 #'
 #' @return A \code{grob} objects from \code{ggplot2}
 #'

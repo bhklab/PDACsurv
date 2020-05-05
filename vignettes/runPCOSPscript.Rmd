@@ -12,27 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## 1. Build the PCOSP model
 
 ```{r build_and_select_models}
-require(switchBox)
-library(vcdExtra)
-library(caret)
-library(forestplot)
-library(pROC)
-library(survcomp)
-library(survival)
-require(data.table)
-library(reportROC)
-library(verification)
-library(grid)
-library(ggplot2)
-library(scales)
-library(BiocParallel)
-library(microbenchmark)
-library(piano)
-
-source(file.path("..", "R", "1_buildPCOSPmodel.R"))
-source(file.path("..", "R", "utilities.R"))
-source(file.path("..", "R", "formatValidationCohorts.R"))
-source(file.path("..", "R", "estimatePCOSPscore.R"))
+library(PCOSP)
 ```
 
 ```{r load_data}
@@ -52,7 +32,6 @@ selectedModels <- buildPCOSPmodels(trainingCohorts, numModels=1000, nthread=15)
 ## 2. Calculate and Validate Meta-Estimate Statistics
 
 ```{r calculate_stats}
-source(file.path("..", "R", "2_validateMetaestimateCalculation.R"))
 load(file.path("..", "data", "validationCohorts.rda"))
 
 # Select the validation cohorts we want to includ
@@ -80,7 +59,6 @@ system.time({
 ### forestPlotMetaEstimates
 
 ```{r forest_plots}
-source(file.path('..', 'R', 'forestPlotMetaEstimate.R'))
 
 forestPlotMetaEstimate(validationStats,
                        stat="dIndex",
@@ -98,14 +76,12 @@ forestPlotMetaEstimate(validationStats,
 ### Calculate AUC Distribution and Plot ROC Curves
 
 ```{r}
-source(file.path("..", "R", "aucMetaEstimates.R"))
 
 aucStats <- aucMetaEstimates(validationCohorts, validationStats, 
                             seqCohorts=seqCohorts)
 ```
 
 ```{r plot_ROC_curve}
-source(file.path("..", "R", "plotROCcurves.R"))
 
 formattedValCohorts <- formatValidationCohorts(validationCohorts)
 PCOSPscores <- validationStats$probabilities
@@ -118,7 +94,6 @@ plotROCcurves(formattedValCohorts, PCOSPscores, colours)
 ## 3. Model Random Label Shuffling
 
 ```{r 3_model_random_label_shuffling}
-source(file.path("..", "R", "3_modelRandomLabelShuffling.R"))
 set.seed(1987, sample.kind="Rounding")
 
 system.time({
@@ -128,7 +103,6 @@ system.time({
 ```
 
 ```{r density_plot}
-source(file.path("..", "R", "densityPlot.R"))
 
 densityPlotModel(formattedValCohorts, selectedModels=randomLabelModels, seqCohorts, 
                  vlines=c(0.69, 0.72, 0.70), nthread=15)
@@ -137,7 +111,6 @@ densityPlotModel(formattedValCohorts, selectedModels=randomLabelModels, seqCohor
 ## 4. Random Gene Assignment Model
 
 ```{r 4_random_gene_assignment_models}
-source(file.path("..", "R", "4_randomGeneAssignmentModel.R"))
 set.seed(1987, sample.kind="Rounding")
 
 ## These results will differ from the Code Ocean capsule due to sampling.
@@ -159,7 +132,6 @@ densityPlotModel(formattedValCohorts, selectedModels=randomGeneModels1, seqCohor
 ## 5. HyperGSA Pathway Analysis
 
 ```{r hyper_gsea_models}
-source(file.path("..", "R", "5_hyperGSApathwayAnalysis.R"))
 
 dataDir <- file.path("..", "data")
 pathwayDataDir <- file.path(dataDir, "Pathway_db_files")
@@ -191,7 +163,6 @@ names(results)
 ```
 
 ```{r clinical_model_comparison}
-source(file.path("..", "R", "6_clinicalModelComparison.R"))
 load(file.path(dataDir, "clinicalFeatures.rda"))
 load(file.path(dataDir, "cohortClasses.rda"))
 
@@ -230,8 +201,7 @@ modelComparisonPvals
 ```
 
 ```{r clinical_model_dindex_cindex}
-source(file.path("..", "R", "7_clinicalModelDindexCindex.R"))
-    
+
 clinicalFeatures <- clinicalFeatures[grepl(paste(cohorts, collapse="|"), names(clinicalFeatures))]
 names(clinicalFeatures) <- cohorts
 
@@ -261,23 +231,24 @@ forestPlotModelComparision(clinicalModelStats,
 ```{r existing_classifier_forest_plots}
 source(file.path("..", "R", "8_existingClassifiersScoreCalculation.R"))
 
-dataDir <- file.path("..", "data", "Classifier_Comparison")
+dataDir <- file.path("..", "data")
+classifierDir <- file.path(dataDir, "Classifier_Comparison")
 
 # Birnbaum data
 
-fileNames1 <- list.files(file.path(dataDir, "Birnbaum"))[-1]
+fileNames1 <- list.files(file.path(classifierDir, "Birnbaum"))[-1]
 geneCoefFile1 <-"bmc_genes.txt"
     
-birnbaumScores <- parseGenefuFiles(file.path(dataDir, "Birnbaum"), fileNames1, geneCoefFile1)
+birnbaumScores <- parseGenefuFiles(file.path(classifierDir, "Birnbaum"), fileNames1, geneCoefFile1)
 
 # Chen data
-fileNames2 <- list.files(file.path(dataDir, "Chen"))[-1]
+fileNames2 <- list.files(file.path(classifierDir, "Chen"))[-1]
 geneCoefFile2 <- "chen_genes.txt"
 
-chenScores <- parseGenefuFiles(file.path(dataDir, "Chen"), fileNames2, geneCoefFile2)
+chenScores <- parseGenefuFiles(file.path(classifierDir, "Chen"), fileNames2, geneCoefFile2)
 
 # Haider data (provided by author)
-load(file.path("..", "data", "haiderScores.rda"))
+load(file.path(dataDir, "haiderScores.rda"))
 
 # PCOSP data
 PCOSPscores <- validationStats$probabilities
@@ -286,7 +257,7 @@ PCOSPscores <- validationStats$probabilities
 ## 9. Existing Classifier Forestplots
 
 ```{r }
-load(file.path(dataDir, ))
+
 ```
 
 ## 10. Subtype Specific 

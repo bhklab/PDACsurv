@@ -2,22 +2,22 @@
 #'
 ## TODO:: HEEWON - description
 #'
-#' @param clinicalFeatures
-#' @param cohortClasses
-#' @param cohorts
+#' @param clinicalFeatures A
+#' @param cohortClasses  A
+#' @param cohorts A
 #' @param models A \code{character} vector names for cohorts in `clinicalFeatures`
 #'     to fit a linear model for. All models will be compared against each
 #'     cohort in `cohorts`, or all cohorts if `cohorts` is not specified.
-#' @param formula
+#' @param formula A
 #'
 #' @return A \code{list} with the first level representing the model the
 #'   data was fit to, the second level representing the cohort the model was
 #'   compared to, and the third level the associated statistics for that
 #'   comparison.
 #'
-#' @importFrom verification
-#' @importFrom glmnet glm
-#' @importFrom stats anova
+# @importFrom verification
+# @importFrom glmnet glm
+# @importFrom stats anova
 #' @export
 compareClinicalModels <- function(clinicalFeatures, cohortClasses, cohorts,
                                   models, formula="binary_grp ~ Age + Sex +
@@ -55,7 +55,7 @@ compareClinicalModels <- function(clinicalFeatures, cohortClasses, cohorts,
 #'     for each cohort (named by `cohorts` argument or as
 #'     `names(clincalFeatures)` if cohorts is absent).
 #'
-#' @importFrom glmnet glm
+# @importFrom glmnet glm
 #' @importFrom stats as.formula
 #' @export
 summarizeClinicalModels <- function(clinicalFeatures, cohorts,
@@ -94,8 +94,8 @@ summarizeClinicalModels <- function(clinicalFeatures, cohorts,
 #' Calculate the clinical and PCOSP probabiltie for a clinical cohort and
 #'     a given clinical model
 #'
-#' @param clinicalCohorts
-#' @param model
+#' @param clinicalCohorts A
+#' @param model A
 #'
 #'
 #' @keywords internal

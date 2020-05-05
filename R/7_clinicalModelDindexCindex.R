@@ -1,9 +1,9 @@
 #' Calculate the
 #'
-#' @param modelProbabilities
-#' @param clinicalFeatures
-#' @param seqCohorts
-#' @param model
+#' @param modelProbabilities A
+#' @param clinicalFeatures A
+#' @param seqCohorts A
+#' @param model A
 #'
 calculateModelDandCindex <- function(modelProbabilities, clinicalFeatures,
                                      seqCohorts, model=1) {

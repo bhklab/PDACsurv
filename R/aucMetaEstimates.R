@@ -1,7 +1,7 @@
 #' Return
 #'
-#' @param validationCohorts
-#' @param validationStats
+#' @param validationCohorts A
+#' @param validationStats A
 #'
 #' @return A named \code{list} of \code{list}s containing AUC, standard error of AUC,
 #'     and the assocaited p-value for each cohort as well as summaries for
@@ -37,7 +37,9 @@ aucMetaEstimates <- function(validationCohorts, validationStats,
 #'
 #'
 #'
-#' @importFrom pROC roc reportROC roc.area
+#' @importFrom pROC roc
+#' @importFrom verification roc.area
+#' @importFrom reportROC reportROC
 #' @export
 AUCstats <- function(formattedValCohorts, PCOSPscores) {
 
