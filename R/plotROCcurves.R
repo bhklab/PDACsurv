@@ -5,10 +5,9 @@
 #' @param colours
 #' @param legendLoc
 #'
-#'
 #' @return None, draws a plot
 #'
-#'
+#' @export
 plotROCcurves <- function(formattedValidationCohorts, PCOSPscores,
                           colours, legendLoc="bottomright") {
 

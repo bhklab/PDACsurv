@@ -3,7 +3,9 @@
 ## TODO:: HEEWON Document this function
 #'
 #' @param trainingCohorts A named \code{list} of training cohorts for which
-#'   to fit and select PCOSP models.
+#'     to fit and select PCOSP models.
+#' @param numModels A \code{numeric} vector containing an integer number of
+#'     models to fit
 #' @param saveDir \code{character} A path to a directory to save the model. If you
 #'   exclude this the function will return the model object instead.
 #' @param nthread \code{integer} The number of threads to parallelize across
@@ -67,42 +69,6 @@ buildRandomLabelShufflingModel <- function(trainingCohorts, numModels, nthread,
 
   selectedModels <- trainedModels
 
-  ## TODO:: Do we not need any of this?
-  # testingDataRowIdxs <- lapply(trainingDataRowIdxs,
-  #                              function(idx, rowIdx, labels)
-  #                                structure(setdiff(rowIdx, idx),
-  #                                          .Label=as.factor(
-  #                                            labels[setdiff(rowIdx, idx)])),
-  #                              rowIdx=seq_len(nrow(cohortMatrix)),
-  #                              labels=cohortMatrixGroups)
-  #
-  #
-  # predictions <- bplapply(seq_along(testingDataRowIdxs),
-  #                         function(i, testIdxs, data, models)
-  #                           SWAP.KTSP.Classify(t(data[testIdxs[[i]], ]),
-  #                                              models[[i]]),
-  #                         testIdxs=testingDataRowIdxs,
-  #                         data=cohortMatrix,
-  #                         models=trainedModels
-  # )
-  #
-  #
-  # confusionMatrices <- bplapply(seq_along(predictions),
-  #                               function(i, predictions, labels)
-  #                                 confusionMatrix(predictions[[i]],
-  #                                                 levels(labels[[i]]),
-  #                                                 mode="prec_recall"),
-  #                               predictions=predictions,
-  #                               labels=testingDataRowIdxs
-  # )
-  #
-  # modelStats <- bplapply(confusionMatrices,
-  #                        function(confMat) confMat$byClass)
-  #
-  # balancedAcc <- unlist(bplapply(modelStats,
-  #                                function(model) model[c('Balanced Accuracy')]))
-  #
-  # selectedModels <- trainedModels[which(balancedAcc > 0.60)]
   return(selectedModels)
 }
 

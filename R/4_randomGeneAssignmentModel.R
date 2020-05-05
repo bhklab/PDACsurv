@@ -87,54 +87,21 @@ buildRandomGeneAssignmentModels <- function(trainingCohorts, numModels, nthread,
                                n=numGenes,
                                genes=geneNames)
 
-  ##TODO:: Do we need this? Not selecting models based on balanced accuray?
-  # testingDataRowIdxs <- lapply(trainingDataRowIdxs,
-  #                              function(idx, rowIdx, labels)
-  #                                structure(setdiff(rowIdx, idx),
-  #                                          .Label=as.factor(
-  #                                            labels[setdiff(rowIdx, idx)])),
-  #                              rowIdx=seq_len(nrow(cohortMatrix)),
-  #                              labels=cohortMatrixGroups)
-  #
-  #
-  # predictions <- bplapply(seq_along(testingDataRowIdxs),
-  #                         function(i, testIdxs, data, models)
-  #                           SWAP.KTSP.Classify(t(data[testIdxs[[i]], ]),
-  #                                              models[[i]]),
-  #                         testIdxs=testingDataRowIdxs,
-  #                         data=cohortMatrix,
-  #                         models=trainedModels
-  # )
-  #
-  #
-  # confusionMatrices <- bplapply(seq_along(predictions),
-  #                               function(i, predictions, labels)
-  #                                 confusionMatrix(predictions[[i]],
-  #                                                 levels(labels[[i]]),
-  #                                                 mode="prec_recall"),
-  #                               predictions=predictions,
-  #                               labels=testingDataRowIdxs
-  # )
-  #
-  # modelStats <- bplapply(confusionMatrices,
-  #                        function(confMat) confMat$byClass)
-  #
-  # balancedAcc <- unlist(bplapply(modelStats,
-  #                                function(model) model[c('Balanced Accuracy')]))
-  #
-  # selectedModels <- trainedModels[which(balancedAcc > 0.60)]
-
   return(RGAmodels)
 }
 
-#' Uses non parallelized computation of the random gene assignment model to
+#' Build the random gene assignment model from <paper reference>
+#'
+#' Uses non-parallelized computation of the random gene assignment model to
 #'     replicate the results from the original PCOSP paper. This method is much
-#'     slower when multiple cores are available and should only be used to
+#'     slower when multiple CPU threads are available and should only be used to
 #'     reproduce the results of the PCOSP paper.
 #'
-#' @param
+#' @param cohortMatrix
+#' @param cohortMatrixGorups
+#' @param numModels
 #'
-#'
+#' @keywords internal
 .buildRGAmodels <- function(cohortMatrix, cohortMatrixGroups, numModels) {
   randomGeneModels <- lapply(rep(40, numModels),
                              .fitRGAModel,
@@ -144,6 +111,13 @@ buildRandomGeneAssignmentModels <- function(trainingCohorts, numModels, nthread,
   return(randomGeneModels)
 }
 
+#'
+#'
+#'
+#'
+#'
+#'
+#'
 .fitRGAModel <- function(n, data, labels) {
   idx <- unlist(mapply(function(grp, labs) sample(which(labs == grp), n, replace=FALSE),
                        grp=sort(unique(labels)),

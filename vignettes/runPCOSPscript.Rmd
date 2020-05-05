@@ -103,7 +103,7 @@ aucStats <- aucMetaEstimates(validationCohorts, validationStats,
 source(file.path("..", "R", "plotROCcurves.R"))
 
 formattedValCohorts <- formatValidationCohorts(validationCohorts)
-PCOSPscores <- validationStats$PCOSPscores
+PCOSPscores <- validationStats$probabilities
 colours <- c("chartreuse3", "magenta", "#fb9a99", "turquoise3", "darkgoldenrod1",
              "wheat4", "green", "red", "cornflowerblue", "mediumorchid2")
 
@@ -176,31 +176,48 @@ results <- lapply(GSCpaths,
                   adjMethod="fdr"
                   )
 names(results) <- gsub("\\..*", "", GSCfiles)
+str(results)
 ```
 
 ```{r clinical_model_comparison}
-source(file.path("..", "R", "5_hyperGSApathwayAnalysis.R"))
+source(file.path("..", "R", "6_clinicalModelComparison.R"))
 load(file.path(dataDir, "clinicalFeatures.rda"))
 load(file.path(dataDir, "cohortClasses.rda"))
 
-tcgaModel <- summarizeClinicalModels(clinicalFeatures, cohorts=c("tcga"))
+fitClinicalModels <- summarizeClinicalModels(clinicalFeatures, cohorts=c("icgc_clinical"))
+
+ICGCclinicalModel <- fitClinicalModels$icgc_clinical
 
 resultsDir <- file.path("..", "results")
-save(tcgaModel$tcga$model, file=file.path(resultsDir, "TCGAclinicalModel.rda"))
+#save(tcgaModel$tcga$model, file=file.path(resultsDir, "TCGAclinicalModel.rda"))
 ```
+
+
 ```{r }
-compareClinicalModels(clinicalFeatures, cohortClasses, models="icgc_clinical",
+modelComparisonStats <- compareClinicalModels(clinicalFeatures, cohortClasses,
+                                   models="icgc_clinical",
                       cohorts=c("pcsi", "tcga", "icgc_arr", "ouh"))
 
-
-
 ```
 
+```{r barplot_model_comparison}
+barplotModelComparison(modelComparisonStats, model="icgc_clinical",
+                 names=c("TCGA","PCSI","ICGC-array","OUH"),
+                 colours=c("palevioletred1", "darkgrey"))
+```
 
+```{r }
+modelComparisonPvals <- metaEstimateComparisonAUCs(modelComparisonStats,
+                                                   model="icgc_clinical",
+                                                   seqCohorts=c("pcsi", "tcga"))
+modelComparisonPvals
+```
 
+```{r clinical_model_dindex_cindex}
+modelProbabilities <- calcualteCohortProbabilties(fitClinicalModels, clinicalFeatures, model="icgc_clinical")
 
-
-
+modelDandCindex(modelProbablities, clinicalFeatures, model="icgc_clinical")
+```
 
 
 

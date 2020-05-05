@@ -23,9 +23,7 @@ compareClinicalModels <- function(clinicalFeatures, cohortClasses, cohorts,
                                   models, formula="binary_grp ~ Age + Sex +
                                   T_status + N + M + Grade")
 {
-    modelFits <- summarizeClinicalModels(clinicalFeatures, cohorts=models)
-
-    fitModels <- lapply(modelFits, function(cohort) cohort$model)
+    fitModels <- summarizeClinicalModels(clinicalFeatures, cohorts=models)
 
     cFeatures <- clinicalFeatures[grep(paste(cohorts, collapse="|"),
                                        names(clinicalFeatures))]
@@ -33,14 +31,11 @@ compareClinicalModels <- function(clinicalFeatures, cohortClasses, cohorts,
     cClasses <- cohortClasses[grep(paste(cohorts, collapse="|"),
                                    names(cohortClasses))]
 
-    cohortProbs <- lapply(fitModels,
-                          function(model, clinicalCohorts)
-                              .predictProbPerCohort(clinicalCohorts, model),
-                          clinicalCohorts=cFeatures)
+    cohortProbs <- calcualteCohortProbabilties(fitModels, clinicalFeatures, model=1)
 
-    modelAUCs <- .estimateModelAUCs(cFeatures, cohortProbs)
+    modelComparisonStats <- .estimateModelAUCs(cFeatures, cohortProbs)
 
-    return(modelAUCs)
+    return(modelComparisonStats)
 }
 
 #' Fit a generalized linear model for each clinical cohort in a list
@@ -93,38 +88,29 @@ summarizeClinicalModels <- function(clinicalFeatures, cohorts,
                           formula=formula)
     }
 
-    summaries <- lapply(models, summary)
-    anovas <- lapply(models, summary)
-
-    results <- .zipLists(models, summaries, anovas,
-                         sublistNames=c("model", "summary", "anova"))
-    return(results)
+    return(models)
 }
 
+#' Calculate the clinical and PCOSP probabiltie for a clinical cohort and
+#'     a given clinical model
+#'
+#' @param clinicalCohorts
+#' @param model
 #'
 #'
-#'
-#'
-.predictProbPerCohort <- function(clinicalCohorts, model) {
-    lapply(clinicalCohorts, .predictClinicalCohortProb, model=model)
-}
-
-#'
-#'
-#'
-#'
+#' @keywords internal
 .predictClinicalCohortProb <- function(clinicalCohort, model) {
 
     rownames(clinicalCohort) <- clinicalCohort$ID
 
-    prediction1 <- predict(model, clinicalCohort, na.action=na.exclude,
+    clinical <- predict(model, clinicalCohort, na.action=na.exclude,
                            type="response")
 
-    prediction2 <- 1 - clinicalCohort$pred_prob[which(clinicalCohort$ID %in%
-                                                          names(prediction1))]
+    pcosp <- 1 - clinicalCohort$pred_prob[which(clinicalCohort$ID %in%
+                                                          names(clinical))]
     return(list(
-        "pred1"=prediction1,
-        "pred2"=prediction2
+        "clinical"=clinical,
+        "PCOSP"=pcosp
     ))
 }
 
@@ -144,9 +130,14 @@ summarizeClinicalModels <- function(clinicalFeatures, cohorts,
                .Names=names(cFeatures))
     }
     return(structure(res, .Names=names(cohortProbs)))
-
 }
 
+#'
+#'
+#'
+#'
+#'
+#'
 .calcModelAUC <- function(coh, preds) {
 
     rownames(coh) <- coh$ID
@@ -163,14 +154,48 @@ summarizeClinicalModels <- function(clinicalFeatures, cohorts,
     )
 }
 
+#' Calcualte two different prediction probabilties under a given model for each
+#'   cohort
 #'
+#' @param fitModels A \code{list} of clinical models, as returned by
+#'     `summarizeClinicalModels`
+#' @param clinicalCohorts A \code{list} of clinical cohorts to calculate
+#'     probabilties under the given models
+#' @param model A \code{character} vector with the model name or a \code{numeric}
+#'     vector with the integer index of the model in `fitModels`.
 #'
+#' @return A \code{list} of
 #'
+calcualteCohortProbabilties <- function(fitModels, clinicalCohorts, model=1) {
+    lapply(fitModels,
+           function(model, clinicalCohorts)
+               lapply(clinicalCohorts,
+                      .predictClinicalCohortProb,
+                      model=model),
+           clinicalCohorts=clinicalCohorts)
+}
+
+#' Plot a bar plot comparing models for sequencing, microarray and overall cohorts
+#'
+##TODO:: HEEWON description
+#'
+#' @param modelComparisonStats A \code{list} of model comparison statistics as
+#'     returned by `compareClinicalModels`.
+#' @param model A \code{character} vector the name of the cohort the model
+#'     was trained on, or a \code{numeric} vector with the integer index of
+#'     the model. Defaults to 1, only need this if a model was trained on
+#'     more than one cohort.
+#' @param names A \code{character} vector of names for each paired barplot
+#' @param colours A \code{character} vector of colours for the paired boxplots
+#' @param ... Fallthrough arguments to `barplot`. Default values are used if
+#'     this is exlcuded.
+#'
+#' @return Nothing, draws a plot
 #'
 #' @export
-barplotModelAUCs <- function(modelAUCs, model, names, colours, ...) {
+barplotModelComparison <- function(modelComparisonStats, model=1, names, colours, ...) {
     data <-data.frame(
-        lapply(modelAUCs[[model]],
+        lapply(modelComparisonStats[[model]],
                function(cohort)
                    as.numeric(c(cohort$roc1$roc$AUC, cohort$roc2$roc$AUC))
         ))
@@ -181,7 +206,92 @@ barplotModelAUCs <- function(modelAUCs, model, names, colours, ...) {
         barplot(as.matrix(data), ...)
     } else {
         barplot(as.matrix(data), main="", ylim=c(0, 0.8), ylab="AUCs",
-                beside=TRUE, col=colours, cex.main=1.4,
-                space=rep(c(0.6, 0.08), length(modelAUCs[[model]])))
+                beside=TRUE, col=colours, cex.main=1.4, border="NA",
+                space=rep(c(0.6, 0.08), length(modelComparisonStats[[model]])))
     }
+}
+
+#'
+#'
+#'
+#'
+#'
+metaEstimateComparisonAUCs <- function(modelComparisonStats, model=1, seqCohorts) {
+
+    comparisonStats <- modelComparisonStats[[model]]
+
+    isSeq <- grepl(paste(seqCohorts, collapse="|"), names(comparisonStats))
+
+    pred1Estimates <- .metaEstimateModelAUCs(comparisonStats,
+                                             subsets=list(isSeq, !isSeq, TRUE),
+                                             subsetNames=c("Sequencing",
+                                                           "Microarray",
+                                                           "Overall"),
+                                             na.rm=c(TRUE, FALSE, TRUE),
+                                             hetero=c(TRUE, TRUE, TRUE),
+                                             prediction=1)
+
+    pred2Estimates <- .metaEstimateModelAUCs(comparisonStats,
+                                             subsets=list(isSeq, !isSeq, TRUE),
+                                             subsetNames=c("Sequencing",
+                                                           "Microarray",
+                                                           "Overall"),
+                                             na.rm=c(TRUE, FALSE, TRUE),
+                                             hetero=c(TRUE, TRUE, TRUE),
+                                             prediction=2)
+
+    pred1Pvals <- lapply(pred1Estimates, function(subset)
+        2*pnorm((subset$prediction$estimate - 0.5)/subset$prediction$se,
+              lower.tail = subset$prediction$estimate < 0.5))
+
+    pred2Pvals <- lapply(pred2Estimates, function(subset)
+        2*pnorm((subset$prediction$estimate - 0.5)/subset$prediction$se,
+                lower.tail = subset$prediction$estimate < 0.5))
+
+    return(list(
+        "prediction1"=pred1Pvals ,
+        "prediction2"=pred2Pvals
+    ))
+}
+
+#'
+#'
+#'
+#'
+#'
+.metaEstimateModelAUCs <- function(comparisonStats, subsets, subsetNames,
+                                   prediction, na.rm, hetero) {
+    structure(lapply(seq_along(subsets),
+           function(i, subsets, comparisonStats, prediction, na.rm, hetero)
+               .calculateModelAUCs(comparisonStats[subsets[[i]]],
+                                   modelIdx=prediction, na.rm=na.rm[i],
+                                   hetero=hetero[i]),
+           comparisonStats=comparisonStats,
+           na.rm=na.rm,
+           hetero=hetero,
+           subsets=subsets,
+           prediction=prediction),
+           .Names=subsetNames)
+}
+
+
+#'
+#'
+#'
+#'
+#'
+#'
+.calculateModelAUCs <- function(comparisonStats, modelIdx, na.rm, hetero) {
+        list(
+            "prediction"=combine.est(
+            vapply(comparisonStats,
+                   function(cohort) as.numeric(cohort[[modelIdx]]$roc$AUC),
+                   FUN.VALUE=numeric(1)),
+            vapply(comparisonStats,
+                   function(cohort) as.numeric(cohort[[modelIdx]]$roc$AUC.SE),
+                   FUN.VALUE=numeric(1)),
+            na.rm=na.rm,
+            hetero=hetero),
+            "cohorts"=names(comparisonStats)
+    )
 }
