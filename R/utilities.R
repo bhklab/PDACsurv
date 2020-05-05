@@ -5,6 +5,7 @@
 #'
 #' @param factor A
 #'
+#' @export
 ##FIXME:: Make sure all the data is either a factor, or not a factor?
 ##FIXME:: This breaks when written with levels because not all of them are factors
 as.numeric.factor <- function(factor) { as.numeric(as.character(factor)) }

@@ -120,7 +120,7 @@ system.time({
     randomGeneModels1 <- buildRandomGeneAssignmentModels(trainingCohorts, 
                                                          numModels=1000,
                                                          nthread=15,
-                                                         original=TRUE)
+                                                         original=FALSE)
 })
 ```
 
@@ -229,16 +229,13 @@ forestPlotModelComparision(clinicalModelStats,
 ## 8. Existing Classifier Score Calculations
 
 ```{r existing_classifier_forest_plots}
-source(file.path("..", "R", "8_existingClassifiersScoreCalculation.R"))
-
 dataDir <- file.path("..", "data")
 classifierDir <- file.path(dataDir, "Classifier_Comparison")
 
 # Birnbaum data
-
 fileNames1 <- list.files(file.path(classifierDir, "Birnbaum"))[-1]
 geneCoefFile1 <-"bmc_genes.txt"
-    
+
 birnbaumScores <- parseGenefuFiles(file.path(classifierDir, "Birnbaum"), fileNames1, geneCoefFile1)
 
 # Chen data
@@ -249,12 +246,64 @@ chenScores <- parseGenefuFiles(file.path(classifierDir, "Chen"), fileNames2, gen
 
 # Haider data (provided by author)
 load(file.path(dataDir, "haiderScores.rda"))
+haiderScores <- haider_prob
+
+# Harmonize case/format of names to use for subsetting the list
+names(haiderScores) <- gsub("-.*|_.*", "", tolower(names(haiderScores)))
 
 # PCOSP data
-PCOSPscores <- validationStats$probabilities
+load(file.path(dataDir, "pcosp_Scores.RData"))
+PCOSPscores <- pcosp_prob
 ```
 
 ## 9. Existing Classifier Forestplots
+
+```{r }
+# Extract survival data from our validation cohorts
+load(file.path(dataDir, "survival_comparison_published_model.RData"))
+
+# Parse into proper format for DF function
+isOS <- grepl('OS$', names(survival))
+OS <- structure(survival[isOS], 
+                .Names=unique(gsub("_.*", "", names(survival))))
+OS_Status <- structure(survival[!isOS],
+                     .Names=unique(gsub("_.*", "", names(survival))))
+
+cohortSurvivalData <- lapply(seq_along(OS), 
+                             function(i, OS, OS_Status) 
+                                 data.frame("OS"=OS[[i]], "OS_Status"=OS_Status[[i]]),
+                             OS=OS, OS_Status=OS_Status)
+names(cohortSurvivalData) <- names(OS)
+
+seqCohorts <- c("tcga", "pcsi", "kirby")
+
+names1 <- intersect(names(PCOSPscores), names(cohortSurvivalData))
+PCOSPstats <- constructMetaEstimatesDF(PCOSPscores[names1], 
+                                       cohortSurvivalData[names1], 
+                                       seqCohorts)
+
+
+names2 <- intersect(names(PCOSPscores), names(cohortSurvivalData))
+birnbaumStats <- constructMetaEstimatesDF(birnbaumScores[names2], 
+                                          cohortSurvivalData[names2], 
+                                          seqCohorts)
+
+
+names3 <- intersect(names(PCOSPscores), names(cohortSurvivalData))
+chenStats <- constructMetaEstimatesDF(chenScores[names3], 
+                                      cohortSurvivalData[names3], 
+                                      seqCohorts)
+
+names4 <- intersect(names(PCOSPscores), names(cohortSurvivalData))
+haiderStats <- constructMetaEstimatesDF(haiderScores[names4], 
+                                        cohortSurvivalData[names4], 
+                                        seqCohorts)
+
+```
+
+```{r }
+
+```
 
 ```{r }
 

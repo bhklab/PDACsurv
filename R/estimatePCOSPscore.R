@@ -12,6 +12,7 @@
 #' @return A \code{vector} containing the probabilities per patient
 #'
 #' @importFrom switchBox SWAP.KTSP.Classify
+#' @export
 estimatePCOSPprob <- function(valMat, selectedModels, nthread) {
 
   # Temporily change number of cores to parallelize over
