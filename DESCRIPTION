@@ -1,8 +1,8 @@
 Package: PCOSP
 Type: Package
 Title: Analysis of Large-Scale Pharmacogenomic Data
-Version: 1.17.1
-Date: 2020-01-28
+Version: 0.0.1
+Date: 2020-05-06
 Author: Petr Smirnov, Zhaleh Safikhani, Mark Freeman, Benjamin Haibe-Kains
 Maintainer: Benjamin Haibe-Kains <benjamin.haibe.kains@utoronto.ca>
 Description: A unique set of 89 pancreatic cancer samples profiled using both sequencing and microarray 
@@ -25,7 +25,9 @@ Imports:
     survival,
     data.table,
     reportROC,
-    verification
+    verification,
+    genefu,
+    BiocParallel
 Depends: R (>= 3.6) 
 RoxygenNote: 7.1.0
 biocViews: GeneExpression, Pharmacogenetics, Pharmacogenomics, Software, Classification

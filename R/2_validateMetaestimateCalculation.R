@@ -143,7 +143,10 @@ calculatePCOSPscores <- function(validationCohorts, selectedModels, nthread) {
   # Estimate PCOSP scores from cohort matrixes
   PCOSPscoreList <- lapply(cohortMatrixList,
                            function(cohortMat, selectedModels, nthread)
-                             estimatePCOSPprob(cohortMat, selectedModels, nthread),
+                             structure(estimatePCOSPprob(cohortMat,
+                                                         selectedModels,
+                                                         nthread),
+                                       .Names=rownames(cohortMat)),
                            selectedModels=selectedModels, nthread=nthread)
   return(PCOSPscoreList)
 }

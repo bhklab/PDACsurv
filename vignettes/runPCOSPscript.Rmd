@@ -34,7 +34,7 @@ selectedModels <- buildPCOSPmodels(trainingCohorts, numModels=1000, nthread=15)
 ```{r calculate_stats}
 load(file.path("..", "data", "validationCohorts.rda"))
 
-# Select the validation cohorts we want to includ
+# Select the validation cohorts we want to include
 include <- c("TCGA", "PCSI", "Kirby", "ICGC_arr", "UNC", "Chen", "OUH",
              "Zhang", "Winter", "Collisson")
 
@@ -234,15 +234,17 @@ classifierDir <- file.path(dataDir, "Classifier_Comparison")
 
 # Birnbaum data
 fileNames1 <- list.files(file.path(classifierDir, "Birnbaum"))[-1]
-geneCoefFile1 <-"bmc_genes.txt"
+geneCoefFile1 <-  list.files(file.path(classifierDir, "Birnbaum"))[1]
 
-birnbaumScores <- parseGenefuFiles(file.path(classifierDir, "Birnbaum"), fileNames1, geneCoefFile1)
+birnbaumSigScores <- readGenefuFilesToSigScores(file.path(classifierDir, "Birnbaum"), 
+                                     fileNames1, 
+                                     geneCoefFile1)
 
 # Chen data
 fileNames2 <- list.files(file.path(classifierDir, "Chen"))[-1]
-geneCoefFile2 <- "chen_genes.txt"
+geneCoefFile2 <- list.files(file.path(classifierDir, "Chen"))[1]
 
-chenScores <- parseGenefuFiles(file.path(classifierDir, "Chen"), fileNames2, geneCoefFile2)
+chenSigScores <- readGenefuFilesToSigScores(file.path(classifierDir, "Chen"), fileNames2, geneCoefFile2)
 
 # Haider data (provided by author)
 load(file.path(dataDir, "haiderScores.rda"))
@@ -254,49 +256,31 @@ names(haiderScores) <- gsub("-.*|_.*", "", tolower(names(haiderScores)))
 # PCOSP data
 load(file.path(dataDir, "pcosp_Scores.RData"))
 PCOSPscores <- pcosp_prob
+names(PCOSPscores) <- gsub("-.*|_.*", "", tolower(names(PCOSPscores)))
+
 ```
 
 ## 9. Existing Classifier Forestplots
 
 ```{r }
-# Extract survival data from our validation cohorts
-load(file.path(dataDir, "survival_comparison_published_model.RData"))
-
-# Parse into proper format for DF function
-isOS <- grepl('OS$', names(survival))
-OS <- structure(survival[isOS], 
-                .Names=unique(gsub("_.*", "", names(survival))))
-OS_Status <- structure(survival[!isOS],
-                     .Names=unique(gsub("_.*", "", names(survival))))
-
-cohortSurvivalData <- lapply(seq_along(OS), 
-                             function(i, OS, OS_Status) 
-                                 data.frame("OS"=OS[[i]], "OS_Status"=OS_Status[[i]]),
-                             OS=OS, OS_Status=OS_Status)
-names(cohortSurvivalData) <- names(OS)
 
 seqCohorts <- c("tcga", "pcsi", "kirby")
 
-names1 <- intersect(names(PCOSPscores), names(cohortSurvivalData))
-PCOSPstats <- constructMetaEstimatesDF(PCOSPscores[names1], 
-                                       cohortSurvivalData[names1], 
+PCOSPstats <- constructMetaEstimatesDF(PCOSPscores[names(cohortSurvivalData)], 
+                                       cohortSurvivalData, 
                                        seqCohorts)
 
 
-names2 <- intersect(names(PCOSPscores), names(cohortSurvivalData))
-birnbaumStats <- constructMetaEstimatesDF(birnbaumScores[names2], 
-                                          cohortSurvivalData[names2], 
+birnbaumStats <- constructMetaEstimatesDF(birnbaumScores[names(cohortSurvivalData)], 
+                                          cohortSurvivalData, 
                                           seqCohorts)
 
-
-names3 <- intersect(names(PCOSPscores), names(cohortSurvivalData))
-chenStats <- constructMetaEstimatesDF(chenScores[names3], 
-                                      cohortSurvivalData[names3], 
+chenStats <- constructMetaEstimatesDF(chenScores[names(cohortSurvivalData)], 
+                                      cohortSurvivalData, 
                                       seqCohorts)
 
-names4 <- intersect(names(PCOSPscores), names(cohortSurvivalData))
-haiderStats <- constructMetaEstimatesDF(haiderScores[names4], 
-                                        cohortSurvivalData[names4], 
+haiderStats <- constructMetaEstimatesDF(haiderScores[names(cohortSurvivalData)], 
+                                        cohortSurvivalData, 
                                         seqCohorts)
 
 ```

@@ -1,4 +1,3 @@
-
 #' Convert the levels of a factor to number
 #'
 #' A convenience function to converting factor levels into numeric
@@ -10,7 +9,7 @@
 ##FIXME:: This breaks when written with levels because not all of them are factors
 as.numeric.factor <- function(factor) { as.numeric(as.character(factor)) }
 
-    #' Exclude samples censored before year 1
+#' Exclude samples censored before year 1
 #'
 #' @param seqCohort A \code{}
 #'
