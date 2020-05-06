@@ -54,6 +54,7 @@ buildRandomLabelShufflingModel <- function(trainingCohorts, numModels, nthread,
 ##TODO:: See if we can refactor part of this to be reused in reshuffleRandomModels
 #' @importFrom caret confusionMatrix
 #' @importFrom switchBox SWAP.KTSP.Train
+#' @importFrom BiocParallel bplapply
 .generateRLSmodels <- function(cohortMatrix, cohortMatrixGroups, numModels) {
 
   trainingDataRowIdxs <- lapply(rep(40, numModels),

@@ -59,11 +59,9 @@ system.time({
 ### forestPlotMetaEstimates
 
 ```{r forest_plots}
-
 forestPlotMetaEstimate(validationStats,
                        stat="dIndex",
                        isSummary=c(rep(FALSE, 10), rep(TRUE, 3)))
-
 ```
 
 
@@ -76,13 +74,11 @@ forestPlotMetaEstimate(validationStats,
 ### Calculate AUC Distribution and Plot ROC Curves
 
 ```{r}
-
 aucStats <- aucMetaEstimates(validationCohorts, validationStats, 
                             seqCohorts=seqCohorts)
 ```
 
 ```{r plot_ROC_curve}
-
 formattedValCohorts <- formatValidationCohorts(validationCohorts)
 PCOSPscores <- validationStats$probabilities
 colours <- c("chartreuse3", "magenta", "#fb9a99", "turquoise3", "darkgoldenrod1",
@@ -205,7 +201,7 @@ modelComparisonPvals
 clinicalFeatures <- clinicalFeatures[grepl(paste(cohorts, collapse="|"), names(clinicalFeatures))]
 names(clinicalFeatures) <- cohorts
 
-modelProbabilities <- calcualteCohortProbabilties(fitClinicalModels, clinicalFeatures)
+modelProbabilities <- calculateCohortProbabilties(fitClinicalModels, clinicalFeatures)
 
 clinicalModelStats <- calculateModelDandCindex(modelProbabilities, 
                                                clinicalFeatures,
@@ -247,50 +243,53 @@ geneCoefFile2 <- list.files(file.path(classifierDir, "Chen"))[1]
 chenSigScores <- readGenefuFilesToSigScores(file.path(classifierDir, "Chen"), fileNames2, geneCoefFile2)
 
 # Haider data (provided by author)
-load(file.path(dataDir, "haiderScores.rda"))
-haiderScores <- haider_prob
+load(file.path(dataDir, "haiderSigScores.rda"))
 
 # Harmonize case/format of names to use for subsetting the list
-names(haiderScores) <- gsub("-.*|_.*", "", tolower(names(haiderScores)))
+names(haiderSigScores) <- gsub("-.*|_.*", "", tolower(names(haiderSigScores)))
 
 # PCOSP data
-load(file.path(dataDir, "pcosp_Scores.RData"))
-PCOSPscores <- pcosp_prob
-names(PCOSPscores) <- gsub("-.*|_.*", "", tolower(names(PCOSPscores)))
+PSCOSPscores <- validationStats$probabilities
 
+# Harmonize case/format of names to use for subsetting the list
+names(PCOSPscores) <- gsub("-.*|_.*", "", tolower(names(PCOSPscores)))
 ```
 
 ## 9. Existing Classifier Forestplots
 
 ```{r }
+# Get cohort survival data
+cohortSurvivalData <- lapply(validationCohorts, 
+                             function(cohort) {
+                                 data <- cbind("OS"=cohort$OS, "OS_Status"=cohort$OS_Status)
+                                 rownames(data) <- rownames(cohort)
+                                 data})
+
+# Harmonize case/format of names to use for subsetting the list
+names(cohortSurvivalData) <- gsub("-.*|_.*", "", tolower(names(cohortSurvivalData)))
+
+# Put our classifier data into a list
+metaestimateData <- list("birnbaum"=birnbaumSigScores, "chen"=chenSigScores, "haider"=haiderSigScores, 
+                         "pcosp"=PCOSPscores, "survival"=cohortSurvivalData)
+
+metaestimateData <- subsetSharedCohortsAndSamples(metaestimateData)
 
 seqCohorts <- c("tcga", "pcsi", "kirby")
 
-PCOSPstats <- constructMetaEstimatesDF(PCOSPscores[names(cohortSurvivalData)], 
-                                       cohortSurvivalData, 
-                                       seqCohorts)
-
-
-birnbaumStats <- constructMetaEstimatesDF(birnbaumScores[names(cohortSurvivalData)], 
-                                          cohortSurvivalData, 
-                                          seqCohorts)
-
-chenStats <- constructMetaEstimatesDF(chenScores[names(cohortSurvivalData)], 
-                                      cohortSurvivalData, 
-                                      seqCohorts)
-
-haiderStats <- constructMetaEstimatesDF(haiderScores[names(cohortSurvivalData)], 
-                                        cohortSurvivalData, 
-                                        seqCohorts)
-
+classifierStats <- lapply(metaestimateData[names(metaestimateData) != "survival"],
+                          constructMetaEstimatesDF,
+                          cohortData=metaestimateData[["survival"]],
+                          seqCohorts=seqCohorts)
 ```
 
-```{r }
-
+```{r classifier_forest_plot_c_index}
+    forestClassifierModelComparision(classifierStats, "cIndex", 
+                                names=c("Haider, 2014", "Chen, 2015", "Birnbaum, 2017", "PCOSP"))
 ```
 
-```{r }
+```{r classifier_forest_plot_d_index}
 
+```
 ```
 
 ## 10. Subtype Specific 

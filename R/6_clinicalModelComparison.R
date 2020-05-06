@@ -163,8 +163,8 @@ summarizeClinicalModels <- function(clinicalFeatures, cohorts,
 #'     probabilties under the given models
 #'
 #' @return A \code{list} of
-#'
-calcualteCohortProbabilties <- function(fitModels, clinicalCohorts) {
+#' @export
+calculateCohortProbabilties <- function(fitModels, clinicalCohorts) {
     lapply(fitModels,
            function(model, clinicalCohorts)
                lapply(clinicalCohorts,
@@ -212,8 +212,8 @@ barplotModelComparison <- function(modelComparisonStats, model=1, names, colours
 #'
 #'
 #'
-#'
-#'
+#' @importFrom survcomp combine.est
+#' @export
 metaEstimateComparisonAUCs <- function(modelComparisonStats, model=1, seqCohorts) {
 
     comparisonStats <- modelComparisonStats[[model]]

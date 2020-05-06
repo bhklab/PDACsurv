@@ -94,6 +94,7 @@ convertCohortToMatrix <- function(cohort) {
 #'
 #' @importFrom switchBox SWAP.KTSP.Classify
 #' @importFrom reportROC reportROC
+#' @importFrom BiocParallel bplapply
 .predictKTSP <- function(formattedValCohort, selectedModels, nthread){
 
     # Temporily change number of cores to parallelize over
@@ -151,6 +152,44 @@ convertCohortToMatrix <- function(cohort) {
     return(zipped)
 }
 
+
+#'
+#'
+#'
+#'
+#' @export
+subsetSharedCohortsAndSamples <- function(metaestimateData) {
+    # Intersect the cohort names
+    cohortNames <- Reduce(intersect, lapply(metaestimateData, names))
+    names(cohortNames) <- cohortNames
+
+    # Subset and reorder all data
+    metaestimateData <- lapply(metaestimateData, function(data, cohorts) data[cohorts], cohorts=cohortNames)
+
+    classiferSampleNames <- c(lapply(metaestimateData[1:4], function(data) lapply(data, names)),
+                              lapply(metaestimateData[5], function(data) lapply(data, rownames)))
+
+    sharedSampleNames <- lapply(cohortNames,
+                                function(cohort, classifierSampleNames)
+                                    Reduce(intersect, lapply(classiferSampleNames,
+                                                             function(class, cohort) class[[cohort]],
+                                                             cohort=cohort)),
+                                class=classiferSampleNames)
+    # Subset to shared samples
+    structure(lapply(names(metaestimateData),
+           function(class, data, samples) structure(lapply(names(samples),
+                                                function(cohort, data, samples, class) {
+                                                    if (class=="survival") {
+                                                        data[[class]][[cohort]][samples[[cohort]], ]
+                                                    } else {
+                                                        data[[class]][[cohort]][samples[[cohort]]]
+                                                    }
+                                                },
+                                                data=data, samples=samples, class=class),
+                                                .Names=names(samples)),
+           data=metaestimateData, samples=sharedSampleNames),
+           .Names=names(metaestimateData))
+}
 
 
 

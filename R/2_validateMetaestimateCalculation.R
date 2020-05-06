@@ -3,7 +3,7 @@
 ##TODO:: HEEWON - what does this function do?
 #'
 #' The function calculates D-index and Concordance index for independent cohorts
-#'   and calculates the meta-estimae of C-index and D-index. The forestplot of
+#'   and calculates the meta-estimate of C-index and D-index. The forestplot of
 #'   C-index and D-index was plotted for all the cohorts.
 #'
 #' @example
@@ -32,7 +32,7 @@
 #'   list labels indicate which cohorts, with the subsequent list level
 #'   indicating the type of statistic (i.e., dindex vs concordance index)
 #'
-
+#'
 #' @export
 calculateValidationStats <- function(validationCohorts, selectedModels, seqCohorts,
                                 nthread, saveDir) {
@@ -54,6 +54,7 @@ calculateValidationStats <- function(validationCohorts, selectedModels, seqCohor
 #' @importFrom reportROC reportROC
 #' @importFrom pROC roc
 #' @importFrom verification roc.area
+#' @importFrom survival strata
 #' @export
 constructMetaEstimatesDF <- function(probList, cohortData, seqCohorts) {
 
@@ -179,8 +180,8 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
     cohort <- validationCohorts[[i]]
     PCOSPscore <- PCOSPscoreList[[i]]
     D.index(x=PCOSPscore,
-            surv.time=as.numeric.factor(cohort$OS),
-            surv.event=as.numeric.factor(cohort$OS_Status),
+            surv.time=as.numeric.factor(cohort[, 'OS']),
+            surv.event=as.numeric.factor(cohort[, 'OS_Status']),
             na.rm=TRUE,
             alpha=0.05,
             method.test="logrank")
@@ -204,8 +205,8 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
     cohort <- validationCohorts[[i]]
     PCOSPscore <- PCOSPscoreList[[i]]
     concordance.index(x=PCOSPscore,
-            surv.time=as.numeric.factor(cohort$OS),
-            surv.event=as.numeric.factor(cohort$OS_Status),
+            surv.time=as.numeric.factor(cohort[, 'OS']),
+            surv.event=as.numeric.factor(cohort[, 'OS_Status']),
             method="noether")
   }), .Names=names(PCOSPscoreList))
 }

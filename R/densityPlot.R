@@ -96,7 +96,7 @@ predictKTSPs <- function(formattedValCohorts, selectedModels, nthread) {
 #'
 #'
 #'
-#'
+#' @importFrom BiocParallel bplapply
 .summarizeKTSPs <- function(KTSPs, nModels, nthread) {
     # Temporily change number of cores to parallelize over
     opts <- options()

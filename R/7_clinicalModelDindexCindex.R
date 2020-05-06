@@ -5,6 +5,7 @@
 #' @param seqCohorts A
 #' @param model A
 #'
+#' @export
 calculateModelDandCindex <- function(modelProbabilities, clinicalFeatures,
                                      seqCohorts, model=1) {
 
@@ -33,7 +34,6 @@ calculateModelDandCindex <- function(modelProbabilities, clinicalFeatures,
     "PCOSP"=PCOSPstats
   ))
 }
-
 
 ###########################
 
