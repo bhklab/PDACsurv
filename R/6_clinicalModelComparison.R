@@ -18,6 +18,7 @@
 # @importFrom verification
 # @importFrom glmnet glm
 # @importFrom stats anova
+#' @importFrom reportROC reportROC
 #' @export
 compareClinicalModels <- function(clinicalFeatures, cohortClasses, cohorts,
                                   models, formula="binary_grp ~ Age + Sex +
@@ -31,7 +32,7 @@ compareClinicalModels <- function(clinicalFeatures, cohortClasses, cohorts,
     cClasses <- cohortClasses[grep(paste(cohorts, collapse="|"),
                                    names(cohortClasses))]
 
-    cohortProbs <- calcualteCohortProbabilties(fitModels, cFeatures)
+    cohortProbs <- calculateCohortProbabilties(fitModels, cFeatures)
 
     modelComparisonStats <- .estimateModelAUCs(cFeatures, cohortProbs)
 

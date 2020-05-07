@@ -9,6 +9,8 @@
 #'    to read from and extract the gene signature scores.
 #' @param geneCoefFile A \code{character} vector with the file name of the
 #'    gene coefficients.
+#' @param signed A \code{logical} vector indicating whether the gene coefficients
+#'    read in are signed or not. Default is FALSE
 #' @param ... Fall through parameters to `sig.scores` function from `genefu`.
 #'    Overrides the default settings.
 #'
@@ -21,7 +23,7 @@
 #'
 #' @importFrom genefu sig.score
 #' @export
-readGenefuFilesToSigScores <- function(dataDir, fileNames, geneCoefFile, ...) {
+readGenefuFilesToSigScores <- function(dataDir, fileNames, geneCoefFile, signed=FALSE, ...) {
 
     geneCoefficients <- read.table(file.path(dataDir, geneCoefFile),
                                    sep="\t", header=TRUE)
@@ -45,7 +47,7 @@ readGenefuFilesToSigScores <- function(dataDir, fileNames, geneCoefFile, ...) {
                                 structure(sig.score(x=geneCoef, data=data,
                                           do.mapping=FALSE, mapping,
                                           size=0, cutoff=NA,
-                                          signed=FALSE, verbose=FALSE
+                                          signed=signed, verbose=FALSE
                                           )$score, .Names=data[,1]),
                             geneCoef=geneCoefficients)
     }
@@ -53,6 +55,9 @@ readGenefuFilesToSigScores <- function(dataDir, fileNames, geneCoefFile, ...) {
     names(sigScores) <- gsub("\\_.*txt|.txt", "", fileNames)
     return(sigScores)
 }
+
+
+# DEPRECATED --------------------------------------------------------------
 
 #' Get a list of `sig.score` vectors named according to the probe they were
 #'     calculated from.

@@ -14,6 +14,7 @@ as.numeric.factor <- function(factor) { as.numeric(as.character(factor)) }
 #' @param seqCohort A \code{}
 #'
 #' @return A sorted vector of indices
+#' @export
 whichNotCensoredYearOne <- function(seqCohort) {
     idxNotCensored <- which(as.numeric.factor(seqCohort$OS) <= 365 &
                                 as.numeric.factor(seqCohort$OS_Status) == 1)
@@ -159,12 +160,12 @@ convertCohortToMatrix <- function(cohort) {
 #'
 #' @export
 subsetSharedCohortsAndSamples <- function(metaestimateData) {
-    # Intersect the cohort names
-    cohortNames <- Reduce(intersect, lapply(metaestimateData, names))
-    names(cohortNames) <- cohortNames
+        # Intersect the cohort names
+        cohortNames <- Reduce(intersect, lapply(metaestimateData, names))
+        names(cohortNames) <- cohortNames
 
-    # Subset and reorder all data
-    metaestimateData <- lapply(metaestimateData, function(data, cohorts) data[cohorts], cohorts=cohortNames)
+        # Subset and reorder all data
+        metaestimateData <- lapply(metaestimateData, function(data, cohorts) data[cohorts], cohorts=cohortNames)
 
     classiferSampleNames <- c(lapply(metaestimateData[1:4], function(data) lapply(data, names)),
                               lapply(metaestimateData[5], function(data) lapply(data, rownames)))

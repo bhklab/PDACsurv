@@ -32,7 +32,7 @@
 #'   list labels indicate which cohorts, with the subsequent list level
 #'   indicating the type of statistic (i.e., dindex vs concordance index)
 #'
-#'
+#' @importFrom survival strata
 #' @export
 calculateValidationStats <- function(validationCohorts, selectedModels, seqCohorts,
                                 nthread, saveDir) {
@@ -56,7 +56,7 @@ calculateValidationStats <- function(validationCohorts, selectedModels, seqCohor
 #' @importFrom verification roc.area
 #' @importFrom survival strata
 #' @export
-constructMetaEstimatesDF <- function(probList, cohortData, seqCohorts) {
+constructMetaEstimatesDF <- function(probList, cohortData, seqCohorts, hetero=c(TRUE, FALSE, FALSE)) {
 
   ## Dindex estimate calculation
   DindexList <- .estimateDindex(probList, cohortData)
@@ -69,7 +69,7 @@ constructMetaEstimatesDF <- function(probList, cohortData, seqCohorts) {
 
   ##  Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR OVERALL DATA
   combinedStats <- metaEstimateStats(DindexList, concordanceIndexList,
-                                     hetero=TRUE)
+                                     hetero=hetero[1])
 
   ## Determine which cohorts are from sequencing data
   isSeq = grepl(paste(seqCohorts, collapse="|"), names(cohortData))
@@ -77,12 +77,12 @@ constructMetaEstimatesDF <- function(probList, cohortData, seqCohorts) {
   ## Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR sequencing cohort
   sequencingStats <- metaEstimateStats(DindexList[isSeq],
                                        concordanceIndexList[isSeq],
-                                       hetero=FALSE)
+                                       hetero=hetero[2])
 
   ## Meta-estimate of d-INDEX AND CONCORDANCE INDEX FOR microarray cohort
   arrayStats <- metaEstimateStats(DindexList[!isSeq],
                                   concordanceIndexList[!isSeq],
-                                  hetero=FALSE)
+                                  hetero=hetero[3])
 
   # Extract statistics for Dindex and concordanceIndex into a list of data.frames
   list(
