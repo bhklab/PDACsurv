@@ -1,7 +1,6 @@
 #' Read in .tsv files of expression data and calculate then return a list with
 #'   a signature score for each expression file.
 #'
-#'
 #' @param dataDir A \code{character} vector containing the path to the
 #'    data directory. We recommend using `file.path` to make your paths
 #'    platform agnostic!

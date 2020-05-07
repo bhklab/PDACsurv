@@ -34,6 +34,9 @@ selectedModels <- buildPCOSPmodels(trainingCohorts, numModels=1000, nthread=15)
 ```{r calculate_stats}
 load(file.path("..", "data", "validationCohorts.rda"))
 
+# Keep a copy of all the cohorts for later
+allValidationCohorts <- validationCohorts
+
 # Select the validation cohorts we want to include
 include <- c("TCGA", "PCSI", "Kirby", "ICGC_arr", "UNC", "Chen", "OUH",
              "Zhang", "Winter", "Collisson")
@@ -46,7 +49,10 @@ names(validationCohorts) <- gsub("_arr", "-array", names(validationCohorts))
 
 # Identify which cohorts contain sequencing data
 seqCohorts <- c("PCSI", "TCGA", "Kirby")
+```
 
+
+```{r calculate_validation_stats}
 # Calculate your validation statistics
 system.time({
         validationStats <- calculateValidationStats(validationCohorts,
@@ -160,7 +166,6 @@ names(results)
 
 ```{r clinical_model_comparison}
 load(file.path(dataDir, "clinicalFeatures.rda"))
-load(file.path(dataDir, "cohortClasses.rda"))
 
 # Rename clinical features for plots and reorder them
 names(clinicalFeatures) <- c("PCSI", "ICGCclinical", "TCGA", "ICGCarray", "OUH")
@@ -298,19 +303,91 @@ classifierStats <- lapply(metaestimateData[names(metaestimateData) != "survival"
 ```
 
 ```{r classifier_forest_plot_c_index}
-    forestClassifierModelComparision(classifierStats, "cIndex", 
-                                names=c("Haider, 2014", "Chen, 2015", "Birnbaum, 2017", "PCOSP"))
+forestClassifierModelComparision(classifierStats, "cIndex", 
+                        names=c("Haider, 2014", "Chen, 2015", "Birnbaum, 2017", "PCOSP"))
 ```
 
 ```{r classifier_forest_plot_d_index}
-forestClassifierModelComparision(classifierStats, "dIndex", 
+forestPlotClassifierModelComparision(classifierStats, "dIndex", 
                                 names=c("Haider, 2014", "Chen, 2015", "Birnbaum, 2017", "PCOSP"))
-```
 ```
 
 ## 10. Subtype Specific 
 
-```{r }
+```{r subtype_statistics}
+load(file.path(dataDir, "cohortClasses.rda"))
 
+# Ensure all cohorts are data.frames
+allValidationCohorts1 <- lapply(allValidationCohorts, function(cohort) as.data.frame(cohort, row.names=rownames(cohort)))
+
+# Match names with cohortClasses and reorder cohorts to match between class and cohort data
+names(allValidationCohorts1) <- tolower(names(allValidationCohorts1))
+names(allValidationCohorts1)[which(names(allValidationCohorts1) == "icgc_seq")] <- "icgc"
+
+# Remove ICGC_array_all
+allValidationCohorts1 <- allValidationCohorts1[names(allValidationCohorts1) != "icgc_array_all"]
+cohortClasses <- cohortClasses[names(cohortClasses) != "icgc_array_all"]
+
+# Reorder validation cohrots to same order as cohortClasses
+allValidationCohorts1 <- allValidationCohorts1[names(cohortClasses)]
+
+# Get cohort survival data
+allCohortSurvivalData <- lapply(allValidationCohorts1, 
+                             function(cohort) {
+                                 OS <- as.numeric.factor(cohort$OS)
+                                 OS_Status <- as.numeric.factor(cohort$OS_Status)
+                                 data.frame("OS"=OS, "OS_Status"=OS_Status,
+                                     row.names=rownames(cohort))
+                                 })
+
+# Get probabilties for all samples
+allCohortProbabilites <- calculatePCOSPscores(allValidationCohorts1, selectedModels, nthread=15)
+
+# Set sequencing cohorts
+seqCohorts <- c("tcga", "pcsi", "kirby")
+
+# Calculate meta-estimates between subtypes per cohort
+cohortSubtypeStats <- calculateCohortSubtypeStats(allCohortProbabilites, allCohortSurvivalData, cohortClasses, seqCohorts=seqCohorts)
 ```
+
+```{r forest_plot_subtype_comparison_dindex}
+forestPlotCohortSubtypeComparison()
+```
+
+
+```{r forest_plot_subtype_comparison_cindex}
+forestPlotCohortSubtypeComparison()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

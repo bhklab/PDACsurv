@@ -18,7 +18,7 @@
 #' @param ... Additional arguments passed to forestplot.
 #'
 #' @importFrom scales scientific
-#' @importFrom forestplot forestplot fpTxtGp
+#' @importFrom forestplot forestplot fpTxtGp fpColors
 #' @importFrom grid unit grid.grabExpr grid.draw gpar
 #' @importFrom ggplot2 ggsave
 #' @export
@@ -204,7 +204,7 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
 #' @param ... Additional arguments passed to forestplot.
 #'
 #' @importFrom scales scientific
-#' @importFrom forestplot forestplot fpTxtGp
+#' @importFrom forestplot forestplot fpTxtGp fpColors
 #' @importFrom grid unit grid.grabExpr grid.draw gpar
 #' @importFrom ggplot2 ggsave
 #' @export
@@ -411,11 +411,11 @@ forestPlotModelComparision <- function(clinicalModelStats, stat, isSummary, file
 #' @param ... Additional arguments passed to forestplot.
 #'
 #' @importFrom scales scientific
-#' @importFrom forestplot forestplot fpTxtGp
+#' @importFrom forestplot forestplot fpTxtGp fpColors
 #' @importFrom grid unit grid.grabExpr grid.draw gpar
 #' @importFrom ggplot2 ggsave
 #' @export
-forestClassifierModelComparision <- function(classifierStats, stat, names, filePath,
+forestPlotClassifierModelComparision <- function(classifierStats, stat, names, filePath,
                                        fileName, ...) {
 
     names(classifierStats) <- names
