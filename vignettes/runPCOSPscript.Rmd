@@ -303,7 +303,7 @@ classifierStats <- lapply(metaestimateData[names(metaestimateData) != "survival"
 ```
 
 ```{r classifier_forest_plot_c_index}
-forestClassifierModelComparision(classifierStats, "cIndex", 
+forestPlotClassifierModelComparision(classifierStats, "cIndex", 
                         names=c("Haider, 2014", "Chen, 2015", "Birnbaum, 2017", "PCOSP"))
 ```
 
@@ -325,8 +325,8 @@ names(allValidationCohorts1) <- tolower(names(allValidationCohorts1))
 names(allValidationCohorts1)[which(names(allValidationCohorts1) == "icgc_seq")] <- "icgc"
 
 # Remove ICGC_array_all
-allValidationCohorts1 <- allValidationCohorts1[names(allValidationCohorts1) != "icgc_array_all"]
-cohortClasses <- cohortClasses[names(cohortClasses) != "icgc_array_all"]
+allValidationCohorts1 <- allValidationCohorts1[!(names(allValidationCohorts1) %in% c("icgc_array_all", "icgc"))]
+cohortClasses <- cohortClasses[!(names(cohortClasses) %in% c("icgc_array_all", "icgc"))]
 
 # Reorder validation cohrots to same order as cohortClasses
 allValidationCohorts1 <- allValidationCohorts1[names(cohortClasses)]
@@ -351,7 +351,22 @@ cohortSubtypeStats <- calculateCohortSubtypeStats(allCohortProbabilites, allCoho
 ```
 
 ```{r forest_plot_subtype_comparison_dindex}
-forestPlotCohortSubtypeComparison()
+forestPlotCohortSubtypeComparison(cohortSubtypeStats, "cIndex", 
+                                  cohortNames=c(NA, "TCGA (n=146)", "Basal-subtype (n=29)", "Classical-subtype (n=117)",
+                                                NA, "PCSI (n=118)", "Basal-subtype (n=25)", "Classical-subtype (n=93)",
+                                                NA, "Kirby (n=51)", "Basal-subtype (n=13)", "Classical-subtype (n=38)",
+                                                NA, "ICGC-array (n=178)", "Basal-subtype (n=156)", "Classical-subtype (n=22)",
+                                                NA, "UNC (n=125)", "Basal-subtype (n=27)", "Classical-subtype (n=98)",
+                                                NA, "Chen (n=63)", "Basal-subtype (n=20)", "Classical-subtype (n=43)",
+                                                NA, "OUH (n=48)", "Basal-subtype (n=08)", "Classical-subtype (n=40)",
+                                                NA, "Zhang (n=42)", "Basal-subtype (n=13)", "Classical-subtype (n=29)",
+                                                NA, "Winter (n=30)", "Basal-subtype (n=8)", "Classical-subtype (n=22)",
+                                                NA, "Collisson (n=27)", "Basal-subtype (n=1)", "Classical-subtype (n=26)",
+                                                NA), 
+                                  summaryNames=c(NA,"Sequencing", "Basal-subtype", "Classical-subtype",
+                                                 NA, "Microarray", "Basal-subtype", "Classical-subtype",
+                                                 NA, "Overall", "Basal-subtype", "Classical-subtype")
+                                  )
 ```
 
 

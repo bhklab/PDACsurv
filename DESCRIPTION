@@ -3,7 +3,7 @@ Type: Package
 Title: Analysis of Large-Scale Pharmacogenomic Data
 Version: 0.0.1
 Date: 2020-05-06
-Author: Petr Smirnov, Zhaleh Safikhani, Mark Freeman, Benjamin Haibe-Kains
+Author: Vandana Sandhu, Heewon Seo, Christopher Eeles, Benjamin Haibe-Kains
 Maintainer: Benjamin Haibe-Kains <benjamin.haibe.kains@utoronto.ca>
 Description: A unique set of 89 pancreatic cancer samples profiled using both sequencing and microarray 
   platform was used for training the PCOSP (Pancreatic cancer overall survival predictor) to predict 

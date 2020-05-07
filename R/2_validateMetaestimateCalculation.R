@@ -32,6 +32,11 @@
 #'   list labels indicate which cohorts, with the subsequent list level
 #'   indicating the type of statistic (i.e., dindex vs concordance index)
 #'
+#' @importFrom survcomp D.index concordance.index combine.est
+#' @importFrom forestplot forestplot
+#' @importFrom reportROC reportROC
+#' @importFrom pROC roc
+#' @importFrom verification roc.area
 #' @importFrom survival strata
 #' @export
 calculateValidationStats <- function(validationCohorts, selectedModels, seqCohorts,
