@@ -350,8 +350,8 @@ seqCohorts <- c("tcga", "pcsi", "kirby")
 cohortSubtypeStats <- calculateCohortSubtypeStats(allCohortProbabilites, allCohortSurvivalData, cohortClasses, seqCohorts=seqCohorts)
 ```
 
-```{r forest_plot_subtype_comparison_dindex}
-forestPlotCohortSubtypeComparison(cohortSubtypeStats, "cIndex", 
+```{r forest_plot_subtype_comparison_dindex, fig.height=11, fig.width=8.5}
+forestPlotCohortSubtypeComparison(cohortSubtypeStats, "dIndex", 
                                   cohortNames=c(NA, "TCGA (n=146)", "Basal-subtype (n=29)", "Classical-subtype (n=117)",
                                                 NA, "PCSI (n=118)", "Basal-subtype (n=25)", "Classical-subtype (n=93)",
                                                 NA, "Kirby (n=51)", "Basal-subtype (n=13)", "Classical-subtype (n=38)",
@@ -370,8 +370,23 @@ forestPlotCohortSubtypeComparison(cohortSubtypeStats, "cIndex",
 ```
 
 
-```{r forest_plot_subtype_comparison_cindex}
-forestPlotCohortSubtypeComparison()
+```{r forest_plot_subtype_comparison_cindex, fig.height=11, fig.width=8.5}
+forestPlotCohortSubtypeComparison(cohortSubtypeStats, "cIndex", 
+                                  cohortNames=c(NA, "TCGA (n=146)", "Basal-subtype (n=29)", "Classical-subtype (n=117)",
+                                                NA, "PCSI (n=118)", "Basal-subtype (n=25)", "Classical-subtype (n=93)",
+                                                NA, "Kirby (n=51)", "Basal-subtype (n=13)", "Classical-subtype (n=38)",
+                                                NA, "ICGC-array (n=178)", "Basal-subtype (n=156)", "Classical-subtype (n=22)",
+                                                NA, "UNC (n=125)", "Basal-subtype (n=27)", "Classical-subtype (n=98)",
+                                                NA, "Chen (n=63)", "Basal-subtype (n=20)", "Classical-subtype (n=43)",
+                                                NA, "OUH (n=48)", "Basal-subtype (n=08)", "Classical-subtype (n=40)",
+                                                NA, "Zhang (n=42)", "Basal-subtype (n=13)", "Classical-subtype (n=29)",
+                                                NA, "Winter (n=30)", "Basal-subtype (n=8)", "Classical-subtype (n=22)",
+                                                NA, "Collisson (n=27)", "Basal-subtype (n=1)", "Classical-subtype (n=26)",
+                                                NA), 
+                                  summaryNames=c(NA,"Sequencing", "Basal-subtype", "Classical-subtype",
+                                                 NA, "Microarray", "Basal-subtype", "Classical-subtype",
+                                                 NA, "Overall", "Basal-subtype", "Classical-subtype")
+                                  )
 ```
 
 

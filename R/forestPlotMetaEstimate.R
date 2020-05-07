@@ -575,7 +575,6 @@ forestPlotClassifierModelComparision <- function(classifierStats, stat, names, f
 
 #' Draw a forest plot using the statistics calcualted in validation metaestimate
 #'
-#' @examples
 #'
 #' @param validationStatsDF A \code{data.frame} containing statistics for Dindex
 #'     or concordance index, as available in the \code{list} returned by
@@ -660,9 +659,7 @@ forestPlotCohortSubtypeComparison <- function(cohortSubtypeStats, stat, cohortNa
     ## FIXME:: Generalize to N classifiers
     plotData <-
         rbind(
-            rep(NA, 4),
             cohortPlotMat,
-            rep(NA, 4),
             summaryData
         )
     colnames(plotData) <- c("mean", "lower", "upper", "pval")
@@ -674,9 +671,8 @@ forestPlotCohortSubtypeComparison <- function(cohortSubtypeStats, stat, cohortNa
     )
 
     plotData <- rbind(rep(NA, 4), plotData)
-    summaries <- c(TRUE, rep(FALSE,40),rep(TRUE,13))
+    summaries <- c(TRUE, TRUE, rep(FALSE,40),rep(TRUE,13))
 
-    par(mar=c(5.1,4.1,4.1,2.1))
     # Match correct plot function to call
     if(missing(...)) {
         if (stat == "dIndex") {
@@ -747,7 +743,7 @@ forestPlotCohortSubtypeComparison <- function(cohortSubtypeStats, stat, cohortNa
             s_clrs =c("#666666", "#1B9E77", "#E7298A", "#666666", "#1B9E77", "#E7298A", "#666666", "#1B9E77", "#E7298A")
             function(..., col){
                 i <<- i + 1
-                fpDrawSummaryCI(...,col=s_clrs[i])
+                fpDrawSummaryCI(..., col=s_clrs[i])
             }
         })
         # Make the plot
@@ -755,19 +751,21 @@ forestPlotCohortSubtypeComparison <- function(cohortSubtypeStats, stat, cohortNa
                                                      plotData[, c("mean", "lower", "upper")],
                                                      xlab="Concordance index",
                                                      is.summary=isSummary,
-                                                     new_page=FALSE,
-                                                     fn.ci_sum = fn1,
-                                                     clip=c(0.4,0.9),
-                                                     txt_gp=fpTxtGp(label=gpar(fontfamily = "Helvetica"),
-                                                                    ticks=gpar(cex=0.5),
-                                                                    xlab=gpar(fontfamily="Helvetica"),
-                                                                    cex=0.5),
-                                                     col=fpColors(text="black"),
+                                                     new_page = FALSE,
+                                                     clip=c(0.3, 0.8),
+                                                     txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),
+                                                                      ticks = gpar(cex=0.5),
+                                                                      xlab  = gpar(fontfamily = "Helvetica", cex = 0.5)),
+                                                     col = fpColors(text="black"),
                                                      title="",
                                                      zero=0.5,
                                                      graphwidth=unit(2, "inches"),
                                                      align=c("l"),
-                                                     boxsize = 0.25))
+                                                     hrzl_lines = list("2" = gpar(lty=2),
+                                                                       "43" = gpar(lty=2, col = "#000044")),
+                                                     vertices= TRUE,
+                                                     fn.ci_norm = fn,
+                                                     fn.ci_sum = fn1))
         }
     return(plot)
 }
@@ -808,26 +806,26 @@ forestPlotCohortSubtypeComparison <- function(cohortSubtypeStats, stat, cohortNa
             }
         })
         # Make the plot
-        plot <- grid.grabExpr(forestplot::forestplot(forestplot(labelText,
-                                                                plotData[, c("mean", "lower", "upper")],
-                                                                xlab="Log2 D-index",
-                                                                is.summary=c(TRUE,TRUE,rep(FALSE,40),rep(TRUE,13)),
-                                                                new_page = FALSE,
-                                                                clip=c(-1,2.5),
-                                                                txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),
-                                                                                 ticks = gpar(cex=0.8),
-                                                                                 xlab  = gpar(fontfamily = "Helvetica")),
-                                                                col = fpColors(summary ="blue",
-                                                                               text="black"),
-                                                                title=" ",
-                                                                zero=0,
-                                                                graphwidth=unit(2, "inches"),
-                                                                align=c("l"),
-                                                                hrzl_lines = list("2" = gpar(lty=2),
-                                                                                  "43" = gpar(lty=2, col = "#000044")),
-                                                                vertices= TRUE,
-                                                                fn.ci_norm = fn,
-                                                                fn.ci_sum = fn1)))
+        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+                                                     plotData[, c("mean", "lower", "upper")],
+                                                     xlab="Log2 D-index",
+                                                     is.summary=isSummary,
+                                                    new_page=FALSE,
+                                                    clip=c(-1, 2.5),
+                                                    txt_gp = fpTxtGp(label = gpar(fontfamily = "Helvetica"),
+                                                                     ticks = gpar(cex=0.8),
+                                                                     xlab  = gpar(fontfamily = "Helvetica")),
+                                                    col = fpColors(summary ="blue",
+                                                                   text="black"),
+                                                    title=" ",
+                                                    zero=0,
+                                                    graphwidth=unit(2, "inches"),
+                                                    align=c("l"),
+                                                    hrzl_lines = list("2" = gpar(lty=2),
+                                                                      "43" = gpar(lty=2, col = "#000044")),
+                                                    vertices= TRUE,
+                                                    fn.ci_norm = fn,
+                                                    fn.ci_sum = fn1))
     }
     return(plot)
 }
