@@ -62,17 +62,14 @@ summarizeClinicalModels <- function(clinicalFeatures, cohorts,
                                     T_status + N + M + Grade",
                                     ...)
 {
-
     if (!missing(cohorts)) {
-        cFeatures <- clinicalFeatures[grep(paste(cohorts, collapse="|"),
-                                           names(clinicalFeatures))]
+        cFeatures <- clinicalFeatures[cohorts]
         names(cFeatures) <- cohorts
     } else {
         cFeatures <- clinicalFeatures
     }
 
     ##TODO:: Add error handling check for formula with data columns
-
     if (!missing(...)) {
         models <- lapply(cFeatures,
                           function(data, formula)

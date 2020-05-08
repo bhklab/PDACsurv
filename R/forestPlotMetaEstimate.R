@@ -223,7 +223,6 @@ forestPlotModelComparison <- function(clinicalModelStats, stat, isSummary, fileP
                 spacing,
                 indexClinical[i, 1:4],
                 indexPCOSP[i, 1:4],
-                spacing
             )
     }
 
