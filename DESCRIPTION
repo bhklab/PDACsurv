@@ -19,6 +19,7 @@ Imports:
     vcdExtra,
     caret,
     forestplot,
+    ggplot2,
     ktspair,
     pROC,
     survcomp,

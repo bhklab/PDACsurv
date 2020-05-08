@@ -8,15 +8,16 @@
 #' @param seqCohorts A
 #' @param vlines A
 #' @param nthread A
-#' @param saveDir A
+#' @param title A
+#' @param filePath A
 #' @param fileName A
 #'
 #' @return A \code{grob} objects from \code{ggplot2}
 #'
 #' @export
-#' @importFrom ggplot2 geom_density labs ggtitle theme geom_vline
-densityPlotModel <- function(formattedValCohorts, selectedModels, seqCohorts,
-                             vlines, nthread, saveDir, fileName) {
+#' @import ggplot2
+densityPlotModel <- function(formattedValCohorts, selectedModels, seqCohorts, title,
+                             vlines, nthread, filePath, fileName) {
 
     dStats <- .densityStats(formattedValCohorts, selectedModels, seqCohorts,
                             nthread)
@@ -37,21 +38,17 @@ densityPlotModel <- function(formattedValCohorts, selectedModels, seqCohorts,
                    linetype="dashed",
                    size=1.5) +
         labs(x = "Balanced Accuracy", y="Density")+
-        ggtitle("Random reshuffling of labels") +
+        ggtitle(title) +
         facet_wrap(~ platforms, ncol=1, strip.position="right") +
         theme(plot.title=element_text(hjust = 0.5),
               panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
               panel.background = element_blank(), axis.line = element_line(colour = "grey"),
               legend.position="none")
 
-    if (!missing(saveDir) & !missing(fileName)) {
-        ggsave(plot, file=file.path(saveDir, fileName))
-        if (interactive()) {
-            plt
-        }
-    } else {
-        plt
+    if (!missing(filePath) && !missing(fileName)) {
+        ggsave(filename=fileName, path=filePath, plot=plt)
     }
+    plt
 }
 
 

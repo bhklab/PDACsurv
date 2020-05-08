@@ -26,11 +26,9 @@ compareClinicalModels <- function(clinicalFeatures, cohortClasses, cohorts,
 {
     fitModels <- summarizeClinicalModels(clinicalFeatures, cohorts=models)
 
-    cFeatures <- clinicalFeatures[grep(paste(cohorts, collapse="|"),
-                                       names(clinicalFeatures))]
+    cFeatures <- clinicalFeatures[cohorts]
 
-    cClasses <- cohortClasses[grep(paste(cohorts, collapse="|"),
-                                   names(cohortClasses))]
+    cClasses <- cohortClasses[cohorts]
 
     cohortProbs <- calculateCohortProbabilties(fitModels, cFeatures)
 
@@ -186,13 +184,15 @@ calculateCohortProbabilties <- function(fitModels, clinicalCohorts) {
 #'     more than one cohort.
 #' @param names A \code{character} vector of names for each paired barplot
 #' @param colours A \code{character} vector of colours for the paired boxplots
+#' @param filePath A
+#' @param fileName A
 #' @param ... Fallthrough arguments to `barplot`. Default values are used if
 #'     this is exlcuded.
 #'
 #' @return Nothing, draws a plot
 #'
 #' @export
-barplotModelComparison <- function(modelComparisonStats, model=1, names, colours, ...) {
+barplotModelComparison <- function(modelComparisonStats, model=1, names, colours, filePath, fileName, ...) {
     data <-data.frame(
         lapply(modelComparisonStats[[model]],
                function(cohort)
@@ -201,13 +201,26 @@ barplotModelComparison <- function(modelComparisonStats, model=1, names, colours
     colnames(data) <- names
     rownames(data) <- c("Clinicopathological mode", "PCOSP")
 
+    if (!missing(filePath) && !missing(fileName)) {
+        pdf(file=file.path(filePath, paste0(fileName, ".pdf")))
+        if (!missing(...)) {
+            barplot(as.matrix(data), ...)
+        } else {
+            barplot(as.matrix(data), main="", ylim=c(0, 0.8), ylab="AUCs",
+                    beside=TRUE, col=colours, cex.main=1.4, border="NA",
+                    space=rep(c(0.6, 0.08), length(modelComparisonStats[[model]])))
+        }
+        dev.off()
+    }
+
     if (!missing(...)) {
-        barplot(as.matrix(data), ...)
+       barplot(as.matrix(data), ...)
     } else {
         barplot(as.matrix(data), main="", ylim=c(0, 0.8), ylab="AUCs",
                 beside=TRUE, col=colours, cex.main=1.4, border="NA",
                 space=rep(c(0.6, 0.08), length(modelComparisonStats[[model]])))
     }
+
 }
 
 #'

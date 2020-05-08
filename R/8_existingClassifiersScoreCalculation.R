@@ -20,7 +20,7 @@
 #'    data contains sample ID/identifiers! If it does not, please rearrange
 #'    the columns before reading the files.
 #'
-#' @importFrom genefu sig.score
+#' @import genefu
 #' @export
 readGenefuFilesToSigScores <- function(dataDir, fileNames, geneCoefFile, signed=FALSE, ...) {
 
@@ -36,14 +36,14 @@ readGenefuFilesToSigScores <- function(dataDir, fileNames, geneCoefFile, signed=
     if (!missing(...)) {
         sigScores <- lapply(expressionData,
                             function(data, geneCoef, ...)
-                                sig.score(x=geneCoef, data=data, ...),
+                                genefu::sig.score(x=geneCoef, data=data, ...),
                             geneCoef=geneCoefficients,
                             ...=...
                             )
     } else {
         sigScores <- lapply(expressionData,
                             function(data, geneCoef)
-                                structure(sig.score(x=geneCoef, data=data,
+                                structure(genefu::sig.score(x=geneCoef, data=data,
                                           do.mapping=FALSE, mapping,
                                           size=0, cutoff=NA,
                                           signed=signed, verbose=FALSE

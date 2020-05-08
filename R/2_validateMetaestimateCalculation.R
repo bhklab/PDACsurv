@@ -32,12 +32,12 @@
 #'   list labels indicate which cohorts, with the subsequent list level
 #'   indicating the type of statistic (i.e., dindex vs concordance index)
 #'
-#' @importFrom survcomp D.index concordance.index combine.est
-#' @importFrom forestplot forestplot
 #' @importFrom reportROC reportROC
 #' @importFrom pROC roc
 #' @importFrom verification roc.area
-#' @importFrom survival strata
+#' @import survcomp
+#' @import forestplot
+#' @import survival
 #' @export
 calculateValidationStats <- function(validationCohorts, selectedModels, seqCohorts,
                                 nthread, saveDir) {
@@ -59,7 +59,7 @@ calculateValidationStats <- function(validationCohorts, selectedModels, seqCohor
 #' @importFrom reportROC reportROC
 #' @importFrom pROC roc
 #' @importFrom verification roc.area
-#' @importFrom survival strata
+#' @import survival
 #' @export
 constructMetaEstimatesDF <- function(probList, cohortData, seqCohorts, hetero=c(TRUE, FALSE, FALSE)) {
 
@@ -136,6 +136,12 @@ constructMetaEstimatesDF <- function(probList, cohortData, seqCohorts, hetero=c(
 #'
 #' @return A \code{list} of PCOSP scores for each validation cohorot
 #'
+#' @importFrom survcomp D.index concordance.index combine.est
+#' @importFrom forestplot forestplot
+#' @importFrom reportROC reportROC
+#' @importFrom pROC roc
+#' @importFrom verification roc.area
+#' @import survival
 #' @export
 calculatePCOSPscores <- function(validationCohorts, selectedModels, nthread) {
 
@@ -164,7 +170,8 @@ calculatePCOSPscores <- function(validationCohorts, selectedModels, nthread) {
 #' @param concordanceIndexList A
 #' @param hetero A
 #'
-#'
+#' @import survcomp
+#' @export
 metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
   DindexMetaEstimate <- .metaEstimateDindex(DindexList, hetero)
   concordanceIndexMetaEstimate <-
@@ -198,11 +205,12 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
 
 #' Estimate the concordance index for a list of validation cohorts
 #'
+##FIXME:: Change parmaeter names to be more general, used for all probabilities
 #' @param PSCOSPscoreList A named \code{list} of PCOSPscores as calculated
 #'   with `estimatePCOSPscore`
 #' @param validationCohorts A named \code{list} of validation cohorts
 #'
-#' @return
+#' @return A list
 #'
 #' @importFrom survcomp concordance.index
 .estimateConcordanceIndex <- function(PCOSPscoreList, validationCohorts) {
@@ -250,7 +258,7 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
 #' @param concordanceIndexList A
 #' @param hetero A
 #'
-#' @importFrom survcomp concordance.index
+#' @importFrom survcomp concordance.index combine.est
 .metaEstimateConcordanceIndex <- function(concordanceIndexList, hetero) {
 
   conIndexes <- vapply(concordanceIndexList, function(cohort) cohort$c.index,

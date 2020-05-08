@@ -17,8 +17,8 @@
 #'     function from `ggplot2`.
 #' @param ... Additional arguments passed to forestplot.
 #'
-#' @importFrom scales scientific
-#' @importFrom forestplot forestplot fpTxtGp fpColors fpDrawNormalCI
+#' @import scales
+#' @import forestplot
 #' @importFrom grid unit grid.grabExpr grid.draw gpar
 #' @importFrom ggplot2 ggsave
 #' @export
@@ -36,7 +36,7 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
     # Construct the forest plot table
     labelText <- data.frame(
         "cohort"=c("Cohorts", rownames(validationStatsDF)[-1]),
-        "pvalue"=c("P value", scientific(validationStatsDF$pval[-1], 2))
+        "pvalue"=c("P value", scales::scientific(validationStatsDF$pval[-1], 2))
     )
 
     # Extract box sizes
@@ -245,7 +245,7 @@ forestPlotModelComparision <- function(clinicalModelStats, stat, isSummary, file
     # Construct the forest plot table
     labelText <- data.frame(
         "cohort"=c("Cohorts", labels),
-        "pvalue"=c("P value", c(scientific(plotData[-1,][, "pval"], 2), NA))
+        "pvalue"=c("P value", c(scales::scientific(plotData[-1,][, "pval"], 2), NA))
     )
 
     plotData <- rbind(rep(NA, 4), plotData)
@@ -450,7 +450,7 @@ forestPlotClassifierModelComparision <- function(classifierStats, stat, names, f
     # Construct the forest plot table
     labelText <- data.frame(
         "cohort"=c("Classifier", rownames(plotData)),
-        "pvalue"=c("P value", NA, c(scientific(plotData[-1,][, "pval"], 2)))
+        "pvalue"=c("P value", NA, c(scales::scientific(plotData[-1,][, "pval"], 2)))
     )
 
     plotData <- rbind(rep(NA, 4), plotData)
@@ -650,9 +650,9 @@ forestPlotCohortSubtypeComparison <- function(cohortSubtypeStats, stat, cohortNa
 
     # Combine summaries
     summaryData <- rbind(
-        overallSummary,
         sequencingSummary,
-        arraySummary
+        arraySummary,
+        overallSummary
     )
     rownames(summaryData) <- summaryNames
 
@@ -667,7 +667,7 @@ forestPlotCohortSubtypeComparison <- function(cohortSubtypeStats, stat, cohortNa
     # Construct the forest plot table
     labelText <- data.frame(
         "cohort"=c("Cohorts", rownames(plotData)),
-        "pvalue"=c("P value", NA, c(scientific(plotData[-1,][, "pval"], 2)))
+        "pvalue"=c("P value", NA, c(scales::scientific(plotData[-1,][, "pval"], 2)))
     )
 
     plotData <- rbind(rep(NA, 4), plotData)
