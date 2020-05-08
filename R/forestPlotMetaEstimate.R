@@ -208,13 +208,13 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
 #' @importFrom grid unit grid.grabExpr grid.draw gpar
 #' @importFrom ggplot2 ggsave
 #' @export
-forestPlotModelComparision <- function(clinicalModelStats, stat, isSummary, filePath,
+forestPlotModelComparison <- function(clinicalModelStats, stat, isSummary, filePath,
                                        fileName, ...) {
 
     indexClinical <- as.matrix(clinicalModelStats$clinical[[stat]])
     indexPCOSP <- as.matrix(clinicalModelStats$PCOSP[[stat]])
 
-    spacing <- rbind(rep(NA, 4), rep(NA, 4))
+    spacing <- rep(NA, 4)
     plotData <- matrix(nrow=0, ncol=4)
     for (i in seq_len(nrow(indexClinical))) {
         plotData <-
@@ -222,7 +222,8 @@ forestPlotModelComparision <- function(clinicalModelStats, stat, isSummary, file
                 plotData,
                 spacing,
                 indexClinical[i, 1:4],
-                indexPCOSP[i, 1:4]
+                indexPCOSP[i, 1:4],
+                spacing
             )
     }
 
@@ -245,7 +246,7 @@ forestPlotModelComparision <- function(clinicalModelStats, stat, isSummary, file
     # Construct the forest plot table
     labelText <- data.frame(
         "cohort"=c("Cohorts", labels),
-        "pvalue"=c("P value", c(scales::scientific(plotData[-1,][, "pval"], 2), NA))
+        "pvalue"=c("P value", NA, c(scales::scientific(plotData[-1,][, "pval"], 2)))
     )
 
     plotData <- rbind(rep(NA, 4), plotData)

@@ -266,21 +266,21 @@ clinicalModelStats <- calculateModelDandCindex(modelProbabilities,
 saveRDS(clinicalModelStats, file=file.path(resultsDir, "7a_clinicalModelStats.rds"))
 ```
 
-```{r model_comparison_forest_plot_dindex}
-forestPlotModelComparision(clinicalModelStats, 
+```{r model_comparison_forest_plot_dindex, fig.height=11, fig.width=8.5}
+forestPlotModelComparison(clinicalModelStats, 
                            stat="dIndex",
                            isSummary=c(rep(FALSE, 4), rep(TRUE, 3)),
-                           filePath="",
-                           fileName="")
+                           filePath=file.path(resultsDir, "figures"),
+                           fileName="7b_modelComparisonDindexForestPlot.pdf")
 ```
 
 
-```{r model_comparison_forest_plot_cindex}
-forestPlotModelComparision(clinicalModelStats, 
+```{r model_comparison_forest_plot_cindex, fig.height=5.5, fig.width=4.25}
+forestPlotModelComparison(clinicalModelStats, 
                            stat="cIndex", 
                            isSummary=c(rep(FALSE, 4), rep(TRUE, 3)),
-                           filePath="",
-                           fileName="")
+                           filePath=file.path(resultsDir, "figures"),
+                           fileName="7c_modelComparisonCindexForestPlot.pdf")
 ```
 
 ## 8. Existing Classifier Score Calculations
