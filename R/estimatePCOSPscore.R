@@ -14,6 +14,7 @@
 #' @importFrom switchBox SWAP.KTSP.Classify
 #' @importFrom BiocParallel bplapply
 #' @export
+#TODO:: Make this faster!
 estimatePCOSPprob <- function(valMat, selectedModels, nthread) {
 
   # Temporily change number of cores to parallelize over

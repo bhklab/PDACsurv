@@ -1,17 +1,20 @@
 #' Convert the levels of a factor to number
-#'
-#' A convenience function to converting factor levels into numeric
-#'
-#' @param factor A
-#'
-#' @export
 ##FIXME:: Make sure all the data is either a factor, or not a factor?
 ##FIXME:: This breaks when written with levels because not all of them are factors
+#' A convenience function for converting factor levels into numeric
+#'
+#' @param factor A \code{factor} vector to convert to numeric.
+#'
+#' @return A \code{numeric} vector of the factor levels.
+#'
+#' @export
 as.numeric.factor <- function(factor) { as.numeric(as.character(factor)) }
 
 #' Exclude samples censored before year 1
 #'
-#' @param seqCohort A \code{}
+#' @param seqCohort A \code{matrix} or \code{data.frame} with
+#'   the cohort expression and survival data. Assumes the columns
+#'   OS and OS_Status are present.
 #'
 #' @return A sorted vector of indices
 #' @export
@@ -43,6 +46,7 @@ mergeCommonData <- function(seqCohort, arrayCohort) {
     )
 }
 
+##TODO:: Should I use list2env function instead of assign
 #' Extract all cohorts from a list of cohorts
 #'
 #' Input a named list of cohorts to be modelled and assign each cohort to an
@@ -57,7 +61,6 @@ mergeCommonData <- function(seqCohort, arrayCohort) {
 #'   the name of each list element appended with "_cohort"
 #'
 #' @export
-##TODO:: Should I use list2env function instead of assign
 extractAllCohorts <- function(cohortList, environment) {
     if (missing(environment)) stop("Please set a target environment to assign
                                  the variables into. We recommend
@@ -78,7 +81,6 @@ extractAllCohorts <- function(cohortList, environment) {
 #' @return A numeric \code{matrix} containing the data from the cohort
 #'   \code{data.frame}
 #'
-#'
 #' @export
 convertCohortToMatrix <- function(cohort) {
     cohortMatrix <-
@@ -90,8 +92,12 @@ convertCohortToMatrix <- function(cohort) {
     return(cohortMatrix)
 }
 
+#' Make predictions using trained kTSP classification model
 #'
-#'
+#' @param formattedValCohorts A \code{list} of formatted validation cohorts
+#' @param selectedModels A \code{list} of kTSP classificaiton models.
+#' @param nthread A \code{numeric} vector of the integer number
+#'     of threads to parallelize over.
 #'
 #' @importFrom switchBox SWAP.KTSP.Classify
 #' @importFrom reportROC reportROC
@@ -154,9 +160,15 @@ convertCohortToMatrix <- function(cohort) {
 }
 
 
+#' Subset meta estimate data to shared cohorts and shared per cohort
+#'   samples
 #'
+#' @param metaestimateData A \code{list} containing a per classifier
+#'    survival predictions as well as ground truth survival data in
+#'    the item names 'survival'.
 #'
-#'
+#' @return The metaestimate \code{list} with only cohorts common to all
+#'    classifiers and only samples common to all classifier cohrots.
 #'
 #' @export
 subsetSharedCohortsAndSamples <- function(metaestimateData) {
@@ -167,7 +179,7 @@ subsetSharedCohortsAndSamples <- function(metaestimateData) {
         # Subset and reorder all data
         metaestimateData <- lapply(metaestimateData, function(data, cohorts) data[cohorts], cohorts=cohortNames)
 
-    classiferSampleNames <- c(lapply(metaestimateData[1:4], function(data) lapply(data, names)),
+    classiferSampleNames <- c(lapply(metaestimateData[seq_along(which(names(meta)))], function(data) lapply(data, names)),
                               lapply(metaestimateData[5], function(data) lapply(data, rownames)))
 
     sharedSampleNames <- lapply(cohortNames,

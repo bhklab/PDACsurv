@@ -9,8 +9,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Run the script
 
-## 1. Build the PCOSP model
-
 ```{r build_and_select_models}
 library(PCOSP)
 ```

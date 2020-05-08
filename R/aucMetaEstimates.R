@@ -35,13 +35,15 @@ aucMetaEstimates <- function(validationCohorts, validationStats,
 
 #' Calculate AUC and its standard error for a list of validation cohorts
 #'
-#'
+#' @param formattedValCohorts A \code{list} of validation cohorts.
+#'    formatted using `formatValidationCohorts`.
+#' @param probList A \code{list} of per cohort survival probability prediction.
 #'
 #' @importFrom pROC roc
 #' @importFrom verification roc.area
 #' @importFrom reportROC reportROC
 #' @export
-AUCstats <- function(formattedValCohorts, PCOSPscores) {
+AUCstats <- function(formattedValCohorts, probList) {
 
     suppressMessages(
     structure(lapply(seq_along(formattedValCohorts),
@@ -55,7 +57,7 @@ AUCstats <- function(formattedValCohorts, PCOSPscores) {
                                                  1 - scores[[i]][cohorts[[i]]$grpIndex])$p.value
                               ),
                    cohorts=formattedValCohorts,
-                   scores=PCOSPscores),
+                   scores=probList),
                    .Names=names(formattedValCohorts)))
 }
 
@@ -69,7 +71,7 @@ AUCstats <- function(formattedValCohorts, PCOSPscores) {
 #'     error and the associated p-value.
 #'
 #' @importFrom survcomp combine.est
-#' @keywords interal
+#' @keywords internal
 .metaEstimateAUCstats <- function(aucStats, hetero) {
     metaEstimate <- combine.est(
         vapply(aucStats, function(stat) stat$AUC, FUN.VALUE=numeric(1)),

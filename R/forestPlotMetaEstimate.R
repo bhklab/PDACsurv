@@ -204,7 +204,7 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
 #' @param ... Additional arguments passed to forestplot.
 #'
 #' @importFrom scales scientific
-#' @importFrom forestplot forestplot fpTxtGp fpColors fpDrawNormalCI
+#' @importFrom forestplot forestplot fpTxtGp fpColors fpDrawNormalCI fpDrawSummaryCI
 #' @importFrom grid unit grid.grabExpr grid.draw gpar
 #' @importFrom ggplot2 ggsave
 #' @export
@@ -339,6 +339,10 @@ forestPlotModelComparison <- function(clinicalModelStats, stat, isSummary, fileP
     return(plot)
 }
 
+#' @importFrom scales scientific
+#' @importFrom forestplot forestplot fpTxtGp fpColors fpDrawNormalCI fpDrawSummaryCI
+#' @importFrom grid unit grid.grabExpr grid.draw gpar
+#' @importFrom ggplot2 ggsave
 .forestPlotDindex2 <- function(labelText, plotData, isSummary, ...) {
     if (!missing(...)) {
         plot <- grid.grabExpr(forestplot::forestplot(labelText,
@@ -411,7 +415,7 @@ forestPlotModelComparison <- function(clinicalModelStats, stat, isSummary, fileP
 #' @param ... Additional arguments passed to forestplot.
 #'
 #' @importFrom scales scientific
-#' @importFrom forestplot forestplot fpTxtGp fpColors fpDrawNormalCI
+#' @importFrom forestplot forestplot fpTxtGp fpColors fpDrawNormalCI fpDrawSummaryCI
 #' @importFrom grid unit grid.grabExpr grid.draw gpar
 #' @importFrom ggplot2 ggsave
 #' @export
@@ -487,6 +491,10 @@ forestPlotClassifierModelComparision <- function(classifierStats, stat, names, f
 
 
 ## FIXME:: Refactor these into one function with more parameters!
+#' @importFrom scales scientific
+#' @importFrom forestplot forestplot fpTxtGp fpColors fpDrawNormalCI fpDrawSummaryCI
+#' @importFrom grid unit grid.grabExpr grid.draw gpar
+#' @importFrom ggplot2 ggsave
 .forestPlotCindex3 <- function(labelText, plotData, isSummary,
                                ...) {
 
@@ -531,6 +539,10 @@ forestPlotClassifierModelComparision <- function(classifierStats, stat, names, f
     return(plot)
 }
 
+#' @importFrom scales scientific
+#' @importFrom forestplot forestplot fpTxtGp fpColors fpDrawNormalCI fpDrawSummaryCI
+#' @importFrom grid unit grid.grabExpr grid.draw gpar
+#' @importFrom ggplot2 ggsave
 .forestPlotDindex3 <- function(labelText, plotData, isSummary, ...) {
     if (!missing(...)) {
         plot <- grid.grabExpr(forestplot::forestplot(labelText,
@@ -592,7 +604,7 @@ forestPlotClassifierModelComparision <- function(classifierStats, stat, names, f
 #' @param ... Additional arguments passed to forestplot.
 #'
 #' @importFrom scales scientific
-#' @importFrom forestplot forestplot fpTxtGp fpColors fpDrawNormalCI
+#' @importFrom forestplot forestplot fpTxtGp fpColors fpDrawNormalCI fpDrawSummaryCI
 #' @importFrom grid unit grid.grabExpr grid.draw gpar
 #' @importFrom ggplot2 ggsave
 #' @export
@@ -707,6 +719,10 @@ forestPlotCohortSubtypeComparison <- function(cohortSubtypeStats, stat, cohortNa
 
 
 ## FIXME:: Refactor these into one function with more parameters!
+#' @importFrom scales scientific
+#' @importFrom forestplot forestplot fpTxtGp fpColors fpDrawNormalCI fpDrawSummaryCI
+#' @importFrom grid unit grid.grabExpr grid.draw gpar
+#' @importFrom ggplot2 ggsave
 .forestPlotCindex4 <- function(labelText, plotData, isSummary,
                                ...) {
 
@@ -770,6 +786,10 @@ forestPlotCohortSubtypeComparison <- function(cohortSubtypeStats, stat, cohortNa
     return(plot)
 }
 
+#' @importFrom scales scientific
+#' @importFrom forestplot forestplot fpTxtGp fpColors fpDrawNormalCI fpDrawSummaryCI
+#' @importFrom grid unit grid.grabExpr grid.draw gpar
+#' @importFrom ggplot2 ggsave
 .forestPlotDindex4 <- function(labelText, plotData, isSummary, ...) {
     if (!missing(...)) {
         plot <- grid.grabExpr(forestplot::forestplot(labelText,

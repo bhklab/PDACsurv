@@ -3,19 +3,29 @@
 #' Create a density plot of the distrubtion of AUCs between the overall,
 #'    sequencing and microarray cohorts in a PCOSP model.
 #'
-#' @param formattedValCohorts A
-#' @param selectedModels A
-#' @param seqCohorts A
-#' @param vlines A
-#' @param nthread A
-#' @param title A
-#' @param filePath A
-#' @param fileName A
+#' @param formattedValCohorts A \code{list} of formatted validation cohorts
+#' @param selectedModels A \code{list} of kTSP classificaiton models.
+#' @param seqCohorts A \code{character} vector of names of cohorts
+#'     containing sequencing data.
+#' @param vlines A \code{numeric} vector of length 3 indicating
+#'     where to draw a vertical line for the combine, sequencing
+#'     and microarray density plots, respectively.
+#' @param nthread A \code{numeric} vector indicating the integer
+#'     number of threads to parallelize over.
+#' @param title A \code{character} vector with the title for the
+#'     plot
+#' @param filePath A \code{character} vector with the path to
+#'     save the plot to. If absent, the plot is just returned,
+#'     not saved to disk. Passed to `ggsave` function.
+#' @param fileName A \code{character} vector with the file name
+#'     and image file extension to save the plot under. Passed
+#'     to `ggsave` function.
 #'
-#' @return A \code{grob} objects from \code{ggplot2}
+#' @return A \code{grob} object from \code{ggplot2}. Also saves to disk if `filePath`
+#'     and `fileName` are specified.
 #'
+#' @importFrom ggplot2 geom_density geom_vline labs ggtitle facect_wrap theme ggsave
 #' @export
-#' @import ggplot2
 densityPlotModel <- function(formattedValCohorts, selectedModels, seqCohorts, title,
                              vlines, nthread, filePath, fileName) {
 
@@ -52,12 +62,16 @@ densityPlotModel <- function(formattedValCohorts, selectedModels, seqCohorts, ti
 }
 
 
+#' Calcualte the density plot statistics for a list of validation
+#'    cohorts and trainedd kTSP classificaiton models
 #'
+#' @param formattedValCohorts A \code{list} of formatted validation cohorts
+#' @param selectedModels A \code{list} of kTSP classificaiton models.
+#' @param seqCohorts A \code{character} vector of names of cohorts
+#'     containing sequencing data.
+#' @param nthread A \code{numeric} vector indicating the integer
 #'
-#'
-#'
-#'
-#'
+#' @keywords interal
 .densityStats <- function(formattedValCohorts, selectedModels, seqCohorts,
                           nthread) {
     KTSPs <- predictKTSPs(formattedValCohorts, selectedModels, nthread)
@@ -78,11 +92,17 @@ densityPlotModel <- function(formattedValCohorts, selectedModels, seqCohorts, ti
 
 }
 
+#' Predict kTSP classification for a list of validation cohorts and
+#'    classifier models
 #'
+#' @param formattedValCohorts A \code{list} of formatted validation cohorts
+#' @param selectedModels A \code{list} of kTSP classificaiton models.
+#' @param nthread A \code{numeric} vector with the integer number of
+#'     thread to parallelize over.
 #'
+#' @return A \code{list} predicted kTSP classifications
 #'
-#'
-#'
+#' @export
 predictKTSPs <- function(formattedValCohorts, selectedModels, nthread) {
     lapply(formattedValCohorts,
            function(cohort, models, nthread) .predictKTSP(cohort, models, nthread),
@@ -90,10 +110,17 @@ predictKTSPs <- function(formattedValCohorts, selectedModels, nthread) {
            nthread=nthread)
 }
 
+#' Calculate the `combine.est` for a list of kTSP model predictions
+#'    repeatedly
 #'
-#'
+## FIXME:: Is this documentation correct?
+#' @param KTSPs A \code{list} kTSP classificaiton predictions
+#'    for AUC and AUC standard error.
+#' @param nModels A \code{numeric} vector indicating the integer
+#'    number of KTSPs
 #'
 #' @importFrom BiocParallel bplapply
+#' @importFrom survcomp combine.est
 .summarizeKTSPs <- function(KTSPs, nModels, nthread) {
     # Temporily change number of cores to parallelize over
     opts <- options()

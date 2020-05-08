@@ -19,7 +19,7 @@
 #'
 #' @details We recommend using the \code{environment()} function to set the
 #'   environment parameter. This will assign the matrix and group objects to
-#'   your current environment the name of the cohort with '_mat' and '_grp'
+#'   your current environment as names of the cohorts with '_mat' and '_grp'
 #'   appended to it.
 #'
 #' @export
