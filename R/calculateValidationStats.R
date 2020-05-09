@@ -36,7 +36,7 @@
 #' @importFrom pROC roc
 #' @importFrom verification roc.area
 #' @importFrom survcomp D.index concordance.index combine.est
-#' @importFrom survival strata
+#' @import survival
 #' @export
 calculateValidationStats <- function(validationCohorts, selectedModels, seqCohorts,
                                 nthread, saveDir) {
@@ -68,7 +68,7 @@ calculateValidationStats <- function(validationCohorts, selectedModels, seqCohor
 #' @importFrom reportROC reportROC
 #' @importFrom pROC roc
 #' @importFrom verification roc.area
-#' @importFrom survival strata
+#' @import survival
 #' @export
 constructMetaEstimatesDF <- function(probList, cohortData, seqCohorts, hetero=c(TRUE, FALSE, FALSE)) {
 
@@ -149,7 +149,7 @@ constructMetaEstimatesDF <- function(probList, cohortData, seqCohorts, hetero=c(
 #' @importFrom reportROC reportROC
 #' @importFrom pROC roc
 #' @importFrom verification roc.area
-#' @importFrom survival strata
+#' @import survival
 #' @export
 calculatePCOSPscores <- function(validationCohorts, selectedModels, nthread) {
 
@@ -179,7 +179,7 @@ calculatePCOSPscores <- function(validationCohorts, selectedModels, nthread) {
 #' @param hetero A
 #'
 #' @importFrom survcomp D.index concordance.index combine.est
-#' @importFrom survival strata
+#' @import survival
 #' @export
 metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
   DindexMetaEstimate <- .metaEstimateDindex(DindexList, hetero)
@@ -202,9 +202,11 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
 #'    `survcomp` package.
 #'
 #' @importFrom survcomp D.index
+#' @import survival
 #' @importFrom survival strata
-#' @keywords internal
+#'
 .estimateDindex <- function(probList, validationCohorts) {
+  require(survival)
   structure(lapply(seq_along(probList), function(i, probList, validationCohorts) {
     cohort <- validationCohorts[[i]]
     probScore <- probList[[i]]
@@ -231,9 +233,10 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
 #'    `survcomp` package.
 #'
 #' @importFrom survcomp concordance.index
+#' @import survival
 #' @importFrom survival strata
-#' @keywords internal
 .estimateConcordanceIndex <- function(probList, validationCohorts) {
+  require(survival)
   structure(lapply(seq_along(validationCohorts), function(i) {
     cohort <- validationCohorts[[i]]
     PCOSPscore <- probList[[i]]
@@ -252,7 +255,8 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
 #'    package. See `?combine.est` for more details.
 #'
 #' @importFrom survcomp combine.est
-#' @keywords internal
+#' @import survival
+#'
 .metaEstimateDindex <- function(DindexList, hetero) {
 
   Dindexes <- vapply(DindexList, function(cohort) cohort$d.index,
@@ -283,7 +287,8 @@ metaEstimateStats <- function(DindexList, concordanceIndexList, hetero) {
 #'    package. See `?combine.est` for more details.
 #'
 #' @importFrom survcomp concordance.index combine.est
-#' @keywords internal
+#' @import survival
+#'
 .metaEstimateConcordanceIndex <- function(concordanceIndexList, hetero) {
 
   conIndexes <- vapply(concordanceIndexList, function(cohort) cohort$c.index,

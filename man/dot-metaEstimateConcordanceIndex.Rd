@@ -16,4 +16,3 @@ package. See `?combine.est` for more details.}
 \description{
 Meta-estimate the concordance index for a list of validation cohorts
 }
-\keyword{internal}

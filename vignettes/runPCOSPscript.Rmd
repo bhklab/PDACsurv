@@ -410,7 +410,7 @@ saveRDS(allCohortSurvivalData, file=file.path(resultsDir, "10b_allCohortSurvival
 
 # Get probabilties for all samples
 allCohortProbabilites <- calculatePCOSPscores(allValidationCohorts, selectedModels, nthread=15)
-save(allCohortProbabilites, file=file.path(resultsDir, "10c_allCohortProbabilities"))
+saveRDS(allCohortProbabilites, file=file.path(resultsDir, "10c_allCohortProbabilities.rds"))
 
 # Set sequencing cohorts
 seqCohorts <- c("tcga", "pcsi", "kirby")

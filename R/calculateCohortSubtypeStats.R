@@ -10,6 +10,7 @@
 #' @param hetero A \code{logical} vector passed to `combine.est` for the
 #'    combined, sequencing and microarray cohorts, respectively.
 #'
+#' @import survival
 #' @export
 calculateCohortSubtypeStats <- function(probList, cohortData, cohortClasses, seqCohorts, hetero) {
 
@@ -30,6 +31,9 @@ calculateCohortSubtypeStats <- function(probList, cohortData, cohortClasses, seq
     }
 }
 
+
+##FIXME:: Refactor into validation stats calculations
+##FIXME:: Refactor this monster to construct the DF's in a separate function call
 #' Calculate stats for combined, basal and classical subtypes for each cohort and return a list of data.frames
 #'
 #' @param probList A \code{list} of per cohort survival probability predictions
@@ -38,9 +42,8 @@ calculateCohortSubtypeStats <- function(probList, cohortData, cohortClasses, seq
 #' @param hetero A \code{logical} vector passed to `combine.est` for the
 #'    combined, basal and classical subtypes, respectively.
 #'
+#' @import survival
 #' @export
-##FIXME:: Refactor into validation stats calculations
-##FIXME:: Refactor this monster to construct the DF's in a separate function call
 constructSubtypeMetaEstimatesDF <- function(probList, cohortData, cohortClasses, hetero=c(TRUE, TRUE, TRUE)) {
 
     ### All

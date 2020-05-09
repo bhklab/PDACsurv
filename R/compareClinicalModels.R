@@ -160,6 +160,8 @@ summarizeClinicalModels <- function(clinicalFeatures, cohorts,
 #'     probabilties under the given models
 #'
 #' @return A \code{list} of
+#'
+#' @import survival
 #' @export
 calculateCohortProbabilties <- function(fitModels, clinicalCohorts) {
     lapply(fitModels,

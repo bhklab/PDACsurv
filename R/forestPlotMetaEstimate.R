@@ -84,7 +84,7 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
                               ...) {
 
     if (!missing(...)) {
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                validationStatsDF[, c("mean", "lower", "upper")],
                                ...))
     } else {
@@ -109,7 +109,7 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
             }
         })
         # Make the plot
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                validationStatsDF[, c("mean", "lower", "upper")],
                                xlab="Log2 HR",
                                is.summary=isSummary,
@@ -135,7 +135,7 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
 .forestPlotCindex <- function(labelText, validationStatsDF, isSeq, isSummary, boxSizes,
                               ...) {
     if (!missing(...)) {
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      validationStatsDF[, c("mean", "lower", "upper")],
                                                      ...))
     } else {
@@ -160,7 +160,7 @@ forestPlotMetaEstimate <- function(validationStats, stat, isSummary, filePath,
             }
         })
         # Make the plot
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      validationStatsDF[, c("mean", "lower", "upper")],
                                                      xlab="C-index",
                                                      is.summary=isSummary,
@@ -290,7 +290,7 @@ forestPlotModelComparison <- function(clinicalModelStats, stat, isSummary, fileP
                               ...) {
 
     if (!missing(...)) {
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      plotData[, c("mean", "lower", "upper")],
                                                      is.summary=isSummary,
                                                      ...))
@@ -318,7 +318,7 @@ forestPlotModelComparison <- function(clinicalModelStats, stat, isSummary, fileP
             }
         })
         # Make the plot
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      plotData[, c("mean", "lower", "upper")],
                                                      xlab="Concordance index",
                                                      is.summary=isSummary,
@@ -345,7 +345,7 @@ forestPlotModelComparison <- function(clinicalModelStats, stat, isSummary, fileP
 #' @importFrom ggplot2 ggsave
 .forestPlotDindex2 <- function(labelText, plotData, isSummary, ...) {
     if (!missing(...)) {
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      plotData[, c("mean", "lower", "upper")],
                                                      is.summary=isSummary,
                                                      ...))
@@ -374,7 +374,7 @@ forestPlotModelComparison <- function(clinicalModelStats, stat, isSummary, fileP
             }
         })
         # Make the plot
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      plotData[, c("mean", "lower", "upper")],
                                                      xlab="Log2 D-index",
                                                      is.summary=isSummary,
@@ -499,7 +499,7 @@ forestPlotClassifierModelComparision <- function(classifierStats, stat, names, f
                                ...) {
 
     if (!missing(...)) {
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      plotData[, c("mean", "lower", "upper")],
                                                      is.summary=isSummary,
                                                      ...))
@@ -518,7 +518,7 @@ forestPlotClassifierModelComparision <- function(classifierStats, stat, names, f
             }
         })
         # Make the plot
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      plotData[, c("mean", "lower", "upper")],
                                                      xlab="Concordance index",
                                                      is.summary=isSummary,
@@ -545,7 +545,7 @@ forestPlotClassifierModelComparision <- function(classifierStats, stat, names, f
 #' @importFrom ggplot2 ggsave
 .forestPlotDindex3 <- function(labelText, plotData, isSummary, ...) {
     if (!missing(...)) {
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      plotData[, c("mean", "lower", "upper")],
                                                      is.summary=isSummary,
                                                      ...))
@@ -564,7 +564,7 @@ forestPlotClassifierModelComparision <- function(classifierStats, stat, names, f
             }
         })
         # Make the plot
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <- grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      plotData[, c("mean", "lower", "upper")],
                                                      is.summary=isSummary,
                                                      xlab="Log2 D-index",
@@ -727,7 +727,7 @@ forestPlotCohortSubtypeComparison <- function(cohortSubtypeStats, stat, cohortNa
                                ...) {
 
     if (!missing(...)) {
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      plotData[, c("mean", "lower", "upper")],
                                                      is.summary=isSummary,
                                                      ...))
@@ -763,7 +763,7 @@ forestPlotCohortSubtypeComparison <- function(cohortSubtypeStats, stat, cohortNa
             }
         })
         # Make the plot
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      plotData[, c("mean", "lower", "upper")],
                                                      xlab="Concordance index",
                                                      is.summary=isSummary,
@@ -792,7 +792,7 @@ forestPlotCohortSubtypeComparison <- function(cohortSubtypeStats, stat, cohortNa
 #' @importFrom ggplot2 ggsave
 .forestPlotDindex4 <- function(labelText, plotData, isSummary, ...) {
     if (!missing(...)) {
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      plotData[, c("mean", "lower", "upper")],
                                                      is.summary=isSummary,
                                                      ...))
@@ -826,7 +826,7 @@ forestPlotCohortSubtypeComparison <- function(cohortSubtypeStats, stat, cohortNa
             }
         })
         # Make the plot
-        plot <- grid.grabExpr(forestplot::forestplot(labelText,
+        plot <-grid::grid.grabExpr(forestplot::forestplot(labelText,
                                                      plotData[, c("mean", "lower", "upper")],
                                                      xlab="Log2 D-index",
                                                      is.summary=isSummary,

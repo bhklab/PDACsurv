@@ -9,6 +9,7 @@
 #'     from microarray data.
 #' @param model A \code{glm} for predicting survival probabilities.
 #'
+#' @import survival
 #' @export
 calculateModelDandCindex <- function(modelProbabilities, clinicalFeatures,
                                      seqCohorts, model=1) {

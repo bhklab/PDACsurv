@@ -20,4 +20,3 @@ A \code{list} of per cohort D index statistics
 \description{
 Estimate the D-index for a list of validation cohorts
 }
-\keyword{internal}

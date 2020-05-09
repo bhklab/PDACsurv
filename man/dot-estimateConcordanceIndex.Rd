@@ -20,4 +20,3 @@ A \code{list} of per cohort concordance index statistics
 \description{
 Estimate the concordance index for a list of validation cohorts
 }
-\keyword{internal}
